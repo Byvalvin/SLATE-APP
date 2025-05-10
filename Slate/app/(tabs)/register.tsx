@@ -1,28 +1,76 @@
 // Slate/app/register.tsx
 import React, { useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Animated,
+  Pressable,
 } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [dob, setDob] = useState('');
+  const [dob, setDob] = useState<Date | undefined>(undefined);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const scaleAnim = useState(new Animated.Value(1))[0];
+  const colorAnim = useState(new Animated.Value(0))[0];
 
   const handleRegister = () => {
-    // TODO: connect to backend API
-    console.log({ name, email, dob });
+    console.log({ name, email, dob: dob?.toISOString().split('T')[0] });
   };
+
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
+  const handleConfirm = (selectedDate: Date) => {
+    setDob(selectedDate);
+    hideDatePicker();
+  };
+
+  const handlePressIn = () => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 0.97,
+        useNativeDriver: true,
+      }),
+      Animated.timing(colorAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: false,
+      }),
+    ]).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 3,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+      Animated.timing(colorAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: false,
+      }),
+    ]).start();
+  };
+
+  const backgroundColor = colorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#E9E2DA', '#55F358'],
+  });
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.innerContainer}>
-        <Text style={styles.title}>Let’s get to know you better!</Text>
+        <Text style={styles.title}>Let’s get you started</Text>
         <Text style={styles.subtitle}>Create your account</Text>
 
         <TextInput
@@ -41,21 +89,42 @@ export default function RegisterScreen() {
           onChangeText={setEmail}
         />
 
-        <TextInput
-          placeholder="Date of Birth (YYYY-MM-DD)"
-          placeholderTextColor="#888"
-          style={styles.inputBox}
-          value={dob}
-          onChangeText={setDob}
+        <TouchableOpacity style={styles.inputBox} onPress={showDatePicker}>
+          <Text style={{ color: dob ? '#000' : '#888', fontSize: 16 }}>
+            {dob ? dob.toLocaleDateString() : 'Date of Birth'}
+          </Text>
+        </TouchableOpacity>
+
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+          maximumDate={new Date()}
+          date={dob || new Date(2000, 0, 1)}
         />
 
+        <View style={styles.separatorContainer}>
+          <View style={styles.line} />
+          <Text style={styles.separatorText}>or register with</Text>
+          <View style={styles.line} />
+        </View>
+
         <TouchableOpacity style={styles.googleButton}>
-          <Text style={styles.googleButtonText}>Register with Google</Text>
+          <AntDesign name="google" size={32} color="#DB4437" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-          <Text style={styles.registerButtonText}>REGISTER</Text>
-        </TouchableOpacity>
+        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <Pressable
+            onPress={handleRegister}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+          >
+            <Animated.View style={[styles.registerButton, { backgroundColor }]}>
+              <Text style={styles.registerButtonText}>REGISTER</Text>
+            </Animated.View>
+          </Pressable>
+        </Animated.View>
       </View>
     </ScrollView>
   );
@@ -94,6 +163,21 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  separatorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#000',
+  },
+  separatorText: {
+    marginHorizontal: 10,
+    color: '#000',
+    fontSize: 14,
+  },
   googleButton: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -105,12 +189,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  googleButtonText: {
-    color: '#000',
-    fontSize: 16,
-  },
   registerButton: {
-    backgroundColor: '#E9E2DA',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
