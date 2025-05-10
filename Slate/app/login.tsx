@@ -1,4 +1,4 @@
-// Slate/app/register.tsx
+// Slate/app/login.tsx
 import React, { useState } from 'react';
 import {
   ScrollView,
@@ -11,56 +11,38 @@ import {
   Pressable,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-export default function RegisterScreen() {
-  const [name, setName] = useState('');
+export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [dob, setDob] = useState<Date | undefined>(undefined);
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const scaleAnim = useState(new Animated.Value(1))[0];
   const colorAnim = useState(new Animated.Value(0))[0];
 
-  const handleRegister = async () => {
-    if (!name || !email || !password || !dob) {
-      alert('Please fill all fields');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert('Please enter email and password');
       return;
     }
 
-    const user = {
-      name,
-      email,
-      password,
-      dob: dob.toISOString().split('T')[0],
-    };
-
     try {
-      const response = await fetch('http://10.0.0.210:3000/api/auth/register', {
+      const response = await fetch('http://10.0.0.210:3000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(user),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
       console.log(data);
 
       if (response.ok) {
-        alert('Registration successful!');
+        alert('Login successful!');
       } else {
-        alert(`Error: ${data.message || 'Registration failed'}`);
+        alert(`Error: ${data.message || 'Login failed'}`);
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('Login error:', error);
       alert('Failed to connect to server.');
     }
-  };
-
-  const showDatePicker = () => setDatePickerVisibility(true);
-  const hideDatePicker = () => setDatePickerVisibility(false);
-  const handleConfirm = (selectedDate: Date) => {
-    setDob(selectedDate);
-    hideDatePicker();
   };
 
   const handlePressIn = () => {
@@ -101,16 +83,8 @@ export default function RegisterScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.innerContainer}>
-        <Text style={styles.title}>Let’s get you started</Text>
-        <Text style={styles.subtitle}>Create your account</Text>
-
-        <TextInput
-          placeholder="Name"
-          placeholderTextColor="#888"
-          style={styles.inputBox}
-          value={name}
-          onChangeText={setName}
-        />
+        <Text style={styles.title}>Welcome Back</Text>
+        <Text style={styles.subtitle}>Log in to your account</Text>
 
         <TextInput
           placeholder="Email"
@@ -118,6 +92,8 @@ export default function RegisterScreen() {
           style={styles.inputBox}
           value={email}
           onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
 
         <TextInput
@@ -129,24 +105,9 @@ export default function RegisterScreen() {
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.inputBox} onPress={showDatePicker}>
-          <Text style={{ color: dob ? '#000' : '#888', fontSize: 16 }}>
-            {dob ? dob.toLocaleDateString() : 'Date of Birth'}
-          </Text>
-        </TouchableOpacity>
-
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          onConfirm={handleConfirm}
-          onCancel={hideDatePicker}
-          maximumDate={new Date()}
-          date={dob || new Date(2000, 0, 1)}
-        />
-
         <View style={styles.separatorContainer}>
           <View style={styles.line} />
-          <Text style={styles.separatorText}>or register with</Text>
+          <Text style={styles.separatorText}>or continue with</Text>
           <View style={styles.line} />
         </View>
 
@@ -156,12 +117,12 @@ export default function RegisterScreen() {
 
         <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
           <Pressable
-            onPress={handleRegister}
+            onPress={handleLogin}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
           >
-            <Animated.View style={[styles.registerButton, { backgroundColor }]}>
-              <Text style={styles.registerButtonText}>REGISTER</Text>
+            <Animated.View style={[styles.loginButton, { backgroundColor }]}>
+              <Text style={styles.loginButtonText}>LOGIN</Text>
             </Animated.View>
           </Pressable>
         </Animated.View>
@@ -229,12 +190,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  registerButton: {
+  loginButton: {
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
   },
-  registerButtonText: {
+  loginButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
