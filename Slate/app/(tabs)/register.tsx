@@ -9,6 +9,7 @@ import {
   View,
   Animated,
   Pressable,
+  //Platform,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -21,8 +22,37 @@ export default function RegisterScreen() {
   const scaleAnim = useState(new Animated.Value(1))[0];
   const colorAnim = useState(new Animated.Value(0))[0];
 
-  const handleRegister = () => {
-    console.log({ name, email, dob: dob?.toISOString().split('T')[0] });
+  const handleRegister = async () => {
+    if (!name || !email || !dob) {
+      alert('Please fill all fields');
+      return;
+    }
+
+    const user = {
+      name,
+      email,
+      dob: dob.toISOString().split('T')[0],
+    };
+
+    try {
+      const response = await fetch('http://10.0.0.210:3000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user),
+      });
+
+      const data = await response.json();
+      console.log(data);
+
+      if (response.ok) {
+        alert('Registration successful!');
+      } else {
+        alert(`Error: ${data.message || 'Registration failed'}`);
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('Failed to connect to server.');
+    }
   };
 
   const showDatePicker = () => setDatePickerVisibility(true);
