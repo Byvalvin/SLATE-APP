@@ -1,11 +1,10 @@
-// Slate/app/(tabs)/index.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function HomeScreen() {
+export default function ProgressScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🏠 Welcome to SLATE Home</Text>
+      <Text style={styles.title}>📈 Progress</Text>
     </View>
   );
 }
@@ -13,9 +12,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2EDE9',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F2EDE9',
   },
   title: {
     fontSize: 24,

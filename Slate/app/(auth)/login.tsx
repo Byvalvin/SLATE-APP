@@ -11,39 +11,42 @@ import {
   Pressable,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const scaleAnim = useState(new Animated.Value(1))[0];
   const colorAnim = useState(new Animated.Value(0))[0];
+  const router = useRouter();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      alert('Please enter email and password');
-      return;
+  if (!email || !password) {
+    alert('Please enter email and password');
+    return;
+  }
+
+  try {
+    const response = await fetch('http://10.0.0.210:3000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    console.log(data);
+
+    if (response.ok) {
+      router.replace('/(tabs)');
+    } else {
+      alert(`Error: ${data.message || 'Login failed'}`);
     }
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('Failed to connect to server.');
+  }
+};
 
-    try {
-      const response = await fetch('http://10.0.0.210:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      console.log(data);
-
-      if (response.ok) {
-        alert('Login successful!');
-      } else {
-        alert(`Error: ${data.message || 'Login failed'}`);
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Failed to connect to server.');
-    }
-  };
 
   const handlePressIn = () => {
     Animated.parallel([
