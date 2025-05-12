@@ -3,37 +3,93 @@ import React from 'react';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { SvgProps } from 'react-native-svg';
+
+
+// ✅ New .tsx icon components
+import DiaryIcon from '../../assets/icons/Diary';
+import ProgressIcon from '../../assets/icons/progress';
+import ProgramsIcon from '../../assets/icons/Dumbell';
+import PremiumIcon from '../../assets/icons/premium';
+import ExercisesIcon from '../../assets/icons/Exercises';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+ const wrapIcon = (IconComponent: React.FC<SvgProps>) => {
+  const WrappedIcon = ({ color }: { color: string }) => (
+    <IconComponent color={color} width={30} height={30} />
+  );
+  WrappedIcon.displayName = IconComponent.name || 'WrappedIcon';
+  return WrappedIcon;
+};
+
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
+        tabBarActiveTintColor: '#55F358',
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
+            height: 85,
+            backgroundColor: '#fff',
+            borderTopWidth: 0,
           },
-          default: {},
+          default: {
+            height: 85,
+            backgroundColor: '#fff',
+            borderTopWidth: 0,
+            elevation: 5,
+          },
         }),
-      }}>
+        tabBarLabelStyle: {
+          fontSize: 11,
+          marginBottom: 4,
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Diary',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: wrapIcon(DiaryIcon),
         }}
       />
-      
+      <Tabs.Screen
+        name="progress"
+        options={{
+          title: 'Progress',
+          tabBarIcon: wrapIcon(ProgressIcon),
+        }}
+      />
+      <Tabs.Screen
+        name="programs"
+        options={{
+          title: 'Programs',
+          tabBarIcon: wrapIcon(ProgramsIcon),
+        }}
+      />
+      <Tabs.Screen
+        name="premium"
+        options={{
+          title: 'Premium',
+          tabBarIcon: wrapIcon(PremiumIcon),
+        }}
+      />
+      <Tabs.Screen
+        name="exercises"
+        options={{
+          title: 'Exercises',
+          tabBarIcon: wrapIcon(ExercisesIcon),
+        }}
+      />
     </Tabs>
   );
 }
