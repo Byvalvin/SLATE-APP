@@ -13,6 +13,8 @@ import {
 import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
+import { servers } from '@/constants/API';
+
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +29,7 @@ export default function LoginScreen() {
   }
 
   try {
-    const response = await fetch('http://10.0.0.210:3000/api/auth/login', {
+    const response = await fetch(`${servers[1]}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),

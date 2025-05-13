@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { servers } from '@/constants/API';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -36,7 +37,7 @@ export default function RegisterScreen() {
     };
 
     try {
-      const response = await fetch('http://10.0.0.210:3000/api/auth/register', {
+      const response = await fetch(`${servers[1]}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(user),
