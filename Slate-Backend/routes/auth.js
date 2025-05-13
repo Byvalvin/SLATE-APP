@@ -7,26 +7,17 @@ const User = require('../models/User');
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, dob } = req.body;
-    console.log("here get data");
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: 'User already exists' });
     }
 
-    console.log("here usernew");
-
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("here pass hashed");
     const user = new User({ name, email, password: hashedPassword, dob });
 
-    console.log(req.body);
-    console.log("here user created");
-
     await user.save();
-    console.log("here saved");
     res.status(201).json({ message: 'User registered!' });
-    console.log("here newser");
 
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
