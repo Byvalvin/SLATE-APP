@@ -7,16 +7,15 @@ const User = require('../models/User');
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, dob } = req.body;
-    console.log(req.body);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword, dob });
-    console.log(password, hashedPassword);
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    // const user = new User({ name, email, password: hashedPassword, dob });
+    const user = new User({ name, email, password, dob }); // hashing happens in User model
 
     await user.save();
     res.status(201).json({ message: 'User registered!' });
@@ -29,22 +28,18 @@ router.post('/register', async (req, res) => {
 // Login route
 router.post('/login', async (req, res) => {
   try {
-    console.log("in")
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    console.log(req.body)
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password1' });
     }
 
-    console.log("check password")
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password2' });
     }
 
-    console.log("pass match")
     res.status(200).json({ message: 'Login successful' });
 
   } catch (err) {
