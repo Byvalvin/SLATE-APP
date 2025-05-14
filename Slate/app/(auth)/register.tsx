@@ -7,12 +7,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Animated,
   Pressable,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { servers } from '@/constants/API';
+import { servers } from '../../constants/API';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -20,8 +19,6 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [dob, setDob] = useState<Date | undefined>(undefined);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const scaleAnim = useState(new Animated.Value(1))[0];
-  const colorAnim = useState(new Animated.Value(0))[0];
 
   const handleRegister = async () => {
     if (!name || !email || !password || !dob) {
@@ -64,40 +61,8 @@ export default function RegisterScreen() {
     hideDatePicker();
   };
 
-  const handlePressIn = () => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 0.97,
-        useNativeDriver: true,
-      }),
-      Animated.timing(colorAnim, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 3,
-        tension: 40,
-        useNativeDriver: true,
-      }),
-      Animated.timing(colorAnim, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  };
-
-  const backgroundColor = colorAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#E9E2DA', '#55F358'],
-  });
+  const isFormFilled = name.trim() && email.trim() && password.trim() && dob;
+  const buttonBackground = isFormFilled ? '#55F358' : '#E9E2DA';
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -155,21 +120,16 @@ export default function RegisterScreen() {
           <AntDesign name="google" size={32} color="#DB4437" />
         </TouchableOpacity>
 
-        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-          <Pressable
-            onPress={handleRegister}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-          >
-            <Animated.View style={[styles.registerButton, { backgroundColor }]}>
-              <Text style={styles.registerButtonText}>REGISTER</Text>
-            </Animated.View>
-          </Pressable>
-        </Animated.View>
+        <Pressable onPress={handleRegister}>
+          <View style={[styles.registerButton, { backgroundColor: buttonBackground }]}>
+            <Text style={styles.registerButtonText}>REGISTER</Text>
+          </View>
+        </Pressable>
       </View>
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

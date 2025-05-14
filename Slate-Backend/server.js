@@ -4,14 +4,22 @@ const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth');
 
 // db setup
-mongoose.connect(process.env.MONGO_URI, {
-  // useNewUrlParser: true,
-  // useUnifiedTopology: true,
-  dbName: 'Slate'  // ✅ this explicitly tells Mongoose to use "Slate" DB
-})
-.then(() => console.log('MongoDB connected to Slate DB'))
-.catch((err) => console.error('MongoDB connection error:', err));
-
+// === MongoDB connection logic optimized for Vercel ===
+let isConnected = false;
+async function connectToDatabase() {
+  if (isConnected) return;
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      dbName: 'Slate'
+    });
+    isConnected = true;
+    console.log("✅ MongoDB connected to Slate DB");
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err);
+  }
+}
+// Connect when this file is loaded (cold start in serverless)
+connectToDatabase();
 
 const app = express();
 const baseURL = '/api';

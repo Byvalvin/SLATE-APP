@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
+    marginBottom: 10,
   },
   footerText: {
     color: '#fff',
@@ -94,5 +95,6 @@ const styles = StyleSheet.create({
   },
   link: {
     textDecorationLine: 'underline',
+    marginBottom: 10,
   },
 });
