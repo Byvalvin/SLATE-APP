@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 // === MongoDB connection logic optimized for Vercel ===
 let isConnected = false;
 
+
 async function connectToDatabase() {
   if (isConnected) return;
   try {
