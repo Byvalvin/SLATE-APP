@@ -7,6 +7,7 @@ const User = require('../models/User');
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, dob } = req.body;
+    console.log(req.body);
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -15,6 +16,7 @@ router.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ name, email, password: hashedPassword, dob });
+    console.log(password, hashedPassword);
 
     await user.save();
     res.status(201).json({ message: 'User registered!' });
