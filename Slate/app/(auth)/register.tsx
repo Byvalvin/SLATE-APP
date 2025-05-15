@@ -1,4 +1,3 @@
-// Slate/app/register.tsx
 import React, { useState } from 'react';
 import {
   ScrollView,
@@ -8,6 +7,7 @@ import {
   TouchableOpacity,
   View,
   Pressable,
+  Dimensions, // Import Dimensions
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -15,6 +15,7 @@ import { servers } from '../../constants/API';
 import { saveTokens } from '@/utils/token';
 import { useRouter } from 'expo-router';
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -50,8 +51,8 @@ export default function RegisterScreen() {
 
       if (response.ok) {
         await saveTokens(data.accessToken, data.refreshToken); // 💾 save session
-        //router.replace('/onboarding'); // or tabs/home/etc
-        alert('Registration successful!');
+        // router.replace('/onboarding'); // or tabs/home/etc - Decide your post-registration navigation
+        alert('Registration successful!'); // You might want to navigate instead of alerting
       } else {
         alert(`Error: ${data.message || 'Registration failed'}`);
       }
@@ -83,6 +84,7 @@ export default function RegisterScreen() {
           style={styles.inputBox}
           value={name}
           onChangeText={setName}
+          autoCapitalize="words" // Capitalize names
         />
 
         <TextInput
@@ -91,6 +93,8 @@ export default function RegisterScreen() {
           style={styles.inputBox}
           value={email}
           onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
 
         <TextInput
@@ -102,19 +106,24 @@ export default function RegisterScreen() {
           secureTextEntry
         />
 
+        {/* Date of Birth Input - Styled as an inputBox */}
         <TouchableOpacity style={styles.inputBox} onPress={showDatePicker}>
-          <Text style={{ color: dob ? '#000' : '#888', fontSize: 16 }}>
+          <Text style={{
+            color: dob ? '#000' : '#888',
+            fontSize: screenWidth * 0.035 // Use relative font size
+          }}>
             {dob ? dob.toLocaleDateString() : 'Date of Birth'}
           </Text>
         </TouchableOpacity>
+
 
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
           mode="date"
           onConfirm={handleConfirm}
           onCancel={hideDatePicker}
-          maximumDate={new Date()}
-          date={dob || new Date(2000, 0, 1)}
+          maximumDate={new Date()} // Prevent selecting future dates
+          date={dob || new Date(2000, 0, 1)} // Default date if none selected
         />
 
         <View style={styles.separatorContainer}>
@@ -124,7 +133,8 @@ export default function RegisterScreen() {
         </View>
 
         <TouchableOpacity style={styles.googleButton}>
-          <AntDesign name="google" size={32} color="#DB4437" />
+          {/* Adjust icon size to be relative */}
+          <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
         </TouchableOpacity>
 
         <Pressable onPress={handleRegister}>
@@ -143,68 +153,70 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: '#F2EDE9',
     justifyContent: 'center',
-    padding: 24,
+    padding: screenWidth * 0.06, // Relative padding
   },
   innerContainer: {
-    marginTop: 40,
+    // Adjust marginTop if needed based on desired spacing from top
+    // marginTop: screenHeight * 0.05,
   },
   title: {
-    fontSize: 16,
+    fontSize: screenWidth * 0.04, // Relative font size
     color: '#333',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: screenHeight * 0.006, // Relative margin bottom
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: screenWidth * 0.05, // Relative font size
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: screenHeight * 0.020, // Relative margin bottom
   },
   inputBox: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-    marginBottom: 16,
+    borderRadius: screenWidth * 0.03, // Relative border radius
+    paddingVertical: screenHeight * 0.014, // Relative vertical padding
+    paddingHorizontal: screenWidth * 0.035, // Relative horizontal padding
+    fontSize: screenWidth * 0.035, // Relative font size
+    marginBottom: screenHeight * 0.012, // Relative margin bottom
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 4, // Fixed shadow radius
+    elevation: 2, // Fixed elevation
   },
   separatorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: screenHeight * 0.012, // Relative vertical margin
   },
   line: {
     flex: 1,
-    height: 1,
+    height: 1, // Fixed height
     backgroundColor: '#000',
   },
   separatorText: {
-    marginHorizontal: 10,
+    marginHorizontal: screenWidth * 0.025, // Relative horizontal margin
     color: '#000',
-    fontSize: 14,
+    fontSize: screenWidth * 0.035, // Relative font size
   },
   googleButton: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: screenWidth * 0.03, // Relative border radius
+    paddingVertical: screenHeight * 0.012, // Relative vertical padding
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: screenHeight * 0.020, // Relative margin bottom
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 4, // Fixed shadow radius
+    elevation: 2, // Fixed elevation
   },
-  registerButton: {
-    borderRadius: 12,
-    paddingVertical: 14,
+  registerButton: { // Renamed from loginButton for clarity
+    borderRadius: screenWidth * 0.03, // Relative border radius
+    paddingVertical: screenHeight * 0.012, // Relative vertical padding
     alignItems: 'center',
   },
-  registerButtonText: {
+  registerButtonText: { // Renamed from loginButtonText for clarity
+    fontSize: screenWidth * 0.04, // Relative font size
     color: '#fff',
-    fontSize: 16,
     fontWeight: 'bold',
   },
 });

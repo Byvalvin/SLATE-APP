@@ -1,6 +1,6 @@
 import * as React from "react";
 import Svg, { Path, SvgProps } from "react-native-svg";
-const progress = ({ color, ...props }: SvgProps)  => (
+const progress: React.FC<SvgProps> = ({ color, ...props }) => (
   <Svg
     width={22}
     height={23}

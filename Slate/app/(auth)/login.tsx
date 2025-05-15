@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   View,
   Pressable,
+  Dimensions, // Import Dimensions
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 import { servers } from '../../constants/API';
 import { saveTokens } from '@/utils/token';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -38,7 +41,7 @@ export default function LoginScreen() {
       if (response.ok) {
         console.log(data);
         await saveTokens(data.accessToken, data.refreshToken); // store session
-        
+
         router.replace('/(tabs)');
       } else {
         alert(`Error: ${data.message || 'Login failed'}`);
@@ -84,7 +87,8 @@ export default function LoginScreen() {
         </View>
 
         <TouchableOpacity style={styles.googleButton}>
-          <AntDesign name="google" size={32} color="#DB4437" />
+          {/* Adjust icon size if needed - currently fixed */}
+          <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
         </TouchableOpacity>
 
         <Pressable onPress={handleLogin}>
@@ -103,68 +107,69 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: '#F2EDE9',
     justifyContent: 'center',
-    padding: 24,
+    padding: screenWidth * 0.06, // Make padding relative to screen width
   },
   innerContainer: {
-    marginTop: 40,
+    // You might want this to be relative or based on design needs
+    // marginTop: screenHeight * 0.05, // Example: Relative margin top
   },
   title: {
-    fontSize: 16,
+    fontSize: screenWidth * 0.04, // Make font size relative to screen width
     color: '#333',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: screenHeight * 0.006, // Make margin bottom relative
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: screenWidth * 0.05, // Make font size relative
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: screenHeight * 0.020, // Make margin bottom relative
   },
   inputBox: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-    marginBottom: 16,
+    borderRadius: screenWidth * 0.03, // Make border radius relative
+    padding: screenHeight * 0.012, // Make padding relative (vertical focus)
+    fontSize: screenWidth * 0.035, // Make font size relative
+    marginBottom: screenHeight * 0.020, // Make margin bottom relative
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 4, // Fixed shadow radius often looks okay
+    elevation: 2, // Fixed elevation often looks okay
   },
   separatorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: screenHeight * 0.012, // Make vertical margin relative
   },
   line: {
     flex: 1,
-    height: 1,
+    height: 1, // Fixed height for the line is fine
     backgroundColor: '#000',
   },
   separatorText: {
-    marginHorizontal: 10,
+    marginHorizontal: screenWidth * 0.025, // Make horizontal margin relative
     color: '#000',
-    fontSize: 14,
+    fontSize: screenWidth * 0.035, // Make font size relative
   },
   googleButton: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: screenWidth * 0.03, // Make border radius relative
+    paddingVertical: screenHeight * 0.012, // Make padding relative (vertical focus)
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: screenHeight * 0.020, // Make margin bottom relative
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 4, // Fixed shadow radius
+    elevation: 2, // Fixed elevation
   },
   loginButton: {
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: screenWidth * 0.03, // Make border radius relative
+    paddingVertical: screenHeight * 0.012, // Make padding relative (vertical focus)
     alignItems: 'center',
   },
   loginButtonText: {
+    fontSize: screenWidth * 0.04, // Make font size relative
     color: '#fff',
-    fontSize: 16,
     fontWeight: 'bold',
   },
 });

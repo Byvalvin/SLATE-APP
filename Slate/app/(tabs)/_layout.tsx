@@ -1,12 +1,19 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, Dimensions } from 'react-native'; // Import Dimensions
 
 import { HapticTab } from '../../components/HapticTab';
 import TabBarBackground from '../../components/ui/TabBarBackground';
 import { Colors } from '../../constants/Colors';
 import { useColorScheme } from '../../hooks/useColorScheme';
 import { SvgProps } from 'react-native-svg';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
+
+// Calculate relative sizes for icons and labels
+const iconSize = screenWidth * 0.06; // Example: Icon size is 7% of screen width
+const labelFontSize = screenWidth * 0.025; // Example: Label font size is 3% of screen width
+const labelMarginBottom = screenHeight * 0.005; // Example: Margin below label is 0.5% of screen height
 
 
 // ✅ New .tsx icon components
@@ -19,13 +26,14 @@ import ExercisesIcon from '../../assets/icons/Exercises';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
- const wrapIcon = (IconComponent: React.FC<SvgProps>) => {
-  const WrappedIcon = ({ color }: { color: string }) => (
-    <IconComponent color={color} width={30} height={30} />
-  );
-  WrappedIcon.displayName = IconComponent.name || 'WrappedIcon';
-  return WrappedIcon;
-};
+  const wrapIcon = (IconComponent: React.FC<SvgProps>) => {
+    const WrappedIcon = ({ color }: { color: string }) => (
+      // Use calculated iconSize
+      <IconComponent color={color} width={iconSize} height={iconSize} />
+    );
+    WrappedIcon.displayName = IconComponent.name || 'WrappedIcon';
+    return WrappedIcon;
+  };
 
 
   return (
@@ -33,26 +41,32 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarBackground: TabBarBackground, // Assuming TabBarBackground handles its own styling if needed, or relies on tabBarStyle background
         tabBarActiveTintColor: '#55F358',
         tabBarStyle: Platform.select({
           ios: {
-            position: 'absolute',
-            height: 85,
+            position: 'absolute', // Be cautious with absolute positioning for tab bars, it can sometimes overlap content
+            height: 85, // Fixed height
             backgroundColor: '#fff',
             borderTopWidth: 0,
+            // You might want to add paddingBottom here for safe area on notched devices
+             paddingBottom: Platform.OS === 'ios' ? screenHeight > 800 ? 20 : 0 : 0 // Example: Adjust for iPhone notch
           },
-          default: {
-            height: 85,
+          default: { // Android and other platforms
+            height: 85, // Fixed height
             backgroundColor: '#fff',
             borderTopWidth: 0,
             elevation: 5,
           },
         }),
         tabBarLabelStyle: {
-          fontSize: 11,
-          marginBottom: 4,
+          fontSize: labelFontSize, // Use calculated labelFontSize
+          marginBottom: labelMarginBottom, // Use calculated labelMarginBottom
         },
+        // Optional: Adjust icon position if needed, often handled by default or with custom tabBarButton/Icon container styles
+        // tabBarIconStyle: {
+        //   marginTop: 5, // Example: push icon down slightly
+        // },
       }}
     >
       <Tabs.Screen

@@ -1,6 +1,6 @@
 import * as React from "react";
 import Svg, { Path, SvgProps } from "react-native-svg";
-const Exercises = ({ color, ...props }: SvgProps) => (
+const Exercises: React.FC<SvgProps> = ({ color, ...props }) => (
   <Svg
     width={22}
     height={19}

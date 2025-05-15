@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, Dimensions } from 'react-native'; // Import Dimensions
 import { LinearGradient } from 'expo-linear-gradient';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);//temproary to be fixed later
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
@@ -86,22 +89,17 @@ export default function HomeScreen() {
 
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
-            {/* Increase stat font sizes */}
             <Text style={styles.statValueSmall}>{calories}</Text>
             <Text style={styles.statLabelSmall}>CALORIE</Text>
           </View>
-
-          {/* Use dynamic timer size */}
           <View style={styles.statBoxMiddle}>
             <View style={[styles.timerContainer, { width: timerSize, height: timerSize, borderRadius: timerBorderRadius }]}>
               <View style={[styles.timerCircle, { borderRadius: timerBorderRadius, borderColor: 'rgba(255, 255, 255, 0.8)' }]}> {/* Use 80% opacity white */}
-                {/* TimerFill remains positioned absolutely within timerCircle */}
                 <View style={[styles.timerFill, { backgroundColor: getTimerColor(), height: `${timerProgress}%` }]} />
                 <Text style={styles.statValueMinutes}>{formatTime(timeRemaining)}</Text>
                 <Text style={styles.statLabelMinutes}>MINS</Text>
               </View>
             </View>
-            {/* Timer Controls moved closer */}
             <View style={styles.timerControls}>
               <TouchableOpacity style={styles.controlButton} onPress={handleStartPause}>
                 <Text style={styles.controlButtonText}>{isRunning ? 'PAUSE' : 'START'}</Text>
@@ -111,23 +109,17 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
           </View>
-
           <View style={styles.statBox}>
-            {/* Increase stat font sizes */}
             <Text style={styles.statValueSmall}>{days}</Text>
             <Text style={styles.statLabelSmall}>DAYS</Text>
           </View>
         </View>
       </LinearGradient>
-
-      {/* Adjust category selector positioning */}
       <View style={styles.categorySelector}>
-        <Text style={styles.categoryText}>Leg</Text>
-        <Text style={styles.categoryText}>Chest</Text>
-        <Text style={styles.categoryText}>Arms</Text>
+        <Text style={styles.categoryText}>LEG</Text>
+        <Text style={styles.categoryText}>CHEST</Text>
+        <Text style={styles.categoryText}>ARMS</Text>
       </View>
-
-      {/* Modal remains largely the same, width is already relative */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -200,7 +192,6 @@ const styles = StyleSheet.create({
   },
 
   // Timer Styles
-
   timerContainer: {
     // width, height, and borderRadius are set dynamically in the component
     justifyContent: 'center',
@@ -274,7 +265,7 @@ const styles = StyleSheet.create({
   categoryText: {
     fontWeight: '600',
     color: '#999',
-    fontSize: screenWidth * 0.04, // Make font size relative
+    fontSize: screenWidth * 0.035, // Make font size relative
   },
 
   // Modal Styles
