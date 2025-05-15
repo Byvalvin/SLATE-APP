@@ -7,6 +7,8 @@ import { useRouter } from 'expo-router';
 
 export default function SplashScreen() {
   const [showSplash, setShowSplash] = useState(true);
+  const [isSessionChecked, setIsSessionChecked] = useState(false);
+  const [shouldShowWelcome, setShouldShowWelcome] = useState(false);
   const fadeAnim = React.useRef(new Animated.Value(1)).current;
 
   const router = useRouter();
@@ -20,8 +22,15 @@ export default function SplashScreen() {
       router.replace('/(tabs)');
     } else {
       const refreshed = await refreshAccessToken();
-      if (refreshed) router.replace('/(tabs)');
-      else router.replace('/login'); // only show login if token & refresh both failed
+      if (refreshed) {
+        router.replace('/(tabs)');
+      }
+      else {
+        // Only show welcome if no valid session
+        setShouldShowWelcome(true);
+        setIsSessionChecked(true);
+        //router.replace('/login'); // only show login if token & refresh both failed
+      }
     }
   };
     
@@ -49,6 +58,11 @@ export default function SplashScreen() {
     );
   }
 
+  if (!isSessionChecked && !shouldShowWelcome) {
+    // Still checking session, show nothing (or a loader if you want)
+    return null;
+  }
+  
   return <WelcomeScreen />;
 }
 
