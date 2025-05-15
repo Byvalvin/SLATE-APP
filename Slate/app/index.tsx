@@ -45,7 +45,7 @@ export default function SplashScreen() {
         setShowSplash(false);
         checkSession(); // check if has a session and go straight to home else default
       });
-    }, 2000);
+    }, 1500);
     return () => clearTimeout(timeout);
   }, [fadeAnim]);
 

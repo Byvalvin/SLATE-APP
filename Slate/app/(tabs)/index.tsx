@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, Dimensions } from 'react-native'; // Import Dimensions
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, Dimensions, LogBox } from 'react-native'; // Import Dimensions
 import { LinearGradient } from 'expo-linear-gradient';
-import { LogBox } from 'react-native';
+
 
 LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);//temproary to be fixed later
 
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   statValueSmall: {
     fontSize: screenWidth * 0.055, // Increased font size (approx 20% larger than 0.045)
     color: 'white',
-    fontWeight: '300',
+    fontWeight: '400',
   },
   statLabelSmall: {
     fontSize: screenWidth * 0.035, // Increased font size (approx 20% larger than 0.03)
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     width: '100%', // Takes 100% of the dynamically sized timerContainer
     height: '100%', // Takes 100% of the dynamically sized timerContainer
     // borderRadius is set dynamically in the component
-    borderWidth: 5, // Fixed border width - consider scaling this for very different screen sizes
+    borderWidth: 3, // Fixed border width - consider scaling this for very different screen sizes
     borderColor: 'rgba(255, 255, 255, 0.8)', // 80% opaque white border
     backgroundColor: 'transparent', // Make the background transparent
     justifyContent: 'center',
@@ -290,13 +290,14 @@ const styles = StyleSheet.create({
     fontSize: screenWidth * 0.045, // Make font size relative
     marginBottom: screenHeight * 0.02, // Make margin bottom relative
     textAlign: 'center',
+    fontWeight: 300,
     color: '#000',
   },
   modalInput: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12, // Fixed border radius
     padding: screenWidth * 0.035, // Make padding relative
-    fontSize: 16, // Fixed font size
+    fontSize: 18, // Fixed font size
     width: '100%',
     marginBottom: screenHeight * 0.02, // Make margin bottom relative
     shadowColor: '#000',
@@ -309,7 +310,7 @@ const styles = StyleSheet.create({
   modalButton: {
     backgroundColor: '#55F358',
     borderRadius: 12, // Fixed border radius
-    paddingVertical: screenHeight * 0.015, // Make padding relative
+    paddingVertical: screenHeight * 0.013, // Make padding relative
     width: '100%',
     alignItems: 'center',
   },
