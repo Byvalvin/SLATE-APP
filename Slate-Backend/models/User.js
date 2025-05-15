@@ -9,6 +9,8 @@ const UserSchema = new mongoose.Schema({
   password: String,
   dob: Date,
   createdAt: { type: Date, default: Date.now },
+
+  refreshToken: { type: String, default: null },
 });
 
 // Hash password before saving

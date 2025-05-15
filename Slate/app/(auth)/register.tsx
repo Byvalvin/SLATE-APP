@@ -12,6 +12,9 @@ import {
 import { AntDesign } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { servers } from '../../constants/API';
+import { saveTokens } from '@/utils/token';
+import { useRouter } from 'expo-router';
+
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -19,6 +22,8 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [dob, setDob] = useState<Date | undefined>(undefined);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const router = useRouter();
 
   const handleRegister = async () => {
     if (!name || !email || !password || !dob) {
@@ -44,6 +49,8 @@ export default function RegisterScreen() {
       console.log(data);
 
       if (response.ok) {
+        await saveTokens(data.accessToken, data.refreshToken); // 💾 save session
+        //router.replace('/onboarding'); // or tabs/home/etc
         alert('Registration successful!');
       } else {
         alert(`Error: ${data.message || 'Registration failed'}`);

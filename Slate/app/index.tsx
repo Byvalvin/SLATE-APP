@@ -2,18 +2,40 @@
 import React, { useEffect, useState } from 'react';
 import { Animated, StatusBar, StyleSheet, Text } from 'react-native';
 import WelcomeScreen from '../components/WelcomeScreen';
+import { getAccessToken, refreshAccessToken } from '@/utils/token';
+import { useRouter } from 'expo-router';
 
 export default function SplashScreen() {
   const [showSplash, setShowSplash] = useState(true);
   const fadeAnim = React.useRef(new Animated.Value(1)).current;
 
+  const router = useRouter();
+
+  // to decide if user gets login or straight to account
+  const checkSession = async () => {
+    const accessToken = await getAccessToken();
+  
+    if (accessToken) {
+      // Optionally validate the token on backend
+      router.replace('/(tabs)');
+    } else {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) router.replace('/(tabs)');
+      else router.replace('/login'); // only show login if token & refresh both failed
+    }
+  };
+    
+  
   useEffect(() => {
     const timeout = setTimeout(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 500,
         useNativeDriver: true,
-      }).start(() => setShowSplash(false));
+      }).start(() => {
+        setShowSplash(false);
+        checkSession(); // check if has a session and go straight to home else default
+      });
     }, 2000);
     return () => clearTimeout(timeout);
   }, [fadeAnim]);

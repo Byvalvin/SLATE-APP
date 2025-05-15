@@ -12,6 +12,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 import { servers } from '../../constants/API';
+import { saveTokens } from '@/utils/token';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -35,6 +36,9 @@ export default function LoginScreen() {
       console.log(data);
 
       if (response.ok) {
+        console.log(data);
+        await saveTokens(data.accessToken, data.refreshToken); // store session
+        
         router.replace('/(tabs)');
       } else {
         alert(`Error: ${data.message || 'Login failed'}`);
