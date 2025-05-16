@@ -5,9 +5,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AccountModal from '../../components/AccountModal';
 import { servers } from '@/constants/API';
 import { getAccessToken } from '@/utils/token';
+import { fetchWithAuth } from '@/utils/user';
 
 
-LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);//temproary to be fixed later
+// LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);//temproary to be fixed later
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
@@ -37,12 +38,8 @@ export default function HomeScreen() {
         const token = await getAccessToken();
         if (!token) return;
   
-        const res = await fetch(`${servers[1]}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
+        const res = await fetchWithAuth(`${servers[1]}/api/auth/me`);
+
         if (res.ok) {
           const userData = await res.json();
           setUser({
@@ -140,7 +137,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.statBoxMiddle}>
             <View style={[styles.timerContainer, { width: timerSize, height: timerSize, borderRadius: timerBorderRadius }]}>
-              <View style={[styles.timerCircle, { borderRadius: timerBorderRadius, borderColor: 'rgba(255, 255, 255, 0.8)' }]}> {/* Use 80% opacity white */}
+              <View style={[styles.timerCircle, { borderRadius: timerBorderRadius, borderColor: 'rgba(255, 255, 255, 0.8)' }]}>
                 <View style={[styles.timerFill, { backgroundColor: getTimerColor(), height: `${timerProgress}%` }]} />
                 <Text style={styles.statValueMinutes}>{formatTime(timeRemaining)}</Text>
                 <Text style={styles.statLabelMinutes}>MINS</Text>
@@ -183,7 +180,6 @@ export default function HomeScreen() {
         </View>
       </Modal>
 
-      {/* show if user wants to see account */}
       {user && (
         <AccountModal
           visible={accountVisible}

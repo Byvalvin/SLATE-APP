@@ -106,7 +106,6 @@ export default function RegisterScreen() {
           secureTextEntry
         />
 
-        {/* Date of Birth Input - Styled as an inputBox */}
         <TouchableOpacity style={styles.inputBox} onPress={showDatePicker}>
           <Text style={{
             color: dob ? '#000' : '#888',
@@ -133,7 +132,6 @@ export default function RegisterScreen() {
         </View>
 
         <TouchableOpacity style={styles.googleButton}>
-          {/* Adjust icon size to be relative */}
           <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
         </TouchableOpacity>
 

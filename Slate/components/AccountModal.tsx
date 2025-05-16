@@ -46,10 +46,8 @@ const AccountModal = ({ visible, onClose, user }: Props) => {
         style={styles.modal}
       >
         <View style={styles.modalContent}>
-          {/* Grabber very top */}
           <View style={styles.grabber} />
 
-          {/* Title and Close button on same horizontal line */}
           <View style={styles.headerRow}>
             <Text style={styles.title}>My Account</Text>
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
@@ -57,7 +55,6 @@ const AccountModal = ({ visible, onClose, user }: Props) => {
             </TouchableOpacity>
           </View>
 
-          {/* Info Fields */}
           <View style={styles.infoBox}>
             <Text style={styles.label}>Name</Text>
             <Text style={styles.value}>{user.name}</Text>

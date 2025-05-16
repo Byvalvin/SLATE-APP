@@ -19,10 +19,8 @@ export default function WelcomeScreen() {
     <View style={{ flex: 1 }}>
       <ImageBackground source={welcomeImage} style={styles.welcomeBg}>
         <View style={styles.overlay}>
-          {/* SLATE positioned absolutely at the top */}
           <Text style={styles.title}>SLATE</Text>
 
-          {/* Wrapper for content aligned at the bottom */}
           <View style={styles.bottomContent}>
             <Text style={styles.subtitle}>Get Personalized Advice</Text>
             <Text style={styles.body}>
