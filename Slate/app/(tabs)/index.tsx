@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, Dimensions, LogBox } from 'react-native'; // Import Dimensions
 import { LinearGradient } from 'expo-linear-gradient';
 
+import AccountModal from '../../components/AccountModal';
+import { servers } from '@/constants/API';
+import { getAccessToken } from '@/utils/token';
+import { fetchWithAuth } from '@/utils/user';
 
-LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);//temproary to be fixed later
+
+// LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);//temproary to be fixed later
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
@@ -18,9 +23,43 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [tempMinutes, setTempMinutes] = useState(initialMinutes);
 
+  const [accountVisible, setAccountVisible] = useState(false);
+
   // Calculate timer size dynamically based on screen width - Reduced by 20% (from 0.5 to 0.4)
   const timerSize = screenWidth * 0.4;
   const timerBorderRadius = timerSize / 2;
+
+  const [user, setUser] = useState<any>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token) return;
+  
+        const res = await fetchWithAuth(`${servers[1]}/api/auth/me`);
+
+        if (res.ok) {
+          const userData = await res.json();
+          setUser({
+            ...userData,
+            dob: new Date(userData.dob).toLocaleDateString(),
+            createdAt: new Date(userData.createdAt).toLocaleDateString(),
+          });
+        } else {
+          console.error('Failed to fetch user');
+        }
+      } catch (err) {
+        console.error('Error fetching user:', err);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+  
+    fetchUser();
+  }, []);
+  
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -86,6 +125,10 @@ export default function HomeScreen() {
         style={styles.header}
       >
         <Text style={styles.headerTitle}>SLATE</Text>
+        <TouchableOpacity style={styles.profileButton} onPress={() => setAccountVisible(true)}>
+          <Text style={styles.profileButtonText}>⚙️</Text>
+        </TouchableOpacity>
+
 
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
@@ -94,7 +137,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.statBoxMiddle}>
             <View style={[styles.timerContainer, { width: timerSize, height: timerSize, borderRadius: timerBorderRadius }]}>
-              <View style={[styles.timerCircle, { borderRadius: timerBorderRadius, borderColor: 'rgba(255, 255, 255, 0.8)' }]}> {/* Use 80% opacity white */}
+              <View style={[styles.timerCircle, { borderRadius: timerBorderRadius, borderColor: 'rgba(255, 255, 255, 0.8)' }]}>
                 <View style={[styles.timerFill, { backgroundColor: getTimerColor(), height: `${timerProgress}%` }]} />
                 <Text style={styles.statValueMinutes}>{formatTime(timeRemaining)}</Text>
                 <Text style={styles.statLabelMinutes}>MINS</Text>
@@ -136,6 +179,14 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
+
+      {user && (
+        <AccountModal
+          visible={accountVisible}
+          onClose={() => setAccountVisible(false)}
+          user={user}
+        />
+      )}
     </View>
   );
 }
@@ -319,4 +370,19 @@ const styles = StyleSheet.create({
     fontSize: 16, // Fixed font size
     fontWeight: 'bold',
   },
+
+
+  profileButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    padding: 8,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  profileButtonText: {
+    fontSize: 18,
+  },
+  
 });

@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+const authMiddleware = require('../middleware/auth');
+
 const JWT_SECRET = process.env.ACCESS_TOKEN_SECRET || 'your_jwt_secret';
 const JWT_EXPIRATION = '15m';
 const REFRESH_TOKEN_EXPIRATION = '7d';
@@ -112,6 +114,22 @@ router.post('/refresh-token', async (req, res) => {
     res.status(403).json({ message: 'Invalid refresh token' });
   }
 });
+
+// Get current user info
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findOne({ userId: req.user.userId }).select('-password -refreshToken -_id -__v');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 
 module.exports = router;

@@ -87,7 +87,6 @@ export default function LoginScreen() {
         </View>
 
         <TouchableOpacity style={styles.googleButton}>
-          {/* Adjust icon size if needed - currently fixed */}
           <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
         </TouchableOpacity>
 
