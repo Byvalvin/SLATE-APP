@@ -1,7 +1,7 @@
 // Slate/app/(auth)/index.tsx
 import React, { useEffect, useState } from 'react';
 import { Animated, StatusBar, StyleSheet, Text } from 'react-native';
-import WelcomeScreen from '../components/WelcomeScreen';
+import WelcomeScreen from '@/components/WelcomeScreen';
 import { getAccessToken, refreshAccessToken } from '@/utils/token';
 import { useRouter } from 'expo-router';
 

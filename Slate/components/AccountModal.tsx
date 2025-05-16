@@ -25,7 +25,7 @@ const AccountModal = ({ visible, onClose, user }: Props) => {
   const handleLogout = async () => {
     await logout();
     onClose();
-    router.replace('/');
+    router.replace('/(auth)/login')
   };
 
   const handleClose = useCallback(() => {

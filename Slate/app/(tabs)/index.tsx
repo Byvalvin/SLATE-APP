@@ -37,7 +37,7 @@ export default function HomeScreen() {
         const token = await getAccessToken();
         if (!token) return;
   
-        const res = await fetch(`${servers[1]}/api/me`, {
+        const res = await fetch(`${servers[1]}/api/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
