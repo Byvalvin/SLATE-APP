@@ -118,7 +118,7 @@ router.post('/refresh-token', async (req, res) => {
 });
 
 // Get current user info
-router.get('/me', authMiddleware, async (req, res) => {
+router.get('/me',  async (req, res) => {
   try {
     const user = await User.findOne({ userId: req.user.userId }).select('-password -refreshToken -_id -__v');
 
