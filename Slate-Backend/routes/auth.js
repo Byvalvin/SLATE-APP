@@ -7,9 +7,8 @@ const User = require('../models/User');
 
 const authMiddleware = require('../middleware/auth');
 
-const JWT_SECRET = process.env.ACCESS_TOKEN_SECRET || 'your_jwt_secret';
-const JWT_EXPIRATION = '15m';
-const REFRESH_TOKEN_EXPIRATION = '7d';
+const JWT_EXPIRATION = '1m';
+const REFRESH_TOKEN_EXPIRATION = '5m';
 
 // Register route
 router.post('/register', async (req, res) => {
@@ -24,10 +23,10 @@ router.post('/register', async (req, res) => {
     const user = new User({ name, email, password, dob });
 
     // Generate tokens
-    const accessToken = jwt.sign({ userId: user.userId }, JWT_SECRET, {
+    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: JWT_EXPIRATION,
     });
-    const refreshToken = jwt.sign({ userId: user.userId }, JWT_SECRET, {
+    const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: REFRESH_TOKEN_EXPIRATION,
     });
 
@@ -62,10 +61,10 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const accessToken = jwt.sign({ userId: user.userId }, JWT_SECRET, {
+    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: JWT_EXPIRATION,
     });
-    const refreshToken = jwt.sign({ userId: user.userId }, JWT_SECRET, {
+    const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: REFRESH_TOKEN_EXPIRATION,
     });
 
@@ -94,21 +93,19 @@ router.post('/refresh-token', async (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, process.env.ACCESS_TOKEN_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     const user = await User.findOne({ userId: decoded.userId });
 
-    console.log('Refresh token received:', refreshToken);
-console.log('Refresh token in DB:', user.refreshToken);
-console.log('Decoded token userId:', decoded.userId);
-
+    console.log('Received refresh token:', refreshToken);
+    console.log('Stored refresh token:', user?.refreshToken);
 
     if (!user || user.refreshToken !== refreshToken) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
 
     // Generate new access and refresh tokens
-    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-    const newRefreshToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
+    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: JWT_EXPIRATION });
+    const newRefreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRATION });
 
     // Update user's refresh token in the database
     user.refreshToken = newRefreshToken;
