@@ -97,6 +97,11 @@ router.post('/refresh-token', async (req, res) => {
     const decoded = jwt.verify(refreshToken, process.env.ACCESS_TOKEN_SECRET);
     const user = await User.findOne({ userId: decoded.userId });
 
+    console.log('Refresh token received:', refreshToken);
+console.log('Refresh token in DB:', user.refreshToken);
+console.log('Decoded token userId:', decoded.userId);
+
+
     if (!user || user.refreshToken !== refreshToken) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
