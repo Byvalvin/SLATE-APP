@@ -36,7 +36,7 @@ export default function LoginScreen() {
       });
 
       const data = await response.json();
-      console.log(data);
+      //console.log(data);
 
       if (response.ok) {
         await saveTokens(data.accessToken, data.refreshToken); // store session

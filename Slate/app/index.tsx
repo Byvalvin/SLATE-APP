@@ -29,7 +29,7 @@ export default function SplashScreen() {
         router.replace('/(tabs)');
       }
       else {
-        console.log("no refreshtoken token. must be new here go to login")
+        console.log("no refreshtoken token. must be new here or refresh expired go to login")
         // Only show welcome if no valid session
         setIsSessionChecked(true);
         //router.replace('/login'); // only show login if token & refresh both failed

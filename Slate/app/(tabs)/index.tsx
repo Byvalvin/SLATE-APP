@@ -376,17 +376,12 @@ export default function HomeScreen() {
                 </View>
             </View>
        </Modal>
-       {loadingUser ? (
-          <Text>Loading user data...</Text> // Or add a spinner here
-        ) : (
-          user && (
-            <AccountModal
-              visible={accountVisible}
-              onClose={() => setAccountVisible(false)}
-              user={user}
-            />
-          )
-        )}
+       
+       <AccountModal
+          visible={accountVisible}
+          onClose={() => setAccountVisible(false)}
+          user={user}
+        />
     </View>
   );
 }
