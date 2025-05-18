@@ -7,8 +7,8 @@ const User = require('../models/User');
 
 const authMiddleware = require('../middleware/auth');
 
-const JWT_EXPIRATION = '1m';
-const REFRESH_TOKEN_EXPIRATION = '5m';
+const JWT_EXPIRATION = '5m';
+const REFRESH_TOKEN_EXPIRATION = '1h';
 
 // Register route
 router.post('/register', async (req, res) => {
@@ -102,16 +102,12 @@ router.post('/refresh-token', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    if (user.refreshToken !== refreshToken) {
-      return res.status(403).json({ message: 'Invalid refresh token forbidden' });
-    }
-
     // Generate new tokens
     const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${JWT_EXPIRATION}` });
     const newRefreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: `${REFRESH_TOKEN_EXPIRATION}` });
 
     // Save the new refresh token in the DB
-    user.refreshToken = newRefreshToken;
+    //user.refreshToken = newRefreshToken;
     await user.save();
 
     // Return new tokens
