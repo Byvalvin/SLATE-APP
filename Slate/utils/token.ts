@@ -46,12 +46,8 @@ export async function deleteTokens(): Promise<void> {
 }
 
 export async function refreshAccessToken(): Promise<string | null> {
-  const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-  const refreshExp = await SecureStore.getItemAsync(REFRESH_EXP_KEY);
-
-  if (!refreshToken || !refreshExp || Date.now() >= parseInt(refreshExp) * 1000) {
-    return null;
-  }
+    const refreshToken = await getRefreshToken();
+    if (!refreshToken) return null;
 
   try {
     const response = await fetch(`${servers[1]}/api/auth/refresh-token`, {
@@ -69,6 +65,7 @@ export async function refreshAccessToken(): Promise<string | null> {
     return accessToken;
   } catch (error) {
     console.error('Error refreshing access token:', error);
+    //await deleteTokens(); // Clear corrupted state
     return null;
   }
 }

@@ -68,7 +68,11 @@ export default function HomeScreen() {
     const fetchUser = async () => {
       try {
         const token = await getAccessToken();
-        if (!token) return;
+        if (!token){
+          console.log('No valid access token, redirecting to login');
+          //router.replace('/login');  // or however you navigate
+          return;
+        }
         const res = await fetchWithAuth(`${servers[1]}/api/auth/me`);
 
         if (res.ok) {
@@ -86,6 +90,7 @@ export default function HomeScreen() {
 
       } catch (err) {
         console.error('Error fetching user:', err);
+        //router.replace('/login');  // fallback on fetch fail
       } finally {
         setLoadingUser(false);
       }

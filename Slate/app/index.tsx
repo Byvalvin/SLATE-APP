@@ -4,7 +4,7 @@ import { ActivityIndicator, Animated, StatusBar, StyleSheet, Text } from 'react-
 import WelcomeScreen from '@/components/WelcomeScreen';
 import { deleteTokens, getAccessToken, refreshAccessToken } from '@/utils/token';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+//import * as SecureStore from 'expo-secure-store';
 
 export default function SplashScreen() {
   const [showSplash, setShowSplash] = useState(true);
