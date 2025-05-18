@@ -13,6 +13,10 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { AntDesign } from '@expo/vector-icons'; // Import icons for the date navigator and add button
 import { format, addDays, subDays, isToday } from 'date-fns'; // Import date manipulation functions and isToday
+import { getAccessToken } from '@/utils/token';
+import { servers } from '@/constants/API';
+import { fetchWithAuth } from '@/utils/user';
+import AccountModal from '@/components/AccountModal';
 
 
 // Temporarily suppress the specific warning during development
@@ -51,10 +55,48 @@ export default function HomeScreen() {
   const [tempReps, setTempReps] = useState('10');
   const [tempExerciseName, setTempExerciseName] = useState(''); // For manual input or selection from list
 
+  const [accountVisible, setAccountVisible] = useState(false);
 
   // Calculate timer size dynamically based on screen width - Reduced by 20% (from 0.5 to 0.4)
   const timerSize = screenWidth * 0.4;
   const timerBorderRadius = timerSize / 2;
+
+  const [user, setUser] = useState<any>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token){
+          console.log('No valid access token, redirecting to login');
+          //router.replace('/login');  // or however you navigate
+          return;
+        }
+        const res = await fetchWithAuth(`${servers[1]}/api/auth/me`);
+
+        if (res.ok) {
+          const userData = await res.json();
+
+          setUser({
+            ...userData,
+            dob: new Date(userData.dob).toLocaleDateString(),
+            createdAt: new Date(userData.createdAt).toLocaleDateString(),
+          });
+
+        } else {
+          console.error('Failed to fetch user');
+        }
+
+      } catch (err) {
+        console.error('Error fetching user:', err);
+        //router.replace('/login');  // fallback on fetch fail
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -205,8 +247,12 @@ export default function HomeScreen() {
       >
         
         <Text style={styles.headerTitle}>SLATE</Text>
+        <TouchableOpacity style={styles.profileButton} onPress={() => setAccountVisible(true)}>
+          <Text style={styles.profileButtonText}>⚙️</Text>
+        </TouchableOpacity>
 
-        
+
+
         <View style={styles.statsContainer}>
           
           <View style={styles.statBox}>
@@ -330,7 +376,12 @@ export default function HomeScreen() {
                 </View>
             </View>
        </Modal>
-
+       
+       <AccountModal
+          visible={accountVisible}
+          onClose={() => setAccountVisible(false)}
+          user={user}
+        />
     </View>
   );
 }
@@ -392,6 +443,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: screenHeight * 0.03, // Adjusted margin bottom
   },
+
+  profileButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    padding: 8,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+
+  profileButtonText: {
+    fontSize: 18,
+  },
+
 
   // Stats Container Styles
   statsContainer: {
