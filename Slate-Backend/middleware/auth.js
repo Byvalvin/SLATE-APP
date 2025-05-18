@@ -20,6 +20,6 @@ module.exports = function (req, res, next) {
     console.log(req.user)
     next();  // Proceed to the next middleware/route handler
   } catch (err) {
-    return res.status(40).json({ message: 'Unauthorized access' });  // Token is invalid or expired
+    return res.status(401).json({ message: 'Unauthorized access' });  // Token is invalid or expired
   }
 };
