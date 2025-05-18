@@ -17,7 +17,7 @@ export async function getRefreshToken(): Promise<string | null> {
   return await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 }
 
-export async function logout(): Promise<void> {
+export async function deleteTokens(): Promise<void> {
   await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
   await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
 }
@@ -47,3 +47,5 @@ export async function refreshAccessToken(): Promise<string | null> {
     return null;
   }
 }
+
+

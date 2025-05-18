@@ -29,6 +29,8 @@ router.post('/register', async (req, res) => {
     const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: `${REFRESH_TOKEN_EXPIRATION}`,
     });
+    //const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    //user.refreshToken = hashedRefreshToken; // Then when verifying the refresh token later, use bcrypt.compare()
 
     // Save refresh token in DB
     user.refreshToken = refreshToken;
@@ -83,7 +85,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
 // Refresh token route
 router.post('/refresh-token', async (req, res) => {
   const { refreshToken } = req.body;
@@ -93,49 +94,49 @@ router.post('/refresh-token', async (req, res) => {
   }
 
   try {
+    // Validate the refresh token
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     const user = await User.findOne({ userId: decoded.userId });
 
-    console.log('Client sent refresh token:', refreshToken);
-    console.log('DB has refresh token:', user?.refreshToken);
-
-    if (!user || user.refreshToken !== refreshToken) {
-      console.log('Refresh token mismatch or user not found');
-      return res.status(403).json({ message: 'Invalid refresh token' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-    const newRefreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+    if (user.refreshToken !== refreshToken) {
+      return res.status(403).json({ message: 'Invalid refresh token forbidden' });
+    }
 
+    // Generate new tokens
+    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${JWT_EXPIRATION}` });
+    const newRefreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: `${REFRESH_TOKEN_EXPIRATION}` });
+
+    // Save the new refresh token in the DB
     user.refreshToken = newRefreshToken;
     await user.save();
 
-    console.log("saved new tokesns")
-    console.log(accessToken)
-    console.log(refreshToken)
-
+    // Return new tokens
     return res.json({ accessToken, refreshToken: newRefreshToken });
+
   } catch (err) {
-    console.error('Refresh token verify failed:', err);
-    return res.status(403).json({ message: 'Invalid refresh token' });
+    console.error('Refresh token error:', err);
+    return res.status(401).json({ message: 'Invalid refresh token unauthorised' }); // Use 401 if token verification fails
   }
 });
 
 
 // Get current user info
 router.get('/me', authMiddleware, async (req, res) => {
-  console.log("in me");
   try {
-    console.log(req)
-    const user = await User.findOne({ userId: req.user.userId }).select('-password -refreshToken -_id -__v');
-    console.log(user)
+    const user = await User.findOne({ userId: req.user.userId })
+      .select('-password -refreshToken -_id -__v');
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json(user);
+    res.json(user);  // Return user info, excluding sensitive fields
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error' });  // General server error handling
   }
 });
 

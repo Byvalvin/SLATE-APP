@@ -1,6 +1,6 @@
-// Slate/app/(auth)/index.tsx
+// Slate/app/index.tsx
 import React, { useEffect, useState } from 'react';
-import { Animated, StatusBar, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Animated, StatusBar, StyleSheet, Text } from 'react-native';
 import WelcomeScreen from '@/components/WelcomeScreen';
 import { getAccessToken, refreshAccessToken } from '@/utils/token';
 import { useRouter } from 'expo-router';
@@ -8,26 +8,27 @@ import { useRouter } from 'expo-router';
 export default function SplashScreen() {
   const [showSplash, setShowSplash] = useState(true);
   const [isSessionChecked, setIsSessionChecked] = useState(false);
-  const [shouldShowWelcome, setShouldShowWelcome] = useState(false);
   const fadeAnim = React.useRef(new Animated.Value(1)).current;
 
   const router = useRouter();
-
+  
+  
   // to decide if user gets login or straight to account
   const checkSession = async () => {
     const accessToken = await getAccessToken();
   
     if (accessToken) {
-      // Optionally validate the token on backend
+      console.log("Access token found, navigating to home.");
       router.replace('/(tabs)');
     } else {
+      console.log("No access token found, attempting to refresh token...");
       const refreshed = await refreshAccessToken();
       if (refreshed) {
         router.replace('/(tabs)');
       }
       else {
+        console.log("no refreshtoken token. must be new here go to login")
         // Only show welcome if no valid session
-        setShouldShowWelcome(true);
         setIsSessionChecked(true);
         //router.replace('/login'); // only show login if token & refresh both failed
       }
@@ -58,9 +59,10 @@ export default function SplashScreen() {
     );
   }
 
-  if (!isSessionChecked && !shouldShowWelcome) {
-    // Still checking session, show nothing (or a loader if you want)
-    return null;
+  if (!isSessionChecked) {
+    // While session is being checked, you can show a loading indicator
+    // return null;  // Or a loading spinner if you'd prefer
+    return <ActivityIndicator size="large" color="#0000ff" />;
   }
   
   return <WelcomeScreen />;

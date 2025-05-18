@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-nati
 import Modal from 'react-native-modal';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
-import { logout } from '@/utils/token';
+import { deleteTokens } from '@/utils/token';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -23,7 +23,7 @@ const AccountModal = ({ visible, onClose, user }: Props) => {
   const router = useRouter();
 
   const handleLogout = async () => {
-    await logout();
+    await deleteTokens();
     onClose();
     router.replace('/(auth)/login')
   };
