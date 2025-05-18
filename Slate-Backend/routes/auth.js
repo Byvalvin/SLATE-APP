@@ -110,6 +110,10 @@ router.post('/refresh-token', async (req, res) => {
     user.refreshToken = newRefreshToken;
     await user.save();
 
+    console.log("saved new tokesns")
+    console.log(accessToken)
+    console.log(refreshToken)
+
     return res.json({ accessToken, refreshToken: newRefreshToken });
   } catch (err) {
     console.error('Refresh token verify failed:', err);
