@@ -39,7 +39,6 @@ export default function LoginScreen() {
       console.log(data);
 
       if (response.ok) {
-        console.log(data);
         await saveTokens(data.accessToken, data.refreshToken); // store session
 
         router.replace('/(tabs)');

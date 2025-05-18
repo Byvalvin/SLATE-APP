@@ -8,9 +8,8 @@ module.exports = function (req, res, next) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Authorization token missing or malformed' });
   }
-a
-  const token = authHeader.split(' ')[1];
 
+  const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;  // Attach userId to the request object
