@@ -17,8 +17,9 @@ module.exports = function (req, res, next) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;  // Attach userId to the request object
+    console.log(req.user)
     next();  // Proceed to the next middleware/route handler
   } catch (err) {
-    return res.status(403).json({ message: 'Unauthorized access' });  // Token is invalid or expired
+    return res.status(40).json({ message: 'Unauthorized access' });  // Token is invalid or expired
   }
 };
