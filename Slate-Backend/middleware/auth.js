@@ -10,6 +10,9 @@ module.exports = function (req, res, next) {
   }
 
   const token = authHeader.split(' ')[1];
+  console.log("heade rtoken")
+  console.log(token)
+  console.log(JWT_SECRET)
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
