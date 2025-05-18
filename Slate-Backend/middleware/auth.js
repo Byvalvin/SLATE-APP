@@ -15,6 +15,7 @@ module.exports = function (req, res, next) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded; // decoded will have userId from your JWT payload
+    console.log(req.user)
     next();
   } catch (err) {
     return res.status(403).json({ message: 'Invalid or expired token' });
