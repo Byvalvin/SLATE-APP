@@ -8,16 +8,12 @@ module.exports = function (req, res, next) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Authorization token missing or malformed' });
   }
-
+a
   const token = authHeader.split(' ')[1];
-  console.log("heade rtoken")
-  console.log(token)
-  console.log(JWT_SECRET)
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;  // Attach userId to the request object
-    console.log(req.user)
     next();  // Proceed to the next middleware/route handler
   } catch (err) {
     return res.status(401).json({ message: 'Unauthorized access' });  // Token is invalid or expired

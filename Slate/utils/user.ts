@@ -3,7 +3,7 @@ import { refreshAccessToken, getAccessToken } from '@/utils/token';
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   let token = await getAccessToken();
 
-  if (!token) throw new Error('No access token');
+  if (!token) throw new Error('No access token available');
 
   const makeRequest = async (accessToken: string) =>
     fetch(url, {
@@ -11,7 +11,7 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
       headers: {
         ...(options.headers || {}),
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json', // Optional: standard
+        'Content-Type': 'application/json',
       },
     });
 
@@ -20,8 +20,10 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   // If access token is expired
   if (res.status === 401) {
     const newToken = await refreshAccessToken();
-
-    if (!newToken) throw new Error('Token refresh failed');
+    if (!newToken) {
+      // Return an explicit error if token refresh fails
+      throw new Error('Session expired. Please log in again.');
+    }
 
     res = await makeRequest(newToken);
   }

@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, StatusBar, StyleSheet, Text } from 'react-native';
 import WelcomeScreen from '@/components/WelcomeScreen';
-import { getAccessToken, refreshAccessToken } from '@/utils/token';
+import { deleteTokens, getAccessToken, refreshAccessToken } from '@/utils/token';
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 
 export default function SplashScreen() {
   const [showSplash, setShowSplash] = useState(true);
@@ -15,6 +16,7 @@ export default function SplashScreen() {
   
   // to decide if user gets login or straight to account
   const checkSession = async () => {
+    // deleteTokens()
     const accessToken = await getAccessToken();
   
     if (accessToken) {
@@ -34,8 +36,17 @@ export default function SplashScreen() {
       }
     }
   };
-    
   
+  // useEffect(() => {
+  //   const logTokens = async () => {
+  //     const access = await SecureStore.getItemAsync('accessToken');
+  //     const refresh = await SecureStore.getItemAsync('refreshToken');
+  //     console.log('Access Token on app load:', access);
+  //     console.log('Refresh Token on app load:', refresh);
+  //   };
+  //   logTokens();
+  // }, []);
+    
   useEffect(() => {
     const timeout = setTimeout(() => {
       Animated.timing(fadeAnim, {
