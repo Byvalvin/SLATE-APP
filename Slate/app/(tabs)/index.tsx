@@ -376,12 +376,14 @@ export default function HomeScreen() {
                 </View>
             </View>
        </Modal>
-       
-       <AccountModal
+
+      {!loadingUser && user && (
+        <AccountModal
           visible={accountVisible}
           onClose={() => setAccountVisible(false)}
           user={user}
         />
+      )}
     </View>
   );
 }
