@@ -24,10 +24,10 @@ router.post('/register', async (req, res) => {
 
     // Generate tokens
     const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: JWT_EXPIRATION,
+      expiresIn: `${JWT_EXPIRATION}`,
     });
     const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: REFRESH_TOKEN_EXPIRATION,
+      expiresIn: `${REFRESH_TOKEN_EXPIRATION}`,
     });
 
     // Save refresh token in DB
