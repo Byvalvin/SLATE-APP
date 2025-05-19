@@ -19,8 +19,6 @@ import { fetchWithAuth } from '@/utils/user';
 import AccountModal from '@/components/AccountModal';
 
 
-// Temporarily suppress the specific warning during development
-// REMOVE this line and the LogBox import once you fix the underlying issue
 //LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -31,7 +29,7 @@ interface Exercise {
   name: string;
   sets: number;
   reps: number;
-  imageKey: string; // Key to look up local image
+  imageKey: string; 
 }
 
 
@@ -73,6 +71,7 @@ export default function HomeScreen() {
           //router.replace('/login');  // or however you navigate
           return;
         }
+        
         const res = await fetchWithAuth(`${servers[1]}/api/auth/me`);
 
         if (res.ok) {
@@ -136,6 +135,7 @@ export default function HomeScreen() {
   }, [timeRemaining, totalTime]);
 
   // --- Exercise Data Fetching Placeholder ---
+  //Daniel here is the stuff that you need tio change basically the hardcoded exercises need to be rendererd dynamically from the database
   // In a real app, you would fetch exercises for the current date here
    useEffect(() => {
      const fetchExercises = async () => {
