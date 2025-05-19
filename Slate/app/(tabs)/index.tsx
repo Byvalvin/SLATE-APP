@@ -304,7 +304,12 @@ export default function HomeScreen() {
       </View>
 
       
-      <ScrollView style={styles.exerciseListContainer} contentContainerStyle={styles.exerciseListContent}>
+      <ScrollView style={styles.exerciseListContainer}
+        contentContainerStyle={[
+          styles.exerciseListContent, 
+          { paddingBottom: accountVisible ? screenHeight * 0.3 : 0 } // Adjust padding when modal is visible
+        ]}
+      >
          
          
          {exercisesForDay.map(exercise => (

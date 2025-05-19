@@ -33,7 +33,7 @@ const AccountModal = ({ visible, onClose, user }: Props) => {
   }, [onClose]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    
       <Modal
         isVisible={visible}
         onBackdropPress={handleClose}
@@ -81,7 +81,6 @@ const AccountModal = ({ visible, onClose, user }: Props) => {
           </TouchableOpacity>
         </View>
       </Modal>
-    </GestureHandlerRootView>
   );
 };
 
@@ -101,6 +100,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 5,
+    maxHeight: screenHeight * 0.7, // Prevent modal from covering entire screen
   },
   grabber: {
     width: 40,
