@@ -7,8 +7,8 @@ const User = require('../models/User');
 
 const authMiddleware = require('../middleware/auth');
 
-const JWT_EXPIRATION = '5m';
-const REFRESH_TOKEN_EXPIRATION = '10m';
+const JWT_EXPIRATION = '1h'; // Access token validity for 1 hour
+const REFRESH_TOKEN_EXPIRATION = '30d'; // Refresh token validity for 30 days
 
 // Register route
 router.post('/register', async (req, res) => {

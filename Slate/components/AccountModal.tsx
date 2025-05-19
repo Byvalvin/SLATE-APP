@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import Modal from 'react-native-modal';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useRouter } from 'expo-router';
 import { deleteTokens } from '@/utils/token';
 
@@ -41,8 +40,10 @@ const AccountModal = ({ visible, onClose, user }: Props) => {
         swipeDirection="down"
         animationInTiming={300}
         animationOutTiming={300}
-        backdropOpacity={0.5}
-        backdropTransitionOutTiming={0}
+        backdropOpacity={0.2}  
+        backdropTransitionInTiming={1000} 
+
+        
         style={styles.modal}
       >
         <View style={styles.modalContent}>
