@@ -251,8 +251,6 @@ export default function HomeScreen() {
           <Text style={styles.profileButtonText}>⚙️</Text>
         </TouchableOpacity>
 
-
-
         <View style={styles.statsContainer}>
           
           <View style={styles.statBox}>
