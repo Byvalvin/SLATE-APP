@@ -1,5 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput as RNTextInput, TouchableOpacity, StyleSheet } from 'react-native';
+// components/PillInput.tsx
+
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput as RNTextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Keyboard,
+} from 'react-native';
 
 type Props = {
   label: string;
@@ -8,51 +17,76 @@ type Props = {
   placeholder?: string;
 };
 
-const PillInput = ({ label, value, onChange, placeholder }: Props) => {
+const PillInput = ({
+  label,
+  value = [],
+  onChange,
+  placeholder = 'Type something...',
+}: Props) => {
   const [inputText, setInputText] = useState('');
 
+  // Clear local input if parent resets state (e.g. form resets)
+  useEffect(() => {
+    if (!value.length) setInputText('');
+  }, [value]);
+
   const handleAddPill = () => {
-    if (inputText && !value.includes(inputText)) {
-      const updatedPills = [...value, inputText];
-      onChange(updatedPills);
-      setInputText('');
+    const trimmed = inputText.trim();
+
+    if (trimmed && !value.includes(trimmed)) {
+      onChange([...value, trimmed]);
     }
+
+    setInputText('');
+    Keyboard.dismiss();
   };
 
   const handleRemovePill = (pill: string) => {
-    const updatedPills = value.filter((item) => item !== pill);
-    onChange(updatedPills);
+    const updated = value.filter((p) => p !== pill);
+    onChange(updated);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
+
       <View style={styles.pillsContainer}>
-        {value.map((pill, index) => (
-          <View key={index} style={styles.pill}>
+        {value.map((pill, idx) => (
+          <View key={`${pill}-${idx}`} style={styles.pill}>
             <Text style={styles.pillText}>{pill}</Text>
-            <TouchableOpacity
-              style={styles.removePillButton}
-              onPress={() => handleRemovePill(pill)}
-            >
+            <TouchableOpacity onPress={() => handleRemovePill(pill)}>
               <Text style={styles.removePillText}>×</Text>
             </TouchableOpacity>
           </View>
         ))}
       </View>
-      <RNTextInput
-        style={styles.input}
-        value={inputText}
-        onChangeText={setInputText}
-        placeholder={placeholder}
-        placeholderTextColor="#6B7280"
-        onSubmitEditing={handleAddPill}
-      />
+
+      <View style={styles.inputRow}>
+        <RNTextInput
+          style={styles.input}
+          placeholder={placeholder}
+          placeholderTextColor="#6B7280"
+          value={inputText}
+          onChangeText={setInputText}
+          onSubmitEditing={handleAddPill}
+          blurOnSubmit={false}
+          returnKeyType="done"
+        />
+
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={handleAddPill}
+          disabled={!inputText.trim()}
+        >
+          <Text style={styles.addButtonText}>Add</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 export default PillInput;
+
 
 const styles = StyleSheet.create({
   container: {
@@ -67,17 +101,17 @@ const styles = StyleSheet.create({
   pillsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#E5E7EB',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     marginRight: 8,
     marginBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   pillText: {
     fontSize: 14,
@@ -90,7 +124,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#9CA3AF',
   },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   input: {
+    flex: 1,
     height: 48,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -99,5 +138,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 16,
     color: '#111827',
+  },
+  addButton: {
+    marginLeft: 8,
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: '500',
+    fontSize: 16,
   },
 });

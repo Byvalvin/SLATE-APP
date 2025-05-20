@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 
 type Props = {
@@ -11,9 +11,9 @@ type Props = {
 const MultiSelect = ({ label, options, value, onChange }: Props) => {
   const handleToggleSelection = (option: string) => {
     if (value.includes(option)) {
-      onChange(value.filter((item) => item !== option)); // Remove option
+      onChange(value.filter((item) => item !== option)); // Remove
     } else {
-      onChange([...value, option]); // Add option
+      onChange([...value, option]); // Add
     }
   };
 
@@ -21,13 +21,15 @@ const MultiSelect = ({ label, options, value, onChange }: Props) => {
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <ScrollView style={styles.optionsContainer}>
-        {options.map((option, index) => (
+        {options.map((option) => (
           <TouchableOpacity
-            key={index}
+            key={option}
             style={[styles.option, value.includes(option) && styles.selectedOption]}
             onPress={() => handleToggleSelection(option)}
           >
-            <Text style={[styles.optionText, value.includes(option) && styles.selectedText]}>
+            <Text
+              style={[styles.optionText, value.includes(option) && styles.selectedText]}
+            >
               {option}
             </Text>
           </TouchableOpacity>
@@ -64,14 +66,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectedOption: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
+    backgroundColor: '#3B82F6',
+    borderColor: '#3B82F6',
   },
   optionText: {
     fontSize: 16,
     color: '#1F2937',
   },
   selectedText: {
-    color: '#fff',
+    color: '#ffffff',
+    fontWeight: '600',
   },
 });

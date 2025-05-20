@@ -1,57 +1,97 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Image } from 'react-native';
-import { countries } from '../data/countries'; // Import the countries data
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ScrollView,
+} from 'react-native';
+import { countries } from '../data/countries';
+import { debounce } from 'lodash';
 
 type Props = {
   label: string;
-  selectedCountry: string;
-  onSelectCountry: (country: string) => void;
+  value: string;
+  onChange: (value: string) => void;
 };
 
-const FlagPicker = ({ label, selectedCountry, onSelectCountry }: Props) => {
+const FlagPicker = ({ label, value, onChange }: Props) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleCountries, setVisibleCountries] = useState(countries.slice(0, 20)); // Initial visible countries
+  const [filteredCountries, setFilteredCountries] = useState(countries);
 
-  // Filter countries based on search query
-  const filteredCountries = countries.filter(country =>
-    country.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Debounce the search query to prevent constant filtering
+  const handleSearchChange = debounce((query: string) => {
+    const filtered = countries.filter((country) =>
+      country.name.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredCountries(filtered);
+    setVisibleCountries(filtered.slice(0, 20)); // Reset to first 20 filtered countries
+  }, 300); // 300ms debounce time
+
+  useEffect(() => {
+    handleSearchChange(searchQuery);
+  }, [searchQuery]);
+
+  const loadMoreCountries = () => {
+    if (visibleCountries.length < filteredCountries.length) {
+      setVisibleCountries(filteredCountries.slice(0, visibleCountries.length + 20)); // Load 20 more countries
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
-      
+
       <TextInput
         style={styles.input}
         placeholder="Search for a country"
         value={searchQuery}
-        onChangeText={setSearchQuery}
+        onChangeText={(text) => {
+          setSearchQuery(text);
+        }} // Trigger the debounced search update
       />
 
-      <FlatList
-        data={filteredCountries}
-        keyExtractor={item => item.code}
-        renderItem={({ item }) => {
-          const flagUrl = `https://flagcdn.com/w320/${item.code.toLowerCase()}.png`; // Construct the flag URL
-
-          return (
-            <TouchableOpacity
-              style={styles.option}
-              onPress={() => onSelectCountry(item.name)}
-            >
-              <Image source={{ uri: flagUrl }} style={styles.flag} />
-              <Text style={styles.optionText}>{item.name}</Text>
-            </TouchableOpacity>
-          );
+      <ScrollView
+        style={styles.listContainer}
+        onScroll={({ nativeEvent }) => {
+          // Trigger lazy loading when user scrolls to the bottom of the list
+          if (nativeEvent.contentOffset.y + nativeEvent.layoutMeasurement.height >= nativeEvent.contentSize.height - 20) {
+            loadMoreCountries();
+          }
         }}
-        ListEmptyComponent={<Text style={styles.noResultsText}>No results found</Text>}
-      />
+        scrollEventThrottle={400}
+      >
+        {filteredCountries.length === 0 ? (
+          <Text style={styles.noResultsText}>No results found</Text>
+        ) : (
+          visibleCountries.map((item) => {
+            const flagUrl = `https://flagcdn.com/w320/${item.code.toLowerCase()}.png`;
+            return (
+              <TouchableOpacity
+                key={item.code}
+                style={styles.option}
+                onPress={() => {
+                  onChange(item.name);
+                  setSearchQuery(''); // Optional: clear search after selection
+                }}
+              >
+                <Image source={{ uri: flagUrl }} style={styles.flag} />
+                <Text style={styles.optionText}>{item.name}</Text>
+              </TouchableOpacity>
+            );
+          })
+        )}
+      </ScrollView>
 
-      {selectedCountry && <Text style={styles.selectedCountry}>Selected: {selectedCountry}</Text>}
+      {value ? (
+        <Text style={styles.selectedCountry}>Selected: {value}</Text>
+      ) : null}
     </View>
   );
 };
-
-export default FlagPicker;
 
 const styles = StyleSheet.create({
   container: {
@@ -71,6 +111,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 16,
     color: '#1F2937',
+  },
+  listContainer: {
+    maxHeight: 250, // Adjust as needed
   },
   option: {
     flexDirection: 'row',
@@ -101,3 +144,5 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
 });
+
+export default FlagPicker;

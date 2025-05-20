@@ -4,28 +4,29 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 type Props = {
   label: string;
   options: string[];
-  selectedValue: string;
-  onSelect: (value: string) => void;
+  value: string;
+  onChange: (value: string) => void;
 };
 
-const SingleSelect = ({ label, options, selectedValue, onSelect }: Props) => {
+const SingleSelect = ({ label, options, value, onChange }: Props) => {
   return (
     <View style={styles.container}>
-  
+      <Text style={styles.label}>{label}</Text>
+
       <View style={styles.optionsContainer}>
         {options.map((option) => (
           <TouchableOpacity
             key={option}
             style={[
               styles.option,
-              selectedValue === option && styles.selectedOption,
+              value === option && styles.selectedOption,
             ]}
-            onPress={() => onSelect(option)}
+            onPress={() => onChange(option)}
           >
             <Text
               style={[
                 styles.optionText,
-                selectedValue === option && styles.selectedOptionText,
+                value === option && styles.selectedOptionText,
               ]}
             >
               {option}
@@ -33,7 +34,6 @@ const SingleSelect = ({ label, options, selectedValue, onSelect }: Props) => {
           </TouchableOpacity>
         ))}
       </View>
-
     </View>
   );
 };
@@ -51,39 +51,32 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   optionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 16,
+    flexDirection: 'column',
+    gap: 12,
   },
   option: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginRight: 12,
-    marginBottom: 12,
-    borderRadius: 8,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
   selectedOption: {
-    borderColor: '#3B82F6', // Blue border when selected
-    backgroundColor: '#E0F2FE', // Light blue background when selected
+    borderColor: '#3B82F6',
+    backgroundColor: '#DBEAFE',
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#1F2937',
+    textAlign: 'center',
   },
   selectedOptionText: {
-    color: '#3B82F6', // Blue text when selected
-  },
-  note: {
-    marginTop: 8,
-    fontSize: 14,
-    color: '#6B7280',
-    fontStyle: 'italic',
+    color: '#2563EB',
+    fontWeight: '600',
   },
 });

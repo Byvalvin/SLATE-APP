@@ -1,3 +1,5 @@
+// components/SingleTextInput.tsx
+
 import React from 'react';
 import { View, Text, TextInput as RNTextInput, StyleSheet } from 'react-native';
 
@@ -6,24 +8,36 @@ type Props = {
   placeholder?: string;
   value: string;
   onChangeText: (text: string) => void;
+  multiline?: boolean;
 };
 
-const TextInput = ({ label, placeholder, value, onChangeText }: Props) => {
+const SingleTextInput = ({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  multiline = false,
+}: Props) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <RNTextInput
-        style={styles.input}
+        style={[styles.input, multiline && styles.multiline]}
         placeholder={placeholder}
-        value={value}
+        value={value ?? ''} // ✅ Fix: ensure value is always a string
         onChangeText={onChangeText}
         placeholderTextColor="#6B7280"
+        multiline={multiline}
+        numberOfLines={multiline ? 4 : 1}
+        textAlignVertical={multiline ? 'top' : 'center'} // for Android
+        autoCorrect={false}
+        autoCapitalize="sentences"
       />
     </View>
   );
 };
 
-export default TextInput;
+export default SingleTextInput;
 
 const styles = StyleSheet.create({
   container: {
@@ -44,5 +58,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 16,
     color: '#111827',
+  },
+  multiline: {
+    height: 120,
+    paddingTop: 12,
+    paddingBottom: 12,
   },
 });

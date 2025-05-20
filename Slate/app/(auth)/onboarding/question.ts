@@ -6,7 +6,7 @@ export type InputComponentType =
   | 'FlagPicker'
   | 'SingleSelect'
   | 'MultiSelect'
-  | 'TextInput'
+  | 'SingleTextInput'
   | 'PillInput';
 
 type BaseInput = {
@@ -37,13 +37,15 @@ type DatePickerInput = BaseInput & {
   type: 'DatePicker';
 };
 
-type TextInput = BaseInput & {
-  type: 'TextInput';
+type SingleTextInput = BaseInput & {
+  type: 'SingleTextInput';
   placeholder?: string;
+  multiline?: boolean;
 };
 
 type PillInput = BaseInput & {
   type: 'PillInput';
+  placeholder?: string;
 };
 
 export type OnboardingInput =
@@ -51,7 +53,7 @@ export type OnboardingInput =
   | SingleSelectInput
   | FlagPickerInput
   | DatePickerInput
-  | TextInput
+  | SingleTextInput
   | PillInput;
 
   export type OnboardingStep = {
@@ -95,6 +97,7 @@ export const onboardingSteps: OnboardingStep[] = [
           type: 'DatePicker',
           key: 'dob',
           label: 'Date of Birth',
+          
         },
       ],
     },
@@ -139,12 +142,13 @@ export const onboardingSteps: OnboardingStep[] = [
       question: 'Tell us a bit more about your goals',
       inputs: [
         {
-          type: 'TextInput',
+          type: 'SingleTextInput',
           key: 'motivation',
           label: 'What motivates you?',
+          multiline:true
         },
         {
-          type: 'TextInput',
+          type: 'SingleTextInput',
           key: 'budget',
           label: 'What’s your budget?',
         },
@@ -159,6 +163,7 @@ export const onboardingSteps: OnboardingStep[] = [
           key: 'health_conditions',
           label: 'Enter each condition',
           note: 'This helps us avoid recommending harmful exercises.',
+          placeholder: 'e.g. knee pain'
         },
       ],
     },
@@ -191,9 +196,10 @@ export const onboardingSteps: OnboardingStep[] = [
       question: 'Is there anything else we should know?',
       inputs: [
         {
-          type: 'TextInput',
+          type: 'SingleTextInput',
           key: 'notes',
           label: 'Final thoughts',
+          multiline: true
         },
       ],
     },

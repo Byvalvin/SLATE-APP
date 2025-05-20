@@ -1,5 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet, Platform, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  TextInput,
+} from 'react-native';
 import Slider from '@react-native-community/slider';
 
 type Props = {
@@ -12,7 +18,51 @@ type Props = {
   unit?: string;
 };
 
-const SliderInput = ({ label, value, onChange, min, max, step = 1, unit }: Props) => {
+const SliderInput = ({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step = 1,
+  unit,
+}: Props) => {
+  const [inputValue, setInputValue] = useState(value.toString());
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Sync input with value prop if it changes
+  useEffect(() => {
+    if (!isFocused) {
+      setInputValue(value.toString());
+    }
+  }, [value, isFocused]);
+
+  const handleSliderChange = (val: number) => {
+    setInputValue(val.toString()); // Update the input as the slider moves
+    onChange(val); // Update parent state immediately as the slider moves
+  };
+
+  const handleBlur = () => {
+    // Validate the value when input field loses focus
+    const numericValue = parseInt(inputValue, 10);
+    if (!isNaN(numericValue)) {
+      // Clamp the value to be within the min and max range
+      const clamped = Math.max(min, Math.min(max, numericValue));
+      setInputValue(clamped.toString()); // Update the input field with the clamped value
+      onChange(clamped); // Update parent state after validation
+    }
+    setIsFocused(false); // Mark the field as not focused
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true); // Mark the field as focused
+  };
+
+  const handleInputChange = (text: string) => {
+    // Update the input value as the user types
+    setInputValue(text);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
@@ -23,7 +73,7 @@ const SliderInput = ({ label, value, onChange, min, max, step = 1, unit }: Props
           minimumValue={min}
           maximumValue={max}
           value={value}
-          onValueChange={onChange}
+          onValueChange={handleSliderChange}
           step={step}
           minimumTrackTintColor="#3B82F6"
           maximumTrackTintColor="#D1D5DB"
@@ -31,7 +81,16 @@ const SliderInput = ({ label, value, onChange, min, max, step = 1, unit }: Props
         />
 
         <View style={styles.valueBox}>
-          <Text style={styles.valueText}>{value}{unit ? ` ${unit}` : ''}</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={inputValue}
+            onChangeText={handleInputChange}
+            onBlur={handleBlur} // Validate on blur (when user leaves the field)
+            onFocus={handleFocus} // Mark as focused when the field is in focus
+            maxLength={4}
+          />
+          {unit && <Text style={styles.unitText}>{unit}</Text>}
         </View>
       </View>
     </View>
@@ -59,17 +118,27 @@ const styles = StyleSheet.create({
     height: 40,
   },
   valueBox: {
-    width: 60,
+    width: 80,
     marginLeft: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    backgroundColor: '#E5E7EB',
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#E5E7EB',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 6,
+    justifyContent: 'space-between',
   },
-  valueText: {
+  input: {
+    flex: 1,
     fontSize: 14,
     fontWeight: '600',
     color: '#1F2937',
+    padding: 0,
+    textAlign: 'right',
+  },
+  unitText: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: '#374151',
   },
 });
