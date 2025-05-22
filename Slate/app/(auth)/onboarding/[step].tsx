@@ -193,3 +193,9 @@ const styles = StyleSheet.create({
     color: 'red',
   },
 });
+
+
+
+/*
+https://reactnavigation.org/docs/typescript/?config=dynamic
+*/

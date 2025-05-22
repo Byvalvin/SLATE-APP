@@ -55,8 +55,8 @@ export default function SplashScreen() {
         useNativeDriver: true,
       }).start(() => {
         setShowSplash(false);
-        router.push('/onboarding/height_weight');
-        //checkSession(); // check if has a session and go straight to home else default
+        //router.push('/onboarding/height_weight');
+        checkSession(); // check if has a session and go straight to home else default
       });
     }, 1500);
     return () => clearTimeout(timeout);
