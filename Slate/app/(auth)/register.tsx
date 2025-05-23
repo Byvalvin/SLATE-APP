@@ -53,6 +53,7 @@ export default function RegisterScreen() {
         await saveTokens(data.accessToken, data.refreshToken); // 💾 save session
         // router.replace('/onboarding'); // or tabs/home/etc - Decide your post-registration navigation
         alert('Registration successful!'); // You might want to navigate instead of alerting
+        router.push('/onboarding/height_weight'); // first onboard qurstion
       } else {
         alert(`Error: ${data.message || 'Registration failed'}`);
       }

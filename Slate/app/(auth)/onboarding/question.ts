@@ -64,143 +64,70 @@ export type OnboardingInput =
   };
   
 
-export const onboardingSteps: OnboardingStep[] = [
+  export const onboardingSteps: OnboardingStep[] = [
     {
       key: 'height_weight',
       question: 'What are your height and weight?',
       inputs: [
-        {
-          type: 'SliderInput',
-          key: 'height',
-          label: 'Height',
-          min: 100,
-          max: 250,
-          step: 1,
-          unit: 'cm',
-        },
-        {
-          type: 'SliderInput',
-          key: 'weight',
-          label: 'Weight',
-          min: 30,
-          max: 200,
-          step: 1,
-          unit: 'kg',
-        },
+        { type: 'SliderInput', key: 'height', label: 'Height', min: 100, max: 250, step: 1, unit: 'cm' },
+        { type: 'SliderInput', key: 'weight', label: 'Weight', min: 30, max: 200, step: 1, unit: 'kg' },
       ],
     },
     {
       key: 'dob',
       question: 'When were you born?',
       inputs: [
-        {
-          type: 'DatePicker',
-          key: 'dob',
-          label: 'Date of Birth',
-          
-        },
+        { type: 'DatePicker', key: 'dob', label: 'Date of Birth' },
       ],
     },
     {
-      key: 'ethnicity',
+      key: 'nation',
       question: 'Where are you from?',
       inputs: [
-        {
-          type: 'FlagPicker',
-          key: 'ethnicity',
-          label: 'Nationality or Ethnicity',
-          note: 'This helps us tailor plans based on your background.',
-        },
+        { type: 'FlagPicker', key: 'nation', label: 'Nationality or Ethnicity' },
       ],
     },
     {
       key: 'goal',
       question: 'What’s your main fitness goal?',
       inputs: [
-        {
-          type: 'SingleSelect',
-          key: 'goal',
-          label: 'Choose one',
-          options: ['Gain Muscle', 'Lose Fat', 'Improve Cardio'],
-        },
+        { type: 'SingleSelect', key: 'goal', label: 'Choose one', options: ['gain muscle', 'lose weight', 'cardio', 'general fitness'] },
       ],
     },
     {
       key: 'gender',
       question: 'What’s your gender?',
       inputs: [
-        {
-          type: 'SingleSelect',
-          key: 'gender',
-          label: 'Choose one',
-          options: ['Male', 'Female', 'Other'],
-        },
+        { type: 'SingleSelect', key: 'gender', label: 'Choose one', options: ['male', 'female'] },
       ],
     },
     {
       key: 'statement_budget',
       question: 'Tell us a bit more about your goals',
       inputs: [
-        {
-          type: 'SingleTextInput',
-          key: 'motivation',
-          label: 'What motivates you?',
-          multiline:true
-        },
-        {
-          type: 'SingleTextInput',
-          key: 'budget',
-          label: 'What’s your budget?',
-        },
+        { type: 'SingleTextInput', key: 'motivationStatement', label: 'What motivates you?', multiline:true },
+        { type: 'SingleTextInput', key: 'budget', label: 'What’s your budget?' },
       ],
     },
     {
       key: 'health_conditions',
       question: 'Any notable health conditions?',
       inputs: [
-        {
-          type: 'PillInput',
-          key: 'health_conditions',
-          label: 'Enter each condition',
-          note: 'This helps us avoid recommending harmful exercises.',
-          placeholder: 'e.g. knee pain'
-        },
+        { type: 'PillInput', key: 'healthConditions', label: 'Enter each condition', placeholder: 'e.g. knee pain' },
       ],
     },
     {
       key: 'experience_level',
       question: 'What’s your fitness experience level?',
       inputs: [
-        {
-          type: 'SingleSelect',
-          key: 'experience',
-          label: 'Choose one',
-          options: ['Beginner', 'Intermediate', 'Advanced'],
-        },
+        { type: 'SingleSelect', key: 'experienceLevel', label: 'Choose one', options: ['beginner', 'intermediate', 'advanced'] },
       ],
     },
     {
       key: 'intensity_preference',
       question: 'How intense do you prefer your workouts?',
       inputs: [
-        {
-          type: 'SingleSelect',
-          key: 'intensity',
-          label: 'Choose one',
-          options: ['Light', 'Moderate', 'High'],
-        },
-      ],
-    },
-    {
-      key: 'final_notes',
-      question: 'Is there anything else we should know?',
-      inputs: [
-        {
-          type: 'SingleTextInput',
-          key: 'notes',
-          label: 'Final thoughts',
-          multiline: true
-        },
+        { type: 'SingleSelect', key: 'intensityPreference', label: 'Choose one', options: ['low', 'medium', 'high'] },
       ],
     },
   ];
@@ -209,7 +136,7 @@ export const onboardingSteps: OnboardingStep[] = [
 export const stepKeys = [
   'height_weight',
   'dob',
-  'ethnicity',
+  'nation',
   'goal',
   'gender',
   'statement_budget',

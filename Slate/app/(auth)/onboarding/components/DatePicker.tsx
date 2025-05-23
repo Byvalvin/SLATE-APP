@@ -9,12 +9,11 @@ type Props = {
 };
 
 const CustomDatePicker = ({ label, value, onChange }: Props) => {
-  // Check for valid value or default to the current date
   const initialDate = value instanceof Date && !isNaN(value.getTime()) ? value : new Date();
 
-  const [selectedMonth, setSelectedMonth] = useState<number>(initialDate.getMonth());
-  const [selectedDay, setSelectedDay] = useState<number>(initialDate.getDate());
-  const [selectedYear, setSelectedYear] = useState<number>(initialDate.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(initialDate.getMonth());
+  const [selectedDay, setSelectedDay] = useState(initialDate.getDate());
+  const [selectedYear, setSelectedYear] = useState(initialDate.getFullYear());
 
   const months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -27,29 +26,26 @@ const CustomDatePicker = ({ label, value, onChange }: Props) => {
 
   const handleMonthChange = (month: number) => {
     setSelectedMonth(month);
-    console.log('Selected Month:', month); // Debugging the selected month
-    if (selectedDay > getDaysInMonth(month, selectedYear)) {
-      setSelectedDay(getDaysInMonth(month, selectedYear));
+    const daysInMonth = getDaysInMonth(month, selectedYear);
+    if (selectedDay > daysInMonth) {
+      setSelectedDay(daysInMonth);
     }
   };
 
   const handleDayChange = (day: number) => {
     setSelectedDay(day);
-    console.log('Selected Day:', day); // Debugging the selected day
   };
 
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
-    console.log('Selected Year:', year); // Debugging the selected year
-    if (selectedDay > getDaysInMonth(selectedMonth, year)) {
-      setSelectedDay(getDaysInMonth(selectedMonth, year));
+    const daysInMonth = getDaysInMonth(selectedMonth, year);
+    if (selectedDay > daysInMonth) {
+      setSelectedDay(daysInMonth);
     }
   };
 
-  // Trigger onChange whenever any of the date values change
   useEffect(() => {
     const newDate = new Date(selectedYear, selectedMonth, selectedDay);
-    console.log('Selected Date:', newDate); // Debugging the selected date
     onChange(newDate);
   }, [selectedMonth, selectedDay, selectedYear]);
 
@@ -80,12 +76,13 @@ const CustomDatePicker = ({ label, value, onChange }: Props) => {
           onValueChange={handleYearChange}
           style={styles.picker}
         >
-          {Array.from({ length: 100 }, (_, i) => (
-            <Picker.Item key={i} label={`${new Date().getFullYear() - i}`} value={new Date().getFullYear() - i} />
-          ))}
+          {Array.from({ length: 100 }, (_, i) => {
+            const year = new Date().getFullYear() - i;
+            return <Picker.Item key={i} label={`${year}`} value={year} />;
+          })}
         </Picker>
       </View>
-      {/* Optional: Displaying selected date directly */}
+
       <TextInput
         style={styles.selectedDate}
         value={`${months[selectedMonth]} ${selectedDay}, ${selectedYear}`}
@@ -97,13 +94,12 @@ const CustomDatePicker = ({ label, value, onChange }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
     marginBottom: 8,
-    color: '#111827',
+    fontSize: 16,
   },
   pickerContainer: {
     flexDirection: 'row',
@@ -111,27 +107,14 @@ const styles = StyleSheet.create({
   },
   picker: {
     flex: 1,
-    height: 56, // Increased height for better visibility
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12, // Slightly more rounded corners
-    marginHorizontal: 8,
-    paddingHorizontal: 12, // Padding inside the picker
-    fontSize: 18, // Larger font for readability
-    backgroundColor: '#FFF', // Ensure a white background for the pickers
-    shadowColor: '#000', // Shadow for prominence
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3, // For Android shadow effect
   },
   selectedDate: {
-    marginTop: 16,
-    fontSize: 18,
-    padding: 12,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-    textAlign: 'center',
+    marginTop: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 6,
+    borderColor: '#ccc',
+    backgroundColor: '#f9f9f9',
   },
 });
 

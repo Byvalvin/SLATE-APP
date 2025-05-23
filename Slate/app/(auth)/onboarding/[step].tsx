@@ -1,7 +1,10 @@
+// app/(auth)/onboarding/[step].tsx
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { OnboardingInput, StepKey, onboardingSteps } from './question';
+import { onboardingSteps, OnboardingInput } from './question';
+
+import { useOnboarding } from './context/OnboardingContext';
 
 import OnboardingHeader from './components/OnboardingHeader';
 import SliderInput from './components/SliderInput';
@@ -13,20 +16,18 @@ import SingleTextInput from './components/SingleTextInput';
 import PillInput from './components/PillInput';
 import Note from './components/Note';
 import NextButton from './components/NextButton';
-import { useState } from 'react';
-
-
-// Define a structure to hold values by input key
-type FormValues = Record<string, any>;
 
 const OnboardingStepScreen = () => {
   const { step } = useLocalSearchParams();
   const router = useRouter();
+  const { formData, updateField } = useOnboarding();
 
   const stepIndex = onboardingSteps.findIndex((s) => s.key === step);
   const stepData = onboardingSteps[stepIndex];
+  
+//   console.log('Step:', step);
+// console.log('StepData:', stepData);
 
-  const [formValues, setFormValues] = useState<FormValues>({});
 
   if (!stepData) {
     return (
@@ -36,29 +37,57 @@ const OnboardingStepScreen = () => {
     );
   }
 
-  const handleInputChange = (key: string, value: any) => {
-    setFormValues((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  // const goToNextStep = () => {
+  //   if (stepIndex + 1 < onboardingSteps.length) {
+  //     const nextStepKey = onboardingSteps[stepIndex + 1].key;
+  //     router.push(`/onboarding/${nextStepKey}`);
+  //   } else {
+  //     // TODO: Submit formData to backend here
+  //     console.log('Final Form Data:', formData);
+  //     Alert.alert('All done!', 'You’ve completed onboarding.');
+  //   }
+  // };
 
-  const goToNextStep = () => {
+  const goToNextStep = async () => {
+    const isStepValid = stepData.inputs.every((input) => {
+      const value = formData[input.key];
+      return value !== undefined && value !== '' && (!Array.isArray(value) || value.length > 0);
+    });
+    
+    if (!isStepValid) {
+      Alert.alert('Hold on', 'Please complete all fields before continuing.');
+      return;
+    }
     if (stepIndex + 1 < onboardingSteps.length) {
       const nextStepKey = onboardingSteps[stepIndex + 1].key;
       router.push(`/onboarding/${nextStepKey}`);
     } else {
-      Alert.alert('All done!', 'You’ve completed onboarding.');
+      try {
+        console.log('Final Form Data:', formData);
+        Alert.alert('All done!', 'You’ve completed onboarding.');
+        // 🔄 Replace with actual backend API call
+        // await fetch('https://your.api/submit-onboarding', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify(formData),
+        // });
+  
+        // Alert.alert('All done!', 'You’ve completed onboarding.');
+  
+        // // Optional: navigate to home or dashboard
+        // router.replace('/(tabs)');
+      } catch (err) {
+        Alert.alert('Error', 'Something went wrong during submission.');
+        console.error('Submission failed:', err);
+      }
     }
   };
+  
 
   const renderInput = (input: OnboardingInput) => {
-    const { key, ...rest } = input;
-    const commonProps = {
-      key,
-      value: formValues[key] ?? '', // Defaults for different types can be handled here
-      onChange: (val: any) => handleInputChange(key, val),
-    };
+    const { key } = input;
 
     switch (input.type) {
       case 'SliderInput':
@@ -66,21 +95,22 @@ const OnboardingStepScreen = () => {
           <SliderInput
             key={key}
             label={input.label}
-            value={formValues[key] ?? input.min}
             min={input.min}
             max={input.max}
             step={input.step}
             unit={input.unit}
-            onChange={(val) => setFormValues((prev) => ({ ...prev, [key]: val }))}
+            value={formData[key] ?? input.min}
+            onChange={(val) => updateField(key, val)}
           />
         );
+
       case 'DatePicker':
         return (
           <CustomDatePicker
             key={key}
             label={input.label}
-            value={formValues[key] ?? new Date()}
-            onChange={(val) => setFormValues((prev) => ({...prev, [key]: val}))}
+            value={formData[key] ?? new Date()}
+            onChange={(val) => updateField(key, val)}
           />
         );
 
@@ -89,18 +119,8 @@ const OnboardingStepScreen = () => {
           <FlagPicker
             key={key}
             label={input.label}
-            value={formValues[key] ?? ''}
-            onChange={(val) => setFormValues((prev) => ({ ...prev, [key]: val }))}
-          />
-        );
-      case 'SingleSelect':
-        return (
-          <SingleSelect
-            key={key}
-            label={input.label}
-            options={input.options}
-            value={formValues[key] ?? ''}
-            onChange={(val) => handleInputChange(key, val)}
+            value={formData[key] ?? ''}
+            onChange={(val) => updateField(key, val)}
           />
         );
 
@@ -110,34 +130,45 @@ const OnboardingStepScreen = () => {
             key={key}
             label={input.label}
             options={input.options}
-            value={formValues[key] ?? []} // Default to empty array
-            onChange={(val) => handleInputChange(key, val)}
+            value={formData[key] ?? []}
+            onChange={(val) => updateField(key, val)}
           />
         );
-
+      
+      case 'SingleSelect':
+        return (
+          <SingleSelect
+            key={key}
+            label={input.label}
+            options={input.options}
+            value={formData[key] ?? ''}
+            onChange={(val) => updateField(key, val)}
+          />
+        );
+      
       case 'SingleTextInput':
         return (
           <SingleTextInput
             key={key}
             label={input.label}
             placeholder={input.placeholder}
-            value={formValues[key] ?? ''}
-            onChangeText={(val) => handleInputChange(key, val)}
-            multiline={!!input.multiline} // Pass this if supported in your input schema
+            multiline={!!input.multiline}
+            value={formData[key] ?? ''}
+            onChangeText={(val) => updateField(key, val)}
           />
         );
-      
+
       case 'PillInput':
         return (
           <PillInput
             key={key}
             label={input.label}
             placeholder={input.placeholder}
-            value={formValues[key] ?? []}
-            onChange={(val) => handleInputChange(key, val)}
+            value={formData[key] ?? []}
+            onChange={(val) => updateField(key, val)}
           />
         );
-        
+
       default:
         return null;
     }
@@ -193,7 +224,6 @@ const styles = StyleSheet.create({
     color: 'red',
   },
 });
-
 
 
 /*
