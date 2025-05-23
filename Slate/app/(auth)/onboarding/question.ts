@@ -14,6 +14,7 @@ type BaseInput = {
   key: string;
   label: string;
   note?: string;
+  required?: boolean;
 };
 
 type SliderInput = BaseInput & {
@@ -61,6 +62,7 @@ export type OnboardingInput =
     question: string; // Replaces 'title'
     inputs: OnboardingInput[];
     note?: string; // Optional global note if it applies to the whole step
+    required?: boolean;
   };
   
 
@@ -72,6 +74,7 @@ export type OnboardingInput =
         { type: 'SliderInput', key: 'height', label: 'Height', min: 100, max: 250, step: 1, unit: 'cm' },
         { type: 'SliderInput', key: 'weight', label: 'Weight', min: 30, max: 200, step: 1, unit: 'kg' },
       ],
+      required: true,
     },
     {
       key: 'dob',
@@ -79,6 +82,7 @@ export type OnboardingInput =
       inputs: [
         { type: 'DatePicker', key: 'dob', label: 'Date of Birth' },
       ],
+      required: true,
     },
     {
       key: 'nation',
@@ -93,6 +97,7 @@ export type OnboardingInput =
       inputs: [
         { type: 'SingleSelect', key: 'goal', label: 'Choose one', options: ['gain muscle', 'lose weight', 'cardio', 'general fitness'] },
       ],
+      required: true,
     },
     {
       key: 'gender',
@@ -100,6 +105,7 @@ export type OnboardingInput =
       inputs: [
         { type: 'SingleSelect', key: 'gender', label: 'Choose one', options: ['male', 'female'] },
       ],
+      required: true,
     },
     {
       key: 'statement_budget',
@@ -122,6 +128,7 @@ export type OnboardingInput =
       inputs: [
         { type: 'SingleSelect', key: 'experienceLevel', label: 'Choose one', options: ['beginner', 'intermediate', 'advanced'] },
       ],
+      required: true,
     },
     {
       key: 'intensity_preference',
@@ -129,6 +136,7 @@ export type OnboardingInput =
       inputs: [
         { type: 'SingleSelect', key: 'intensityPreference', label: 'Choose one', options: ['low', 'medium', 'high'] },
       ],
+      required: true,
     },
   ];
   

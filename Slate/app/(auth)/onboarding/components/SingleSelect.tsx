@@ -22,6 +22,7 @@ const SingleSelect = ({ label, options, value, onChange }: Props) => {
               value === option && styles.selectedOption,
             ]}
             onPress={() => onChange(option)}
+            activeOpacity={0.7}
           >
             <Text
               style={[

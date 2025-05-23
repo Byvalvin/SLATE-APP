@@ -37,27 +37,24 @@ const OnboardingStepScreen = () => {
     );
   }
 
-  // const goToNextStep = () => {
-  //   if (stepIndex + 1 < onboardingSteps.length) {
-  //     const nextStepKey = onboardingSteps[stepIndex + 1].key;
-  //     router.push(`/onboarding/${nextStepKey}`);
-  //   } else {
-  //     // TODO: Submit formData to backend here
-  //     console.log('Final Form Data:', formData);
-  //     Alert.alert('All done!', 'You’ve completed onboarding.');
+  // const allRequiredAnswered = stepData.inputs.every((input) => {
+  //   if (input.required) {
+  //     const val = formData[input.key];
+  //     return val !== undefined && val !== '' && val !== null && !(Array.isArray(val) && val.length === 0);
   //   }
-  // };
+  //   return true;
+  // });
+
+  const allRequiredAnswered = ()=>{
+    if (stepData.required) {
+      const val = formData[stepData.key];
+      return val !== undefined && val !== '' && val !== null && !(Array.isArray(val) && val.length === 0);
+    }
+    return true;
+}
+  
 
   const goToNextStep = async () => {
-    const isStepValid = stepData.inputs.every((input) => {
-      const value = formData[input.key];
-      return value !== undefined && value !== '' && (!Array.isArray(value) || value.length > 0);
-    });
-    
-    if (!isStepValid) {
-      Alert.alert('Hold on', 'Please complete all fields before continuing.');
-      return;
-    }
     if (stepIndex + 1 < onboardingSteps.length) {
       const nextStepKey = onboardingSteps[stepIndex + 1].key;
       router.push(`/onboarding/${nextStepKey}`);
@@ -145,6 +142,7 @@ const OnboardingStepScreen = () => {
             onChange={(val) => updateField(key, val)}
           />
         );
+        
       
       case 'SingleTextInput':
         return (
@@ -186,7 +184,8 @@ const OnboardingStepScreen = () => {
         {stepData.note && <Note text={stepData.note} />}
       </ScrollView>
 
-      <NextButton onPress={goToNextStep} />
+      <NextButton onPress={goToNextStep} disabled={!allRequiredAnswered} />
+
     </View>
   );
 };

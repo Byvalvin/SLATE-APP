@@ -41,12 +41,19 @@ const OnboardingHeader = ({ currentStep, totalSteps, onBack }: Props) => {
       </View>
 
       <View style={styles.headerRow}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#333" />
-        </TouchableOpacity>
+        {currentStep > 0 ? (
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={24} color="#333" />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 24 }} /> // Placeholder to align title
+        )}
+        
         <Text style={styles.appTitle}>SLATE</Text>
-        <View style={{ width: 24 }} /> 
+
+        <View style={{ width: 24 }} />
       </View>
+
     </View>
   );
 };

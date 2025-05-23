@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -20,47 +20,60 @@ type Props = {
 
 const SliderInput = ({
   label,
-  value,
+  value: externalValue,
   onChange,
   min,
   max,
   step = 1,
   unit,
 }: Props) => {
-  const [inputValue, setInputValue] = useState(value.toString());
-  const [isFocused, setIsFocused] = useState(false);
+  const [internalValue, setInternalValue] = useState(externalValue.toString());
+  const [sliderValue, setSliderValue] = useState(externalValue);
+  const isInteracting = useRef(false);
 
-  // Sync input with value prop if it changes
+  // Update local state only when not interacting
   useEffect(() => {
-    if (!isFocused) {
-      setInputValue(value.toString());
+    if (!isInteracting.current) {
+      setInternalValue(externalValue.toString());
+      setSliderValue(externalValue);
     }
-  }, [value, isFocused]);
+  }, [externalValue]);
 
   const handleSliderChange = (val: number) => {
-    setInputValue(val.toString()); // Update the input as the slider moves
-    onChange(val); // Update parent state immediately as the slider moves
+    isInteracting.current = true;
+    setSliderValue(val);
+    setInternalValue(val.toString());
   };
 
-  const handleBlur = () => {
-    // Validate the value when input field loses focus
-    const numericValue = parseInt(inputValue, 10);
-    if (!isNaN(numericValue)) {
-      // Clamp the value to be within the min and max range
-      const clamped = Math.max(min, Math.min(max, numericValue));
-      setInputValue(clamped.toString()); // Update the input field with the clamped value
-      onChange(clamped); // Update parent state after validation
-    }
-    setIsFocused(false); // Mark the field as not focused
-  };
-
-  const handleFocus = () => {
-    setIsFocused(true); // Mark the field as focused
+  const handleSliderComplete = (val: number) => {
+    isInteracting.current = false;
+    onChange(val);
   };
 
   const handleInputChange = (text: string) => {
-    // Update the input value as the user types
-    setInputValue(text);
+    setInternalValue(text);
+    const parsed = parseInt(text, 10);
+    if (!isNaN(parsed)) {
+      setSliderValue(parsed);
+    }
+  };
+
+  const handleInputBlur = () => {
+    const parsed = parseInt(internalValue, 10);
+    if (!isNaN(parsed)) {
+      const clamped = Math.max(min, Math.min(max, parsed));
+      setInternalValue(clamped.toString());
+      setSliderValue(clamped);
+      onChange(clamped);
+    } else {
+      // Reset to last known good value
+      setInternalValue(externalValue.toString());
+    }
+    isInteracting.current = false;
+  };
+
+  const handleInputFocus = () => {
+    isInteracting.current = true;
   };
 
   return (
@@ -72,8 +85,9 @@ const SliderInput = ({
           style={styles.slider}
           minimumValue={min}
           maximumValue={max}
-          value={value}
+          value={sliderValue}
           onValueChange={handleSliderChange}
+          onSlidingComplete={handleSliderComplete}
           step={step}
           minimumTrackTintColor="#3B82F6"
           maximumTrackTintColor="#D1D5DB"
@@ -84,10 +98,10 @@ const SliderInput = ({
           <TextInput
             style={styles.input}
             keyboardType="numeric"
-            value={inputValue}
+            value={internalValue}
             onChangeText={handleInputChange}
-            onBlur={handleBlur} // Validate on blur (when user leaves the field)
-            onFocus={handleFocus} // Mark as focused when the field is in focus
+            onBlur={handleInputBlur}
+            onFocus={handleInputFocus}
             maxLength={4}
           />
           {unit && <Text style={styles.unitText}>{unit}</Text>}
