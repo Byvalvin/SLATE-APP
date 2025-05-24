@@ -10,7 +10,6 @@ import {
   Dimensions, // Import Dimensions
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { servers } from '../../constants/API';
 import { saveTokens } from '@/utils/token';
 import { useRouter } from 'expo-router';
@@ -21,13 +20,11 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [dob, setDob] = useState<Date | undefined>(undefined);
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
   const router = useRouter();
 
   const handleRegister = async () => {
-    if (!name || !email || !password || !dob) {
+    if (!name || !email || !password /*|| !dob*/) {
       alert('Please fill all fields');
       return;
     }
@@ -36,7 +33,7 @@ export default function RegisterScreen() {
       name,
       email,
       password,
-      dob: dob.toISOString().split('T')[0],
+      //dob: dob.toISOString().split('T')[0],
     };
 
     try {
@@ -54,6 +51,7 @@ export default function RegisterScreen() {
         // router.replace('/onboarding'); // or tabs/home/etc - Decide your post-registration navigation
         alert('Registration successful!'); // You might want to navigate instead of alerting
         router.push('/onboarding/height_weight'); // first onboard qurstion
+        
       } else {
         alert(`Error: ${data.message || 'Registration failed'}`);
       }
@@ -63,14 +61,8 @@ export default function RegisterScreen() {
     }
   };
 
-  const showDatePicker = () => setDatePickerVisibility(true);
-  const hideDatePicker = () => setDatePickerVisibility(false);
-  const handleConfirm = (selectedDate: Date) => {
-    setDob(selectedDate);
-    hideDatePicker();
-  };
 
-  const isFormFilled = name.trim() && email.trim() && password.trim() && dob;
+  const isFormFilled = name.trim() && email.trim() && password.trim() /*&& dob*/;
   const buttonBackground = isFormFilled ? '#55F358' : '#E9E2DA';
 
   return (
@@ -105,25 +97,6 @@ export default function RegisterScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-        />
-
-        <TouchableOpacity style={styles.inputBox} onPress={showDatePicker}>
-          <Text style={{
-            color: dob ? '#000' : '#888',
-            fontSize: screenWidth * 0.035 // Use relative font size
-          }}>
-            {dob ? dob.toLocaleDateString() : 'Date of Birth'}
-          </Text>
-        </TouchableOpacity>
-
-
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          onConfirm={handleConfirm}
-          onCancel={hideDatePicker}
-          maximumDate={new Date()} // Prevent selecting future dates
-          date={dob || new Date(2000, 0, 1)} // Default date if none selected
         />
 
         <View style={styles.separatorContainer}>
@@ -219,3 +192,43 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+
+// old dob stuff
+/*
+
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+
+
+  const [dob, setDob] = useState<Date | undefined>(undefined);
+
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  
+
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
+  const handleConfirm = (selectedDate: Date) => {
+    setDob(selectedDate);
+    hideDatePicker();
+  };
+
+       <TouchableOpacity style={styles.inputBox} onPress={showDatePicker}>
+          <Text style={{
+            color: dob ? '#000' : '#888',
+            fontSize: screenWidth * 0.035 // Use relative font size
+          }}>
+            {dob ? dob.toLocaleDateString() : 'Date of Birth'}
+          </Text>
+        </TouchableOpacity>
+
+
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirm}
+          onCancel={hideDatePicker}
+          maximumDate={new Date()} // Prevent selecting future dates
+          date={dob || new Date(2000, 0, 1)} // Default date if none selected
+        />
+*/

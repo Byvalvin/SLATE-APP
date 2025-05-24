@@ -69,6 +69,7 @@ app.get(`${baseURL}`, (req, res) => {
 // auth routes (e.g., /api/auth/login, /api/auth/register)
 app.use(`${baseURL}/auth`, authRoutes);
 
+// profile routes
 app.use(`${baseURL}/profile`, profileRoutes);
 
 // exercise routes (e.g., /api/exercises/:date)

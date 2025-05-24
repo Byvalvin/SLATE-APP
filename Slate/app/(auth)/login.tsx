@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 
 import { servers } from '../../constants/API';
 import { saveTokens } from '@/utils/token';
+import { hasProfile } from '@/utils/profile';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
@@ -40,8 +41,14 @@ export default function LoginScreen() {
 
       if (response.ok) {
         await saveTokens(data.accessToken, data.refreshToken); // store session
-
-        router.replace('/(tabs)');
+        
+        const profileExists = await hasProfile();
+        if (profileExists) {
+          router.replace('/(tabs)');
+        } else {
+          router.push('/onboarding/height_weight');
+        }
+        
       } else {
         alert(`Error: ${data.message || 'Login failed'}`);
       }
