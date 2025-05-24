@@ -9,7 +9,9 @@ type Props = {
 };
 
 const CustomDatePicker = ({ label, value, onChange }: Props) => {
-  const initialDate = value instanceof Date && !isNaN(value.getTime()) ? value : new Date();
+  const parsed = typeof value === 'string' ? new Date(value) : value;
+  const initialDate = parsed instanceof Date && !isNaN(parsed.getTime()) ? parsed : new Date();
+
 
   const [selectedMonth, setSelectedMonth] = useState(initialDate.getMonth());
   const [selectedDay, setSelectedDay] = useState(initialDate.getDate());

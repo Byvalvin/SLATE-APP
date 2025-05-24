@@ -17,6 +17,10 @@ import PillInput from './components/PillInput';
 import Note from './components/Note';
 import NextButton from './components/NextButton';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { submitOnboarding } from '@/utils/profile';
+import { servers } from '@/constants/API';
+
 const OnboardingStepScreen = () => {
   const { step } = useLocalSearchParams();
   const router = useRouter();
@@ -56,25 +60,21 @@ const OnboardingStepScreen = () => {
 
   const goToNextStep = async () => {
     if (stepIndex + 1 < onboardingSteps.length) {
+      await AsyncStorage.setItem('onboardingFormData', JSON.stringify(formData));
+
       const nextStepKey = onboardingSteps[stepIndex + 1].key;
       router.push(`/onboarding/${nextStepKey}`);
     } else {
       try {
         console.log('Final Form Data:', formData);
         Alert.alert('All done!', 'You’ve completed onboarding.');
-        // 🔄 Replace with actual backend API call
-        // await fetch('https://your.api/submit-onboarding', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(formData),
-        // });
+        //🔄 Replace with actual backend API call
+        await submitOnboarding(`${servers[1]}/api/profile/`,formData);
   
-        // Alert.alert('All done!', 'You’ve completed onboarding.');
+        Alert.alert('All done!', 'You’ve completed onboarding.');
   
-        // // Optional: navigate to home or dashboard
-        // router.replace('/(tabs)');
+        // Optional: navigate to home or dashboard
+        router.replace('/(tabs)');
       } catch (err) {
         Alert.alert('Error', 'Something went wrong during submission.');
         console.error('Submission failed:', err);

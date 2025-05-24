@@ -20,60 +20,63 @@ type Props = {
 
 const SliderInput = ({
   label,
-  value: externalValue,
+  value,
   onChange,
   min,
   max,
   step = 1,
   unit,
 }: Props) => {
-  const [internalValue, setInternalValue] = useState(externalValue.toString());
-  const [sliderValue, setSliderValue] = useState(externalValue);
-  const isInteracting = useRef(false);
+  const [internalValue, setInternalValue] = useState(value); // Slider value
+  const [inputValue, setInputValue] = useState(value.toString()); // Text input
+  const isSliding = useRef(false);
+  const isFocusing = useRef(false);
 
-  // Update local state only when not interacting
+  // Sync from parent unless user is interacting
   useEffect(() => {
-    if (!isInteracting.current) {
-      setInternalValue(externalValue.toString());
-      setSliderValue(externalValue);
-    }
-  }, [externalValue]);
+    // Update both internal and input values when parent value changes (even initially)
+    const stringified = value.toString();
+    setInternalValue(value);
+    setInputValue(stringified);
+  }, [value]);
+  
 
   const handleSliderChange = (val: number) => {
-    isInteracting.current = true;
-    setSliderValue(val);
-    setInternalValue(val.toString());
+    isSliding.current = true;
+    setInternalValue(val);
+    setInputValue(val.toString());
   };
 
   const handleSliderComplete = (val: number) => {
-    isInteracting.current = false;
+    isSliding.current = false;
     onChange(val);
   };
 
-  const handleInputChange = (text: string) => {
-    setInternalValue(text);
-    const parsed = parseInt(text, 10);
-    if (!isNaN(parsed)) {
-      setSliderValue(parsed);
-    }
+  const handleInputFocus = () => {
+    isFocusing.current = true;
   };
 
   const handleInputBlur = () => {
-    const parsed = parseInt(internalValue, 10);
+    const parsed = parseInt(inputValue, 10);
     if (!isNaN(parsed)) {
       const clamped = Math.max(min, Math.min(max, parsed));
-      setInternalValue(clamped.toString());
-      setSliderValue(clamped);
+      setInternalValue(clamped);
+      setInputValue(clamped.toString());
       onChange(clamped);
     } else {
-      // Reset to last known good value
-      setInternalValue(externalValue.toString());
+      // Reset to last valid value
+      setInternalValue(value);
+      setInputValue(value.toString());
     }
-    isInteracting.current = false;
+    isFocusing.current = false;
   };
 
-  const handleInputFocus = () => {
-    isInteracting.current = true;
+  const handleInputChange = (text: string) => {
+    setInputValue(text);
+    const parsed = parseInt(text, 10);
+    if (!isNaN(parsed)) {
+      setInternalValue(parsed);
+    }
   };
 
   return (
@@ -85,7 +88,7 @@ const SliderInput = ({
           style={styles.slider}
           minimumValue={min}
           maximumValue={max}
-          value={sliderValue}
+          value={internalValue}
           onValueChange={handleSliderChange}
           onSlidingComplete={handleSliderComplete}
           step={step}
@@ -98,10 +101,10 @@ const SliderInput = ({
           <TextInput
             style={styles.input}
             keyboardType="numeric"
-            value={internalValue}
+            value={inputValue}
             onChangeText={handleInputChange}
-            onBlur={handleInputBlur}
             onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
             maxLength={4}
           />
           {unit && <Text style={styles.unitText}>{unit}</Text>}

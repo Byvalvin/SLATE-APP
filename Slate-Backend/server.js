@@ -7,10 +7,12 @@ const mongoose = require('mongoose');
 require('./models/User');     // Your existing User model
 require('./models/Exercise'); // Import Exercise model
 require('./models/Program');  // Import Program model
+require('./models/Profile');  // Import Profile model
 
 const authRoutes = require('./routes/auth');
 const exerciseRoutes = require('./routes/exercises'); // Import the exercises route
 const programRoutes = require('./routes/programs');   // Import the new programs route
+const profileRoutes = require('./routes/profile');
 
 // db setup
 // === MongoDB connection logic optimized for Vercel ===
@@ -66,6 +68,8 @@ app.get(`${baseURL}`, (req, res) => {
 
 // auth routes (e.g., /api/auth/login, /api/auth/register)
 app.use(`${baseURL}/auth`, authRoutes);
+
+app.use(`${baseURL}/profile`, profileRoutes);
 
 // exercise routes (e.g., /api/exercises/:date)
 app.use(`${baseURL}/exercises`, exerciseRoutes);

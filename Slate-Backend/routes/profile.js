@@ -27,7 +27,7 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 // (Optional) Get current user's profile
-router.get('/me', a, async (req, res) => {
+router.get('/me', authMiddleware, async (req, res) => {
   try {
     const profile = await Profile.findOne({ userId: req.user.userId });
     if (!profile) return res.status(404).json({ message: 'Profile not found' });

@@ -24,17 +24,27 @@ const PillInput = ({
   placeholder = 'Type something...',
 }: Props) => {
   const [inputText, setInputText] = useState('');
+  const [validationError, setValidationError] = useState('');
 
-  // Clear local input if parent resets state (e.g. form resets)
   useEffect(() => {
     if (!value.length) setInputText('');
   }, [value]);
 
   const handleAddPill = () => {
     const trimmed = inputText.trim();
+    const lowerTrimmed = trimmed.toLowerCase();
 
-    if (trimmed && !value.includes(trimmed)) {
+    if (!trimmed) {
+      setValidationError('Please enter something.');
+    } else if (trimmed.length < 2) {
+      setValidationError('Minimum 2 characters.');
+    } else if (trimmed.length > 30) {
+      setValidationError('Maximum 30 characters.');
+    } else if (value.some(p => p.toLowerCase() === lowerTrimmed)) {
+      setValidationError('That’s already added.');
+    } else {
       onChange([...value, trimmed]);
+      setValidationError('');
     }
 
     setInputText('');
@@ -52,12 +62,15 @@ const PillInput = ({
 
       <View style={styles.pillsContainer}>
         {value.map((pill, idx) => (
-          <View key={`${pill}-${idx}`} style={styles.pill}>
+          <TouchableOpacity
+            key={`${pill}-${idx}`}
+            style={styles.pill}
+            onPress={() => handleRemovePill(pill)}
+            activeOpacity={0.7}
+          >
             <Text style={styles.pillText}>{pill}</Text>
-            <TouchableOpacity onPress={() => handleRemovePill(pill)}>
-              <Text style={styles.removePillText}>×</Text>
-            </TouchableOpacity>
-          </View>
+            <Text style={styles.removePillText}>×</Text>
+          </TouchableOpacity>
         ))}
       </View>
 
@@ -67,7 +80,10 @@ const PillInput = ({
           placeholder={placeholder}
           placeholderTextColor="#6B7280"
           value={inputText}
-          onChangeText={setInputText}
+          onChangeText={(text) => {
+            setInputText(text);
+            setValidationError(''); // Clear error on typing
+          }}
           onSubmitEditing={handleAddPill}
           blurOnSubmit={false}
           returnKeyType="done"
@@ -81,9 +97,14 @@ const PillInput = ({
           <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
+
+      {validationError ? (
+        <Text style={styles.errorText}>{validationError}</Text>
+      ) : null}
     </View>
   );
 };
+
 
 export default PillInput;
 
@@ -151,4 +172,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 16,
   },
+  errorText: {
+    color: '#DC2626', // red-600
+    marginTop: 4,
+    fontSize: 13,
+  },
+  
 });

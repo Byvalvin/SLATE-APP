@@ -7,6 +7,8 @@ type Props = {
   style?: ViewStyle;
 };
 
+
+
 const NextButton = ({ onPress, disabled = false, style }: Props) => {
   return (
     <TouchableOpacity

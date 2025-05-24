@@ -34,7 +34,7 @@ export const OnboardingProvider = ({ children }: OnboardingProviderProps) => {
     const updateField = (key: string, value: any) => {
       setFormData((prev) => {
         const updated = { ...prev, [key]: value };
-        AsyncStorage.setItem('onboardingFormData', JSON.stringify(updated)); // persist on update
+        //AsyncStorage.setItem('onboardingFormData', JSON.stringify(updated)); // persist on update
         return updated;
       });
     };
