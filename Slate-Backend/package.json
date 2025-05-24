@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "migrate:profiles": "node scripts/migrate_userfields_to_profile.js",
+    "migrate:dashboard": "node scripts/migrate_dashboard_collections.js"
   },
   "keywords": [],
   "author": "",
