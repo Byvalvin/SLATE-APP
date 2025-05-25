@@ -228,18 +228,6 @@ export default function HomeScreen() {
       setAddExerciseModalVisible(false);
   };
 
-
-  // Placeholder for local image mapping
-  // Add your actual require paths here once images are in assets/images or a subfolder
-  // const exerciseImageMap: { [key: string]: any } = {
-  //     'squats_img_1': null, // require('../assets/images/squat.png'),
-  //     'bench_press_img_a': null, // require('../assets/images/bench_press.png'),
-  //     'lateral_raise_img': null, // require('../assets/images/lateral_raise.png'),
-  //     'bicep_curl_img': null, // require('../assets/images/bicep_curl.png'),
-  //     // Add all your custom image requires here
-  // };
-
-
   return (
     <View style={styles.container}>
       <LinearGradient

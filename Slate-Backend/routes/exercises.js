@@ -8,7 +8,7 @@ const { getDay, differenceInCalendarWeeks } = require('date-fns');
 
 router.get('/user-daily-exercises', async (req, res) => {
   try {
-    const userId = req.user.id; // assuming auth middleware
+    const userId = req.user.userId; // assuming auth middleware
     const profile = await Profile.findOne({ userId });
 
     if (!profile) return res.status(404).json({ error: 'Profile not found' });
