@@ -5,6 +5,7 @@ const Profile = require('../models/Profile');
 const Program = require('../models/Program');
 const Exercise = require('../models/Exercise');
 const { getDay, differenceInCalendarWeeks } = require('date-fns');
+const authMiddleware = require('../middleware/auth'); // You need to extract user ID from token
 
 router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
   try {
