@@ -3,20 +3,18 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
 
-require('dotenv').config(); // Load env if needed
+require('dotenv').config(); // Load env vars from .env file
 
 const DB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/YOUR_DB_NAME';
 
 (async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-        dbName: 'Slate', // Specify your database name
-        // Add recommended options for stability if not already present in your setup
-        // useNewUrlParser: true, // Deprecated in Mongoose 6+
-        // useUnifiedTopology: true, // Deprecated in Mongoose 6+
-        serverSelectionTimeoutMS: 5000, // Keep trying to connect for 5 seconds
-        connectTimeoutMS: 10000 // Give up initial connection after 10 seconds
+    await mongoose.connect(DB_URI, {
+      dbName: 'Slate', // Your actual DB name
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000,
     });
+
     console.log('✅ Connected to MongoDB\n');
 
     const users = await User.find();
@@ -25,40 +23,44 @@ const DB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/YOUR_DB_NAME'
     let updated = 0;
 
     for (const user of users) {
-      const { dob, program_start_date, selected_program_id } = user;
+      const { dob, program_start_date, selected_program_id, userId, email } = user;
 
-      const existingProfile = await Profile.findOne({ userId: user._id });
+      if (!userId) {
+        console.warn(`⚠️ User ${email || user._id} is missing userId (UUID), skipping...`);
+        continue;
+      }
+
+      const existingProfile = await Profile.findOne({ userId });
 
       if (existingProfile) {
-        // Optionally update profile if the fields are not already set
+        // Prepare only missing fields to update
         const updateFields = {};
         if (!existingProfile.dob && dob) updateFields.dob = dob;
         if (!existingProfile.program_start_date && program_start_date) updateFields.program_start_date = program_start_date;
         if (!existingProfile.selected_program_id && selected_program_id) updateFields.selected_program_id = selected_program_id;
 
         if (Object.keys(updateFields).length > 0) {
-          await Profile.updateOne({ userId: user._id }, { $set: updateFields });
+          await Profile.updateOne({ userId }, { $set: updateFields });
           updated++;
-          console.log(`🔄 Updated profile for ${user.email}`);
+          console.log(`🔄 Updated profile for ${email} (${userId})`);
         } else {
           skipped++;
-          console.log(`⏭️ Skipped ${user.email} (already migrated)`);
+          console.log(`⏭️ Skipped ${email} (${userId}) — already has all fields`);
         }
       } else {
-        // Create new profile
         await Profile.create({
-          userId: user._id,
+          userId,
           dob: dob || null,
           program_start_date: program_start_date || null,
           selected_program_id: selected_program_id || null,
         });
         created++;
-        console.log(`✅ Created profile for ${user.email}`);
+        console.log(`✅ Created profile for ${email} (${userId})`);
       }
 
-      // Remove fields from User
+      // Clean up old fields from User
       await User.updateOne(
-        { _id: user._id },
+        { userId },
         {
           $unset: {
             dob: "",
@@ -73,7 +75,7 @@ const DB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/YOUR_DB_NAME'
     console.log(`  ➕ Profiles created: ${created}`);
     console.log(`  🔄 Profiles updated: ${updated}`);
     console.log(`  ⏭️ Users skipped:     ${skipped}`);
-    console.log('  🧹 Fields removed from all User documents\n');
+    console.log(`  🧹 Fields removed from all User documents\n`);
 
     process.exit(0);
   } catch (err) {

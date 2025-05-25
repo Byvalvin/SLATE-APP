@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "migrate:profiles": "node scripts/migrate_userfields_to_profile.js",
-    "migrate:dashboard": "node scripts/migrate_dashboard_collections.js"
+    "migrate:dashboard": "node scripts/migrate_dashboard_collections.js",
+    "clean:users": "node scripts/clean_old_userfields.js"
   },
   "keywords": [],
   "author": "",

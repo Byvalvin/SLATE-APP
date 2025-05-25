@@ -7,39 +7,44 @@ const ProgramModel = require('../models/Program');
 
 const DB_URI = process.env.MONGO_URI;
 
-async function migrateCollection(sourceName, targetModel) {
-  const sourceCollection = mongoose.connection.collection(sourceName);
+async function migrateCollection(fromCollectionName, targetModel) {
+  const sourceCollection = mongoose.connection.collection(fromCollectionName);
   const docs = await sourceCollection.find().toArray();
 
   if (docs.length === 0) {
-    console.log(`⚠️ No documents found in ${sourceName}, skipping...`);
+    console.log(`⚠️ No documents found in ${fromCollectionName}, skipping...`);
     return;
   }
 
   for (const doc of docs) {
-    // Remove _id so Mongoose can generate a new one or use same if possible
     const { _id, ...rest } = doc;
-    await targetModel.updateOne({ _id }, { $set: rest }, { upsert: true });
+
+    // Optional: remove original _id if you want new IDs
+    await targetModel.updateOne(
+      { _id }, // match by original _id to preserve references
+      { $set: rest },
+      { upsert: true }
+    );
   }
 
-  console.log(`✅ Migrated ${docs.length} documents from ${sourceName} to ${targetModel.collection.name}`);
+  console.log(`✅ Migrated ${docs.length} documents from ${fromCollectionName} → ${targetModel.collection.name}`);
 }
 
 (async () => {
   try {
-    console.log("Connecting to:", process.env.MONGO_URI);
-
-    await mongoose.connect(process.env.MONGO_URI, {
-        dbName: 'Slate', // Specify your database name
-        serverSelectionTimeoutMS: 5000, // Keep trying to connect for 5 seconds
-        connectTimeoutMS: 10000 // Give up initial connection after 10 seconds
+    console.log("Connecting to:", DB_URI);
+    await mongoose.connect(DB_URI, {
+      dbName: 'Slate',
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000
     });
     console.log('✅ Connected to MongoDB');
 
-    await migrateCollection('Exercise', ExerciseModel);
-    await migrateCollection('Program', ProgramModel);
+    // Use manual collection names as source
+    await migrateCollection('Exercises', ExerciseModel); // Source: 'Exercises' → Mongoose: 'exercises'
+    await migrateCollection('Programs', ProgramModel);   // Source: 'Programs' → Mongoose: 'programs'
 
-    console.log('🎉 Migration complete. You can now drop the old collections manually if all looks good.');
+    console.log('🎉 Migration complete. You can now drop the old collections (Exercises, Programs) if verified.');
     process.exit(0);
   } catch (err) {
     console.error('❌ Migration failed:', err);

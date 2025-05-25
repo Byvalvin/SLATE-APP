@@ -64,10 +64,7 @@ const AccountModal = ({ visible, onClose, user }: Props) => {
             <Text style={styles.label}>Email</Text>
             <Text style={styles.value}>{user.email}</Text>
           </View>
-          <View style={styles.infoBox}>
-            <Text style={styles.label}>Date of Birth</Text>
-            <Text style={styles.value}>{user.dob}</Text>
-          </View>
+
           <View style={styles.infoBox}>
             <Text style={styles.label}>Plan</Text>
             <Text style={styles.value}>{user.plan ?? 'Free'}</Text>
@@ -158,3 +155,10 @@ const styles = StyleSheet.create({
 });
 
 export default AccountModal;
+
+/*
+  <View style={styles.infoBox}>
+    <Text style={styles.label}>Date of Birth</Text>
+    <Text style={styles.value}>{user.dob}</Text>
+  </View>
+*/

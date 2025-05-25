@@ -16,7 +16,7 @@ export default function SplashScreen() {
   
   // to decide if user gets login or straight to account
   const checkSession = async () => {
-    // deleteTokens()
+    //deleteTokens()
     const accessToken = await getAccessToken();
   
     if (accessToken) {
