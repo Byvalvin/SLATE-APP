@@ -9,7 +9,14 @@ const DB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/YOUR_DB_NAME'
 
 (async () => {
   try {
-    await mongoose.connect(DB_URI);
+    await mongoose.connect(process.env.MONGO_URI, {
+        dbName: 'Slate', // Specify your database name
+        // Add recommended options for stability if not already present in your setup
+        // useNewUrlParser: true, // Deprecated in Mongoose 6+
+        // useUnifiedTopology: true, // Deprecated in Mongoose 6+
+        serverSelectionTimeoutMS: 5000, // Keep trying to connect for 5 seconds
+        connectTimeoutMS: 10000 // Give up initial connection after 10 seconds
+    });
     console.log('✅ Connected to MongoDB\n');
 
     const users = await User.find();

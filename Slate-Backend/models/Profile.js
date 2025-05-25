@@ -2,8 +2,8 @@
 const mongoose = require('mongoose');
 
 const ProfileSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  
+  userId: { type: String, ref: 'User', required: true, unique: true }, // 🔄 Changed from ObjectId to String
+
   height: Number,
   weight: Number,
   
@@ -23,7 +23,9 @@ const ProfileSchema = new mongoose.Schema({
   healthConditions: [String], // user-input "pills"
 
   program_start_date: Date,
-  selected_program_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Program' },
+  selected_program_id: { type: String, ref: 'Program' }, // Match programId in Program
+
+  streak: Number,
 });
 
 module.exports = mongoose.model('Profile', ProfileSchema);

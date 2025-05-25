@@ -27,7 +27,13 @@ async function migrateCollection(sourceName, targetModel) {
 
 (async () => {
   try {
-    await mongoose.connect(DB_URI);
+    console.log("Connecting to:", process.env.MONGO_URI);
+
+    await mongoose.connect(process.env.MONGO_URI, {
+        dbName: 'Slate', // Specify your database name
+        serverSelectionTimeoutMS: 5000, // Keep trying to connect for 5 seconds
+        connectTimeoutMS: 10000 // Give up initial connection after 10 seconds
+    });
     console.log('✅ Connected to MongoDB');
 
     await migrateCollection('Exercise', ExerciseModel);
