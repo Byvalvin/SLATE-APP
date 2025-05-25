@@ -4,6 +4,7 @@ import { ActivityIndicator, Animated, StatusBar, StyleSheet, Text } from 'react-
 import WelcomeScreen from '@/components/WelcomeScreen';
 import { deleteTokens, getAccessToken, refreshAccessToken } from '@/utils/token';
 import { useRouter } from 'expo-router';
+import { hasProfile } from '@/utils/profile';
 //import * as SecureStore from 'expo-secure-store';
 
 export default function SplashScreen() {
@@ -16,26 +17,43 @@ export default function SplashScreen() {
   
   // to decide if user gets login or straight to account
   const checkSession = async () => {
-    //deleteTokens()
+    //deleteTokens();
     const accessToken = await getAccessToken();
   
     if (accessToken) {
-      console.log("Access token found, navigating to home.");
-      router.replace('/(tabs)');
+      console.log("Access token found, checking profile...");
+      
+      const profileExists = await hasProfile();
+  
+      if (profileExists) {
+        console.log("Profile exists. Navigating to home.");
+        router.replace('/(tabs)');
+      } else {
+        console.log("No profile found. Redirecting to onboarding.");
+        router.replace('/onboarding/height_weight');
+      }
+  
     } else {
       console.log("No access token found, attempting to refresh token...");
       const refreshed = await refreshAccessToken();
+      
       if (refreshed) {
-        router.replace('/(tabs)');
-      }
-      else {
-        console.log("no refreshtoken token. must be new here or refresh expired go to login")
-        // Only show welcome if no valid session
+        const profileExists = await hasProfile();
+  
+        if (profileExists) {
+          console.log("Refreshed and profile exists. Navigating to home.");
+          router.replace('/(tabs)');
+        } else {
+          console.log("Refreshed but no profile. Redirecting to onboarding.");
+          router.replace('/onboarding/height_weight');
+        }
+      } else {
+        console.log("No refresh token. Going to welcome/login screen.");
         setIsSessionChecked(true);
-        //router.replace('/login'); // only show login if token & refresh both failed
       }
     }
   };
+  
   
   // useEffect(() => {
   //   const logTokens = async () => {
