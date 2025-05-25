@@ -6,7 +6,7 @@ const Program = require('../models/Program');
 const Exercise = require('../models/Exercise');
 const { getDay, differenceInCalendarWeeks } = require('date-fns');
 
-router.get('/user-daily-exercises', async (req, res) => {
+router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId; // assuming auth middleware
     const profile = await Profile.findOne({ userId });
