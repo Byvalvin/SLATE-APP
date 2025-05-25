@@ -29,7 +29,7 @@ interface Exercise {
   name: string;
   sets: number;
   reps: number;
-  imageKey: string; 
+  image_url?: string; 
 }
 
 
@@ -135,24 +135,28 @@ export default function HomeScreen() {
   }, [timeRemaining, totalTime]);
 
   // --- Exercise Data Fetching Placeholder ---
-  //Daniel here is the stuff that you need tio change basically the hardcoded exercises need to be rendererd dynamically from the database
-  // In a real app, you would fetch exercises for the current date here
-   useEffect(() => {
-     const fetchExercises = async () => {
-        // Fetch data from your API for the currentDate
-        // const data = await api.get(`/exercises?date=${format(currentDate, 'yyyy-MM-dd')}`);
-        // setExercisesForDay(data);
-       console.log(`Workspaceing exercises for: ${format(currentDate, 'yyyy-MM-dd')}`);
-        // Placeholder static data for now
-        setExercisesForDay([
-          { id: '1', name: 'SQUATS', sets: 3, reps: 10, imageKey: 'squats_img_1' },
-          { id: '2', name: 'BENCH PRESS', sets: 3, reps: 10, imageKey: 'bench_press_img_a' },
-          { id: '3', name: 'LATERAL RAISE', sets: 3, reps: 10, imageKey: 'lateral_raise_img' },
-           { id: '4', name: 'BICEP CURL', sets: 3, reps: 10, imageKey: 'bicep_curl_img' },
-        ]);
-     };
-     fetchExercises();
-   }, [currentDate]); // Refetch when date changes
+  useEffect(() => {
+    const fetchExercises = async () => {
+      try {
+        const token = await getAccessToken();
+        const res = await fetch(`${servers[1]}/api/exercises/user-daily-exercises?date=${format(currentDate, 'yyyy-MM-dd')}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+  
+        if (!res.ok) throw new Error('Failed to fetch exercises');
+  
+        const data = await res.json();
+        setExercisesForDay(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  
+    fetchExercises();
+  }, [currentDate]);
+  
   // --- End Exercise Data Fetching Placeholder ---
 
 
@@ -227,13 +231,13 @@ export default function HomeScreen() {
 
   // Placeholder for local image mapping
   // Add your actual require paths here once images are in assets/images or a subfolder
-  const exerciseImageMap: { [key: string]: any } = {
-      'squats_img_1': null, // require('../assets/images/squat.png'),
-      'bench_press_img_a': null, // require('../assets/images/bench_press.png'),
-      'lateral_raise_img': null, // require('../assets/images/lateral_raise.png'),
-      'bicep_curl_img': null, // require('../assets/images/bicep_curl.png'),
-      // Add all your custom image requires here
-  };
+  // const exerciseImageMap: { [key: string]: any } = {
+  //     'squats_img_1': null, // require('../assets/images/squat.png'),
+  //     'bench_press_img_a': null, // require('../assets/images/bench_press.png'),
+  //     'lateral_raise_img': null, // require('../assets/images/lateral_raise.png'),
+  //     'bicep_curl_img': null, // require('../assets/images/bicep_curl.png'),
+  //     // Add all your custom image requires here
+  // };
 
 
   return (
@@ -311,7 +315,7 @@ export default function HomeScreen() {
          
          
          {exercisesForDay.map(exercise => (
-              <ExerciseItem key={exercise.id} exercise={exercise} onEdit={handleEditExercise} exerciseImageMap={exerciseImageMap} /> // Pass image map
+              <ExerciseItem key={exercise.id} exercise={exercise} onEdit={handleEditExercise} /> // Pass image map
          ))}
       </ScrollView>
 
@@ -396,33 +400,26 @@ export default function HomeScreen() {
 // and import it into HomeScreen.tsx.
 // Keeping it here for now for ease of illustration.
 // Remember to import Image and other necessary components if you move it.
-const ExerciseItem = ({ exercise, onEdit, exerciseImageMap }: { exercise: Exercise, onEdit: (exercise: Exercise) => void, exerciseImageMap: { [key: string]: any } }) => {
-    // The image map is now passed as a prop, so you don't need to define it here again
-    // or import the individual images within this component if you move it.
-
-    return (
-        <TouchableOpacity style={styles.exerciseItem} onPress={() => onEdit(exercise)}> 
-            
-            
-            {exercise.imageKey && exerciseImageMap && exerciseImageMap[exercise.imageKey] ? (
-               <Image
-                 source={exerciseImageMap[exercise.imageKey]}
-                 style={styles.exerciseImagePlaceholder} // Reuse placeholder style for size
-               />
-             ) : (
-               // Fallback Placeholder (shows the gray box when image is not found or path is commented out)
-               <View style={styles.exerciseImagePlaceholder} />
-             )}
-            
-            <View style={styles.exerciseDetails}>
-                <Text style={styles.exerciseTitle}>{exercise.name}</Text>
-                <Text style={styles.exerciseReps}>{exercise.sets} SET - {exercise.reps} REP</Text>
-            </View>
-             
-             
-        </TouchableOpacity>
-    );
+const ExerciseItem = ({ exercise, onEdit }: { exercise: Exercise, onEdit: (exercise: Exercise) => void }) => {
+  return (
+    <TouchableOpacity style={styles.exerciseItem} onPress={() => onEdit(exercise)}> 
+      {exercise.image_url ? (
+        <Image
+          source={{ uri: exercise.image_url }}
+          style={styles.exerciseImagePlaceholder} // reuse this for sizing
+        />
+      ) : (
+        <View style={styles.exerciseImagePlaceholder} /> // fallback gray box
+      )}
+      
+      <View style={styles.exerciseDetails}>
+        <Text style={styles.exerciseTitle}>{exercise.name}</Text>
+        <Text style={styles.exerciseReps}>{exercise.sets} SET - {exercise.reps} REP</Text>
+      </View>
+    </TouchableOpacity>
+  );
 };
+
 // --- End Separate Exercise Item Component ---
 
 
