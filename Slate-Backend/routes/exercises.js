@@ -1,9 +1,9 @@
 // routes/api/exercises.js (Express example)
 const express = require('express');
 const router = express.Router();
-const Profile = require('../../models/Profile');
-const Program = require('../../models/Program');
-const Exercise = require('../../models/Exercise');
+const Profile = require('../models/Profile');
+const Program = require('../models/Program');
+const Exercise = require('../models/Exercise');
 const { getDay, differenceInCalendarWeeks } = require('date-fns');
 
 router.get('/user-daily-exercises', async (req, res) => {
