@@ -30,7 +30,6 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  // Removed: dob, program_start_date, selected_program_id
 });
 
 UserSchema.pre('save', async function (next) {

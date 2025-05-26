@@ -46,8 +46,8 @@ export async function deleteTokens(): Promise<void> {
 }
 
 export async function refreshAccessToken(): Promise<string | null> {
-    const refreshToken = await getRefreshToken();
-    if (!refreshToken) return null;
+  const refreshToken = await getRefreshToken();
+  if (!refreshToken) return null;
 
   try {
     const response = await fetch(`${servers[1]}/api/auth/refresh-token`, {
@@ -56,16 +56,32 @@ export async function refreshAccessToken(): Promise<string | null> {
       body: JSON.stringify({ refreshToken }),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to refresh token');
+    if (response.ok) {
+      const { accessToken, refreshToken: newRefreshToken } = await response.json();
+      await saveTokens(accessToken, newRefreshToken);
+      return accessToken;
     }
 
-    const { accessToken, refreshToken: newRefreshToken } = await response.json();
-    await saveTokens(accessToken, newRefreshToken);
-    return accessToken;
+    // Handle different error types based on status code
+    const { message } = await response.json();
+
+    if (response.status === 403 && message.includes('expired')) {
+      console.info('Refresh token expired. Redirecting to login.');
+      // You could show a toast or redirect here
+    } else if (response.status === 401) {
+      console.warn('Refresh token invalid. User may be tampering.');
+    } else {
+      console.error('Unexpected token refresh error:', message);
+    }
+
+    // Optional cleanup
+    // await deleteTokens();
+
+    return null;
+
   } catch (error) {
-    console.error('Error refreshing access token:', error);
-    //await deleteTokens(); // Clear corrupted state
+    console.error('Network/server error refreshing access token:', error);
     return null;
   }
 }
+
