@@ -3,19 +3,18 @@ import {
   View,
   Text,
   StyleSheet,
-  Platform,
   TextInput,
-  Dimensions, // Import Dimensions
+  Dimensions,
+  Platform,
 } from 'react-native';
-import Slider from '@react-native-community/slider';
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
 
-// Get screen dimensions for relative sizing
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 type Props = {
   label: string;
   value: number;
-  onChange: (value: number) => void;
+  onChangeEnd: (value: number) => void;
   min: number;
   max: number;
   step?: number;
@@ -25,62 +24,54 @@ type Props = {
 const SliderInput = ({
   label,
   value,
-  onChange,
+  onChangeEnd,
   min,
   max,
   step = 1,
   unit,
 }: Props) => {
-  const [internalValue, setInternalValue] = useState(value); // Slider value
-  const [inputValue, setInputValue] = useState(value.toString()); // Text input
-  const isSliding = useRef(false);
-  const isFocusing = useRef(false);
+  const [displayValue, setDisplayValue] = useState(value.toString());
+  const isInteractingRef = useRef(false);
 
-  // Sync from parent unless user is interacting
   useEffect(() => {
-    // Update both internal and input values when parent value changes (even initially)
-    const stringified = value.toString();
-    setInternalValue(value);
-    setInputValue(stringified);
+    if (!isInteractingRef.current) {
+      setDisplayValue(value.toString());
+    }
   }, [value]);
 
-
-  const handleSliderChange = (val: number) => {
-    isSliding.current = true;
-    setInternalValue(val);
-    setInputValue(val.toString());
+  const handleSliderChange = (values: number[]) => {
+    const val = values[0];
+    isInteractingRef.current = true;
+    setDisplayValue(val.toString());
   };
 
-  const handleSliderComplete = (val: number) => {
-    isSliding.current = false;
-    onChange(val);
-  };
-
-  const handleInputFocus = () => {
-    isFocusing.current = true;
-  };
-
-  const handleInputBlur = () => {
-    const parsed = parseInt(inputValue, 10);
-    if (!isNaN(parsed)) {
-      const clamped = Math.max(min, Math.min(max, parsed));
-      setInternalValue(clamped);
-      setInputValue(clamped.toString());
-      onChange(clamped);
-    } else {
-      // Reset to last valid value
-      setInternalValue(value);
-      setInputValue(value.toString());
-    }
-    isFocusing.current = false;
+  const handleSliderComplete = (values: number[]) => {
+    const val = values[0];
+    isInteractingRef.current = false;
+    const clamped = Math.max(min, Math.min(max, val));
+    setDisplayValue(clamped.toString());
+    onChangeEnd(clamped);
   };
 
   const handleInputChange = (text: string) => {
-    setInputValue(text);
-    const parsed = parseInt(text, 10);
+    isInteractingRef.current = true;
+    setDisplayValue(text);
+  };
+
+  const handleInputBlur = () => {
+    const parsed = parseInt(displayValue, 10);
+    let finalValue = value;
+
     if (!isNaN(parsed)) {
-      setInternalValue(parsed);
+      const clamped = Math.max(min, Math.min(max, parsed));
+      setDisplayValue(clamped.toString());
+      finalValue = clamped;
+    } else {
+      setDisplayValue(value.toString());
     }
+
+    onChangeEnd(finalValue);
+    isInteractingRef.current = false;
   };
 
   return (
@@ -88,26 +79,32 @@ const SliderInput = ({
       <Text style={styles.label}>{label}</Text>
 
       <View style={styles.sliderRow}>
-        <Slider
-          style={styles.slider}
-          minimumValue={min}
-          maximumValue={max}
-          value={internalValue}
-          onValueChange={handleSliderChange}
-          onSlidingComplete={handleSliderComplete}
+        <MultiSlider
+          values={[parseInt(displayValue) || min]}
+          min={min}
+          max={max}
           step={step}
-          minimumTrackTintColor="#55F358" // Changed to new color
-          maximumTrackTintColor="#D1D5DB"
-          thumbTintColor={Platform.OS === 'android' ? '#55F358' : undefined} // Changed to new color for Android
+          onValuesChange={handleSliderChange}
+          onValuesChangeFinish={handleSliderComplete}
+          sliderLength={screenWidth * 0.6}
+          selectedStyle={{ backgroundColor: '#55F358' }}
+          unselectedStyle={{ backgroundColor: '#D1D5DB' }}
+          markerStyle={{
+            backgroundColor: '#55F358',
+            borderWidth: 1,
+            borderColor: '#999',
+            height: 20,
+            width: 20,
+            borderRadius: 10,
+          }}
         />
 
         <View style={styles.valueBox}>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
-            value={inputValue}
+            value={displayValue}
             onChangeText={handleInputChange}
-            onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             maxLength={4}
           />
@@ -122,44 +119,40 @@ export default SliderInput;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: screenHeight * 0.03, // Relative margin bottom (e.g., 3% of screen height)
+    marginBottom: screenHeight * 0.03,
   },
   label: {
-    fontSize: screenWidth * 0.04, // Relative font size (e.g., 4% of screen width)
+    fontSize: screenWidth * 0.04,
     fontWeight: '300',
-    marginBottom: screenHeight * 0.01, // Relative margin bottom (e.g., 1% of screen height)
+    marginBottom: screenHeight * 0.01,
     color: '#111827',
   },
   sliderRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  slider: {
-    flex: 1,
-    height: screenHeight * 0.05, // Relative height (e.g., 5% of screen height)
-  },
   valueBox: {
-    width: screenWidth * 0.2, // Relative width (e.g., 20% of screen width)
-    marginLeft: screenWidth * 0.03, // Relative margin left (e.g., 3% of screen width)
+    width: screenWidth * 0.2,
+    marginLeft: screenWidth * 0.03,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#E5E7EB',
-    paddingHorizontal: screenWidth * 0.02, // Relative horizontal padding
-    paddingVertical: screenHeight * 0.008, // Relative vertical padding
-    borderRadius: screenWidth * 0.015, // Relative border radius
+    paddingHorizontal: screenWidth * 0.02,
+    paddingVertical: screenHeight * 0.008,
+    borderRadius: screenWidth * 0.015,
     justifyContent: 'space-between',
   },
   input: {
     flex: 1,
-    fontSize: screenWidth * 0.035, // Relative font size
+    fontSize: screenWidth * 0.035,
     fontWeight: '600',
     color: '#1F2937',
-    padding: 0, // Keep padding 0 for TextInput inside valueBox
+    padding: 0,
     textAlign: 'right',
   },
   unitText: {
-    marginLeft: screenWidth * 0.01, // Relative margin left
-    fontSize: screenWidth * 0.035, // Relative font size
+    marginLeft: screenWidth * 0.01,
+    fontSize: screenWidth * 0.035,
     color: '#374151',
   },
 });

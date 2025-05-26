@@ -30,6 +30,7 @@ export const OnboardingProvider = ({ children }: OnboardingProviderProps) => {
       };
       loadFormData();
     }, []);
+    
   
     const updateField = (key: string, value: any) => {
       setFormData((prev) => {

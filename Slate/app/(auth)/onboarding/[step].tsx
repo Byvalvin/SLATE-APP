@@ -92,14 +92,16 @@ const OnboardingStepScreen = () => {
           <SliderInput
             key={key}
             label={input.label}
+            value={formData[key] ?? input.min} // Initial value
             min={input.min}
             max={input.max}
             step={input.step}
             unit={input.unit}
-            value={formData[key] ?? input.min}
-            onChange={(val) => updateField(key, val)}
+            onChangeEnd={(val) => updateField(key, val)} // Save to context once done
           />
+
         );
+      
 
       case 'DatePicker':
         return (
