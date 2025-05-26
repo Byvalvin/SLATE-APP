@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Keyboard,
-  Dimensions, // Import Dimensions
+  KeyboardEvent,
+  Dimensions,
 } from 'react-native';
 
-// Get screen dimensions for relative sizing
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 type Props = {
@@ -27,14 +27,24 @@ const PillInput = ({
 }: Props) => {
   const [inputText, setInputText] = useState('');
   const [validationError, setValidationError] = useState('');
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const inputRef = useRef<RNTextInput>(null);
 
   useEffect(() => {
-    // Only clear inputText if the parent value becomes empty
-    // This prevents clearing input while user is typing and pills are being added
+    const showListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideListener = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
+
+  useEffect(() => {
     if (value.length === 0 && inputText !== '') {
       setInputText('');
     }
-  }, [value]); // Depend on value
+  }, [value]);
 
   const handleAddPill = () => {
     const trimmed = inputText.trim();
@@ -51,14 +61,13 @@ const PillInput = ({
     } else {
       onChange([...value, trimmed]);
       setValidationError('');
-      setInputText(''); // Clear input only on successful add
-      Keyboard.dismiss();
+      setInputText('');
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   };
 
   const handleRemovePill = (pill: string) => {
-    const updated = value.filter((p) => p !== pill);
-    onChange(updated);
+    onChange(value.filter(p => p !== pill));
   };
 
   return (
@@ -81,26 +90,28 @@ const PillInput = ({
 
       <View style={styles.inputRow}>
         <RNTextInput
+          ref={inputRef}
           style={styles.input}
           placeholder={placeholder}
           placeholderTextColor="#6B7280"
           value={inputText}
           onChangeText={(text) => {
             setInputText(text);
-            setValidationError(''); // Clear error on typing
+            setValidationError('');
           }}
           onSubmitEditing={handleAddPill}
-          blurOnSubmit={false} // Keep keyboard open if needed
+          blurOnSubmit={false}
           returnKeyType="done"
         />
 
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={handleAddPill}
-          disabled={!inputText.trim()}
-        >
-          <Text style={styles.addButtonText}>Add</Text>
-        </TouchableOpacity>
+        {!keyboardVisible && !!inputText.trim() && (
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleAddPill}
+          >
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {validationError ? (
@@ -114,38 +125,37 @@ export default PillInput;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: screenHeight * 0.03, // Relative margin bottom
+    marginBottom: screenHeight * 0.03,
   },
   label: {
-    fontSize: screenWidth * 0.04, // Relative font size
+    fontSize: screenWidth * 0.04,
     fontWeight: '300',
-    marginBottom: screenHeight * 0.01, // Relative margin bottom
+    marginBottom: screenHeight * 0.01,
     color: '#111827',
   },
   pillsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: screenHeight * 0.005, // Relative margin bottom
-     
+    marginBottom: screenHeight * 0.005,
   },
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#E5E7EB',
-    paddingHorizontal: screenWidth * 0.027, // Relative horizontal padding
-    paddingVertical: screenHeight * 0.007, // Relative vertical padding
-    borderRadius: screenWidth * 0.04, // Relative border radius (more rounded)
-    marginRight: screenWidth * 0.018, // Relative margin right
-    marginBottom: screenHeight * 0.01, // Relative margin bottom
+    paddingHorizontal: screenWidth * 0.027,
+    paddingVertical: screenHeight * 0.007,
+    borderRadius: screenWidth * 0.04,
+    marginRight: screenWidth * 0.018,
+    marginBottom: screenHeight * 0.01,
   },
   pillText: {
-    fontSize: screenWidth * 0.035, // Relative font size
+    fontSize: screenWidth * 0.035,
     color: '#1F2937',
   },
   removePillText: {
-    fontSize: screenWidth * 0.04, // Relative font size
+    fontSize: screenWidth * 0.04,
     color: '#9CA3AF',
-    marginLeft: screenWidth * 0.015, // Relative margin left
+    marginLeft: screenWidth * 0.015,
   },
   inputRow: {
     flexDirection: 'row',
@@ -153,32 +163,34 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: screenHeight * 0.045, // Relative height
-    paddingHorizontal: screenWidth * 0.04, // Relative horizontal padding
-    borderRadius: screenWidth * 0.02, // Relative border radius
+    height: screenHeight * 0.06,
+    paddingHorizontal: screenWidth * 0.04,
+    paddingVertical: screenHeight * 0.012,
+    borderRadius: screenWidth * 0.02,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     backgroundColor: '#fff',
-    fontSize: screenWidth * 0.04, // Relative font size
+    fontSize: screenWidth * 0.04,
     color: '#111827',
+    textAlignVertical: 'center',
   },
   addButton: {
-    marginLeft: screenWidth * 0.02, // Relative margin left
-    backgroundColor: '#55F358', // Changed to the new green color
-    paddingHorizontal: screenWidth * 0.04, // Relative horizontal padding
-    paddingVertical: screenHeight * 0.01, // Relative vertical padding
-    borderRadius: screenWidth * 0.02, // Relative border radius
-    justifyContent: 'center', // Center text vertically
-    alignItems: 'center', // Center text horizontally
+    marginLeft: screenWidth * 0.02,
+    backgroundColor: '#55F358',
+    paddingHorizontal: screenWidth * 0.04,
+    paddingVertical: screenHeight * 0.012,
+    borderRadius: screenWidth * 0.02,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addButtonText: {
     color: '#fff',
     fontWeight: '500',
-    fontSize: screenWidth * 0.04, // Relative font size
+    fontSize: screenWidth * 0.04,
   },
   errorText: {
     color: '#DC2626',
-    marginTop: screenHeight * 0.005, // Relative margin top
-    fontSize: screenWidth * 0.035, // Relative font size
+    marginTop: screenHeight * 0.005,
+    fontSize: screenWidth * 0.035,
   },
 });

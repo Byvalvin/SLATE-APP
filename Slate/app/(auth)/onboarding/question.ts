@@ -119,7 +119,7 @@ export type OnboardingInput =
       key: 'health_conditions',
       question: 'Any notable health conditions?',
       inputs: [
-        { type: 'PillInput', key: 'healthConditions', label: 'Enter each condition', placeholder: 'e.g. knee pain' },
+        { type: 'PillInput', key: 'healthConditions', label: 'Enter each condition one at a time.', placeholder: 'e.g. knee pain' },
       ],
     },
     {
