@@ -11,7 +11,7 @@ require('./models/Profile');  // Import Profile model
 
 const authRoutes = require('./routes/auth');
 const exerciseRoutes = require('./routes/exercises'); // Import the exercises route
-const programRoutes = require('./routes/programs');   // Import the new programs route
+//const programRoutes = require('./routes/programs');   // Import the new programs route
 const profileRoutes = require('./routes/profile');
 
 // db setup
@@ -76,7 +76,7 @@ app.use(`${baseURL}/profile`, profileRoutes);
 app.use(`${baseURL}/exercises`, exerciseRoutes);
 
 // program routes (e.g., /api/programs, /api/programs/:id)
-app.use(`${baseURL}/programs`, programRoutes); // Mount the new programs route
+// app.use(`${baseURL}/programs`, programRoutes); // Mount the new programs route
 
 // Export the app for serverless functions (like Vercel)
 module.exports = app;
