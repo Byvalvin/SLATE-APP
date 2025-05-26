@@ -1,5 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native'; // Import Dimensions
+
+// Get screen dimensions for relative sizing
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 type Props = {
   label: string;
@@ -43,41 +46,42 @@ export default SingleSelect;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: screenHeight * 0.03, // Relative margin bottom (e.g., 3% of screen height)
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
+    fontSize: screenWidth * 0.040, // Relative font size (e.g., 4.5% of screen width)
+    fontWeight: '300',
+    marginBottom: screenHeight * 0.01, // Relative margin bottom (e.g., 1% of screen height)
     color: '#111827',
   },
   optionsContainer: {
     flexDirection: 'column',
-    gap: 12,
+    gap: screenHeight * 0.015, // Relative gap (e.g., 1.5% of screen height)
   },
   option: {
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    paddingVertical: screenHeight * 0.012, // Relative vertical padding (e.g., 2.2% of screen height)
+    paddingHorizontal: screenWidth * 0.05, // Relative horizontal padding (e.g., 5% of screen width)
+    borderRadius: screenWidth * 0.03, // Relative border radius (e.g., 3% of screen width)
     borderWidth: 1,
     borderColor: '#E5E7EB',
     backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: screenHeight * 0.002 }, // Relative shadow offset height
     shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowRadius: screenWidth * 0.015, // Relative shadow radius
+    elevation: 2, // Keep fixed elevation for Android consistency
   },
   selectedOption: {
-    borderColor: '#3B82F6',
-    backgroundColor: '#DBEAFE',
+    borderColor: '#28A745', // Changed to a darker, industry-standard green
+    backgroundColor: '#D9F7D9', // A much lighter matching green (kept as is)
   },
   optionText: {
-    fontSize: 18,
+    fontSize: screenWidth * 0.045, // Relative font size (e.g., 4.5% of screen width)
     color: '#1F2937',
     textAlign: 'center',
   },
   selectedOptionText: {
-    color: '#2563EB',
+    color: '#28A745', // Changed to a darker, industry-standard green
     fontWeight: '600',
   },
 });

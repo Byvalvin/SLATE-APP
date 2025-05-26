@@ -1,5 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native'; // Import Dimensions
+
+// Get screen dimensions for relative sizing
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 type Props = {
   label: string;
@@ -43,24 +46,25 @@ export default MultiSelect;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: screenHeight * 0.03, // Relative margin bottom (e.g., 3% of screen height)
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
+    fontSize: screenWidth * 0.035, // Relative font size (e.g., 3.5% of screen width)
+    fontWeight: '300',
+    marginBottom: screenHeight * 0.01, // Relative margin bottom (e.g., 1% of screen height)
     color: '#111827',
   },
   optionsContainer: {
     flexDirection: 'column',
-    marginBottom: 16,
+    marginBottom: screenHeight * 0.015, // Relative margin bottom (e.g., 2% of screen height)
+    maxHeight: screenHeight * 0.23, // Added a maxHeight to prevent it from taking too much vertical space
   },
   option: {
     backgroundColor: '#F3F4F6',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 8,
+    paddingHorizontal: screenWidth * 0.04, // Relative horizontal padding (e.g., 4% of screen width)
+    paddingVertical: screenHeight * 0.015, // Relative vertical padding (e.g., 1.5% of screen height)
+    borderRadius: screenWidth * 0.02, // Relative border radius (e.g., 2% of screen width)
+    marginBottom: screenHeight * 0.01, // Relative margin bottom (e.g., 1% of screen height)
     borderWidth: 1,
     borderColor: '#E5E7EB',
     alignItems: 'center',
@@ -70,7 +74,7 @@ const styles = StyleSheet.create({
     borderColor: '#3B82F6',
   },
   optionText: {
-    fontSize: 16,
+    fontSize: screenWidth * 0.04, // Relative font size (e.g., 4% of screen width)
     color: '#1F2937',
   },
   selectedText: {

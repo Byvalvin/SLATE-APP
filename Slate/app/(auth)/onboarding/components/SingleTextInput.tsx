@@ -5,7 +5,11 @@ import {
   TextInput as RNTextInput,
   StyleSheet,
   TextInputProps,
+  Dimensions, // Import Dimensions
 } from 'react-native';
+
+// Get screen dimensions for relative sizing
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 type Props = {
   label: string;
@@ -64,35 +68,35 @@ export default SingleTextInput;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: screenHeight * 0.03, // Relative margin bottom (e.g., 3% of screen height)
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
+    fontSize: screenWidth * 0.04, // Relative font size (e.g., 4.5% of screen width)
+    fontWeight: '300',
+    marginBottom: screenHeight * 0.01, // Relative margin bottom (e.g., 1% of screen height)
     color: '#111827',
   },
   input: {
-    height: 48,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    height: screenHeight * 0.06, // Relative height (e.g., 6% of screen height)
+    paddingHorizontal: screenWidth * 0.04, // Relative horizontal padding (e.g., 4% of screen width)
+    borderRadius: screenWidth * 0.02, // Relative border radius (e.g., 2% of screen width)
     borderWidth: 1,
     borderColor: '#E5E7EB',
     backgroundColor: '#fff',
-    fontSize: 16,
+    fontSize: screenWidth * 0.04, // Relative font size (e.g., 4% of screen width)
     color: '#111827',
   },
   multiline: {
-    height: 120,
-    paddingTop: 12,
-    paddingBottom: 12,
+    height: screenHeight * 0.15, // Relative height for multiline (e.g., 15% of screen height)
+    paddingTop: screenHeight * 0.015, // Relative padding top
+    paddingBottom: screenHeight * 0.015, // Relative padding bottom
   },
   inputError: {
-    borderColor: '#DC2626',
+    borderColor: '#DC2626', // Red color for error border
   },
   errorText: {
-    marginTop: 4,
-    color: '#DC2626',
-    fontSize: 12,
+    marginTop: screenHeight * 0.005, // Relative margin top
+    color: '#DC2626', // Red color for error text
+    fontSize: screenWidth * 0.03, // Relative font size
   },
 });

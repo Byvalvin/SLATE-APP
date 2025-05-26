@@ -176,7 +176,7 @@ const OnboardingStepScreen = () => {
     <View style={styles.container}>
       <OnboardingHeader currentStep={stepIndex} totalSteps={onboardingSteps.length} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.intro}>Let's get you started</Text>
+        <Text style={styles.intro}>Lets get you started</Text>
         <Text style={styles.question}>{stepData.question}</Text>
 
         {stepData.inputs.map(renderInput)}

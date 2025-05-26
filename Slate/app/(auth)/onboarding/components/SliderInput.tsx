@@ -5,8 +5,12 @@ import {
   StyleSheet,
   Platform,
   TextInput,
+  Dimensions, // Import Dimensions
 } from 'react-native';
 import Slider from '@react-native-community/slider';
+
+// Get screen dimensions for relative sizing
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 type Props = {
   label: string;
@@ -39,7 +43,7 @@ const SliderInput = ({
     setInternalValue(value);
     setInputValue(stringified);
   }, [value]);
-  
+
 
   const handleSliderChange = (val: number) => {
     isSliding.current = true;
@@ -92,9 +96,9 @@ const SliderInput = ({
           onValueChange={handleSliderChange}
           onSlidingComplete={handleSliderComplete}
           step={step}
-          minimumTrackTintColor="#3B82F6"
+          minimumTrackTintColor="#55F358" // Changed to new color
           maximumTrackTintColor="#D1D5DB"
-          thumbTintColor={Platform.OS === 'android' ? '#3B82F6' : undefined}
+          thumbTintColor={Platform.OS === 'android' ? '#55F358' : undefined} // Changed to new color for Android
         />
 
         <View style={styles.valueBox}>
@@ -118,12 +122,12 @@ export default SliderInput;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: screenHeight * 0.03, // Relative margin bottom (e.g., 3% of screen height)
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
+    fontSize: screenWidth * 0.04, // Relative font size (e.g., 4% of screen width)
+    fontWeight: '300',
+    marginBottom: screenHeight * 0.01, // Relative margin bottom (e.g., 1% of screen height)
     color: '#111827',
   },
   sliderRow: {
@@ -132,30 +136,30 @@ const styles = StyleSheet.create({
   },
   slider: {
     flex: 1,
-    height: 40,
+    height: screenHeight * 0.05, // Relative height (e.g., 5% of screen height)
   },
   valueBox: {
-    width: 80,
-    marginLeft: 12,
+    width: screenWidth * 0.2, // Relative width (e.g., 20% of screen width)
+    marginLeft: screenWidth * 0.03, // Relative margin left (e.g., 3% of screen width)
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#E5E7EB',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 6,
+    paddingHorizontal: screenWidth * 0.02, // Relative horizontal padding
+    paddingVertical: screenHeight * 0.008, // Relative vertical padding
+    borderRadius: screenWidth * 0.015, // Relative border radius
     justifyContent: 'space-between',
   },
   input: {
     flex: 1,
-    fontSize: 14,
+    fontSize: screenWidth * 0.035, // Relative font size
     fontWeight: '600',
     color: '#1F2937',
-    padding: 0,
+    padding: 0, // Keep padding 0 for TextInput inside valueBox
     textAlign: 'right',
   },
   unitText: {
-    marginLeft: 4,
-    fontSize: 14,
+    marginLeft: screenWidth * 0.01, // Relative margin left
+    fontSize: screenWidth * 0.035, // Relative font size
     color: '#374151',
   },
 });
