@@ -116,7 +116,13 @@ router.post('/refresh-token', async (req, res) => {
 
   } catch (err) {
     console.error('Refresh token error:', err);
-    return res.status(401).json({ message: 'Invalid refresh token unauthorised' }); // Use 401 if token verification fails
+    if (err instanceof TokenExpiredError) {
+      return res.status(403).json({ message: 'Refresh token expired. Please log in again.' });
+    } else if (err instanceof JsonWebTokenError) {
+      return res.status(401).json({ message: 'Invalid refresh token. Unauthorized.' });
+    } else {
+      return res.status(500).json({ message: 'Internal server error during token refresh' });
+    }
   }
 });
 
