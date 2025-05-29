@@ -10,7 +10,7 @@ import {
   StatusBar,
   Platform, // Import Platform for conditional padding
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons, AntDesign, FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons'; // Only Ionicons is used now
 
 // Get screen dimensions for relative sizing
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -29,37 +29,19 @@ const LifesumCloneScreen = () => {
     title: string,
     subtitle: string,
     isNew?: boolean,
-    // isLocked prop removed as per request
   ) => (
     <TouchableOpacity style={styles.card}>
       {}
       {isNew && (
         <View style={styles.newTag}>
-          <Text style={styles.newTagText}>NEW</Text> {}
+          <Text style={styles.newTagText}>NEW</Text>
         </View>
       )}
+      {}
       <Image source={{ uri: imageUri }} style={styles.cardImage} />
       <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{title}</Text> {}
-        <Text style={styles.cardSubtitle}>{subtitle}</Text> {}
-        {}
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderFastingCard = (
-    imageUri: string,
-    mealPlanText: string,
-    fastingType: string,
-    // showShoppingList prop removed as per request
-  ) => (
-    <TouchableOpacity style={styles.fastingCard}>
-      <Image source={{ uri: imageUri }} style={styles.fastingCardImage} />
-      <View style={styles.fastingCardContent}>
-        {}
-        <Text style={styles.fastingCardMealPlanText}>{mealPlanText}</Text> {}
-        <Text style={styles.fastingCardFastingType}>{fastingType}</Text> {}
-        {}
+        <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text> {}
+        <Text style={styles.cardSubtitle}>{subtitle}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -73,10 +55,10 @@ const LifesumCloneScreen = () => {
       <View style={styles.topGreenBackground}>
         <View style={styles.profileSection}>
           <View style={styles.profileLeft}>
-            <Text style={styles.activeText}>ACTIVE</Text> {}
+            <Text style={styles.activeText}>ACTIVE</Text>
             <View style={styles.lifesumRow}>
-              <Text style={styles.lifesumStandardText}>Standard</Text> {}
-              <Ionicons name="chevron-forward" size={getFontSize(20)} color="#fff" /> {}
+              <Text style={styles.lifesumStandardText}>Standard</Text>
+              <Ionicons name="chevron-forward" size={getFontSize(20)} color="#fff" />
             </View>
           </View>
           {}
@@ -88,72 +70,73 @@ const LifesumCloneScreen = () => {
       </View>
 
       {}
-      <ScrollView style={styles.scrollViewContent}>
+      <ScrollView style={styles.scrollViewContent} contentContainerStyle={{ paddingBottom: getHeight(30) }}> 
         
+        <View style={styles.curatedInfo}>
+          <Ionicons name="sparkles" size={getFontSize(16)} color="#6B7280" />
+          <Text style={styles.curatedInfoText}>Curated for you by an expert</Text>
+        </View>
 
-        {}
-        <Text style={styles.sectionTitle}>BALANCED</Text> {}
+       
+        <Text style={styles.sectionTitle}>MAINTAINANCE PLANS</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
           {renderCard(
-            `https://placehold.co/${getWidth(150)}x${getHeight(150)}/E9E2DA/000?text=Blueberries`,
-            'Eat like the world\'s\nlongest-living people', // Text to change: Card 1 Title
-            'Vitality', // Text to change: Card 1 Subtitle
+            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/getting_fit_xlbwy0.png`,
+            '3 Months to get \nin shape',
+            'Vitality',
             true, // isNew
           )}
           {renderCard(
-            `https://placehold.co/${getWidth(150)}x${getHeight(150)}/2D4B4B/fff?text=Sugar+Detox`,
-            '21-day Meal Plan', // Text to change: Card 2 Title
-            'Sugar Detox', // Text to change: Card 2 Subtitle
+            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/build_muscle_vq4pll.png`,
+            'Build Muscle',
+            'Performance',
             false,
           )}
           {renderCard(
-            `https://placehold.co/${getWidth(150)}x${getHeight(150)}/E9E2DA/000?text=Fuel+You`,
-            'Fuel your body', // Text to change: Card 3 Title
-            'Eat, move, thrive', // Text to change: Card 3 Subtitle
+            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/tone_up_yovjqr.png`,
+            'Tone Up',
+            'Vitality',
             false,
           )}
         </ScrollView>
 
-        {}
-        <Text style={styles.sectionTitle}>FASTING</Text> {}
+        
+        <Text style={styles.sectionTitle}>WEIGHT LOSS</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-          {renderFastingCard(
-            `https://placehold.co/${getWidth(100)}x${getHeight(100)}/2D4B4B/fff?text=Morning+Fast`,
-            '21-day Meal Plan', // Text to change: Fasting Card 1 Meal Plan Text
-            '16:8 Morning\nfasting', // Text to change: Fasting Card 1 Type
+          {renderCard(
+            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/losing_weight_jszw5l.png`,
+            '3 Months to lose \nweight',
+            'Vitality',
+            false, // isNew
           )}
-          {renderFastingCard(
-            `https://placehold.co/${getWidth(100)}x${getHeight(100)}/E9E2DA/000?text=Evening+Fast`,
-            '21-day Meal Plan', // Text to change: Fasting Card 2 Meal Plan Text
-            '16:8 Evening\nfasting', // Text to change: Fasting Card 2 Type
-          )}
-          {renderFastingCard(
-            `https://placehold.co/${getWidth(100)}x${getHeight(100)}/2D4B4B/fff?text=Another+Fast`,
-            '21-day Meal Plan', // Text to change: Fasting Card 3 Meal Plan Text
-            'Another Fasting\nPlan', // Text to change: Fasting Card 3 Type
+          {renderCard(
+            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/lose_belly_fat_gcgejw.png`,
+            'Lose Belly Fat',
+            'Vitality',
+            false,
           )}
         </ScrollView>
 
-        {}
-        <Text style={styles.sectionTitle}>HIGH PROTEIN</Text> {}
-        <TouchableOpacity style={styles.takeTheTestCard}>
-          {}
-          <Image
-            source={{ uri: `https://placehold.co/${getWidth(60)}x${getHeight(60)}/D9F7D9/000?text=Test+Icon` }}
-            style={styles.takeTheTestImage}
-          />
-          <View style={styles.takeTheTestContent}>
-            <Text style={styles.takeTheTestTitle}>Take the test</Text> {}
-            <Text style={styles.takeTheTestSubtitle}>To get help choosing a plan</Text> {}
-          </View>
-          <Ionicons name="chevron-forward" size={getFontSize(24)} color="#6B7280" />
-        </TouchableOpacity>
+        
+        <Text style={styles.sectionTitle}>MUSCLE BUILDING</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
+          {renderCard(
+            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/build_muscle_vq4pll.png`,
+            'Gain Strength',
+            'Performance',
+            false,
+          )}
+          {renderCard(
+            ``,
+            'Bulk Up',
+            'Advanced',
+            false,
+          )}
+        </ScrollView>
 
-        {}
-        <View style={{ height: getHeight(100) }} />
+        
+        <View style={{ height: getHeight(60) }} />
       </ScrollView>
-
-      {}
     </View>
   );
 };
@@ -164,32 +147,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB', // Overall background color for the rest of the screen
   },
   topGreenBackground: {
-    backgroundColor: '#005B44', // The new dark green background color // Adjust padding for status bar and content
+    backgroundColor: '#005B44', // The new dark green background color
     paddingHorizontal: getWidth(16),
     paddingBottom: getHeight(50), // Padding at the bottom of the green section
+    // Added zIndex to ensure it's above the scroll view if any overlap issues, though unlikely with current layout
+    zIndex: 1,
   },
   scrollViewContent: { // New style for the scrollable area below the green header
     flex: 1,
     paddingHorizontal: getWidth(16), // Keep horizontal padding consistent
-    // No paddingTop here, as the green background handles the top spacing
+    // marginTop: -getHeight(20), // Example of pulling scroll content slightly under a curved header if needed
   },
-  // Header styles (no longer needed as header content is directly in topGreenBackground)
-  // header: {
-  //   marginBottom: getHeight(10),
-  // },
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop:getHeight(65),
-    // No marginBottom needed here, it's handled by topGreenBackground's paddingBottom
+    marginTop:Platform.OS === 'android' ? getHeight(35) : getHeight(65), // Adjust for Android status bar
   },
   profileLeft: {
     flexDirection: 'column',
   },
   activeText: {
     fontSize: getFontSize(12),
-    color: '#fff', // Changed to white for contrast on dark green
+    color: '#fff',
     fontWeight: '500',
   },
   lifesumRow: {
@@ -199,13 +179,13 @@ const styles = StyleSheet.create({
   lifesumStandardText: {
     fontSize: getFontSize(22),
     fontWeight: '700',
-    color: '#fff', // Changed to white for contrast on dark green
+    color: '#fff',
     marginRight: getWidth(5),
   },
   profileImage: {
     width: getWidth(60),
-    height: getHeight(60),
-    borderRadius: getWidth(30),
+    height: getHeight(60), // Ensure height matches width for a circle if source image is square
+    borderRadius: getWidth(30), // half of width/height
     backgroundColor: '#D9F7D9', // Placeholder background
   },
   curatedInfo: {
@@ -235,7 +215,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: getWidth(180), // Card width
-    height: getHeight(220), // Card height
+    height: getHeight(220), // Card height - kept same
     backgroundColor: '#fff',
     borderRadius: getWidth(12),
     marginRight: getWidth(15),
@@ -246,7 +226,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     overflow: 'hidden', // Clip image and tags
   },
-  // lockIconContainer removed as per request
   newTag: {
     position: 'absolute',
     top: getHeight(10),
@@ -255,112 +234,37 @@ const styles = StyleSheet.create({
     borderRadius: getWidth(8),
     paddingHorizontal: getWidth(8),
     paddingVertical: getHeight(4),
-    zIndex: 1,
+    zIndex: 1, // Ensure tag is above the image
   },
   newTagText: {
-    color: '#fff',
+    color: '#fff', // Changed to white for better contrast on green tag
     fontSize: getFontSize(10),
     fontWeight: 'bold',
   },
   cardImage: {
-    width: '100%',
-    height: getHeight(120), // Image takes top portion of card
-    borderTopLeftRadius: getWidth(12),
-    borderTopRightRadius: getWidth(12),
-    resizeMode: 'cover',
+    width: '100%', // Image now takes full width of the card
+    height: getHeight(154), // Adjusted height: 154 is 70% of 220 (card height)
+    borderTopLeftRadius: getWidth(12), // Keep top corners rounded
+    borderTopRightRadius: getWidth(12), // Keep top corners rounded
+    // No bottom radius needed here as content is below
+    resizeMode: 'cover', // Ensures the image covers the area, cropping if necessary
   },
   cardContent: {
-    padding: getWidth(12),
-    flex: 1,
-    justifyContent: 'space-between',
+    paddingHorizontal: getWidth(12),
+    paddingVertical: getHeight(8), // Adjusted padding slightly for better balance
+    flex: 1, // Allows content to take remaining space
+    justifyContent: 'space-around', // Distribute space a bit more evenly if title is short
   },
   cardTitle: {
     fontSize: getFontSize(14),
     fontWeight: '600',
     color: '#1F2937',
-    marginBottom: getHeight(5),
+    marginBottom: getHeight(4), // Slightly reduced margin
   },
   cardSubtitle: {
     fontSize: getFontSize(12),
     color: '#6B7280',
   },
-  // shoppingListContainer removed as per request
-  // shoppingListText removed as per request
-  fastingCard: {
-    width: getWidth(150),
-    height: getHeight(200),
-    backgroundColor: '#fff',
-    borderRadius: getWidth(12),
-    marginRight: getWidth(15),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: getHeight(4) },
-    shadowOpacity: 0.1,
-    shadowRadius: getWidth(8),
-    elevation: 5,
-    overflow: 'hidden',
-    alignItems: 'center', // Center content horizontally
-    justifyContent: 'center', // Center content vertically
-  },
-  fastingCardImage: {
-    width: getWidth(100),
-    height: getHeight(100),
-    borderRadius: getWidth(50), // Circular image
-    marginBottom: getHeight(10),
-    resizeMode: 'cover',
-  },
-  fastingCardContent: {
-    alignItems: 'center',
-    paddingHorizontal: getWidth(10),
-    position: 'relative', // For lock icon positioning
-  },
-  // fastingCardLockIcon removed as per request
-  fastingCardMealPlanText: {
-    fontSize: getFontSize(12),
-    color: '#6B7280',
-    marginBottom: getHeight(5),
-  },
-  fastingCardFastingType: {
-    fontSize: getFontSize(16),
-    fontWeight: '600',
-    color: '#1F2937',
-    textAlign: 'center',
-  },
-  takeTheTestCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: getWidth(12),
-    paddingVertical: getHeight(15),
-    paddingHorizontal: getWidth(15),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: getHeight(4) },
-    shadowOpacity: 0.1,
-    shadowRadius: getWidth(8),
-    elevation: 5,
-    marginBottom: getHeight(20),
-  },
-  takeTheTestImage: {
-    width: getWidth(50),
-    height: getHeight(50),
-    borderRadius: getWidth(25),
-    marginRight: getWidth(15),
-    backgroundColor: '#D9F7D9', // Placeholder background
-  },
-  takeTheTestContent: {
-    flex: 1,
-  },
-  takeTheTestTitle: {
-    fontSize: getFontSize(16),
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  takeTheTestSubtitle: {
-    fontSize: getFontSize(13),
-    color: '#6B7280',
-  },
-  // bottomNav removed as per request
-  // navItem removed as per request
-  // navText removed as per request
 });
 
 export default LifesumCloneScreen;
