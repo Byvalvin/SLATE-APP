@@ -22,7 +22,7 @@ const getFontSize = (size: number) => screenWidth * (size / 375); // Assuming ba
 const getWidth = (size: number) => screenWidth * (size / 375);
 const getHeight = (size: number) => screenHeight * (size / 812); // Assuming base height of 812 for scaling
 
-const LifesumCloneScreen = () => {
+const ProgramsScreen = () => {
   // --- Reusable Card Components ---
   const renderCard = (
     imageUri: string,
@@ -31,16 +31,16 @@ const LifesumCloneScreen = () => {
     isNew?: boolean,
   ) => (
     <TouchableOpacity style={styles.card}>
-      {}
+      
       {isNew && (
         <View style={styles.newTag}>
           <Text style={styles.newTagText}>NEW</Text>
         </View>
       )}
-      {}
+      
       <Image source={{ uri: imageUri }} style={styles.cardImage} />
       <View style={styles.cardContent}>
-        <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text> {}
+        <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text> 
         <Text style={styles.cardSubtitle}>{subtitle}</Text>
       </View>
     </TouchableOpacity>
@@ -48,10 +48,10 @@ const LifesumCloneScreen = () => {
 
   return (
     <View style={styles.fullScreenContainer}>
-      {}
+    
       <StatusBar barStyle="light-content" backgroundColor="#005B44" />
 
-      {}
+   
       <View style={styles.topGreenBackground}>
         <View style={styles.profileSection}>
           <View style={styles.profileLeft}>
@@ -61,7 +61,7 @@ const LifesumCloneScreen = () => {
               <Ionicons name="chevron-forward" size={getFontSize(20)} color="#fff" />
             </View>
           </View>
-          {}
+      
           <Image
             source={{ uri: `https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/male_green_ifnxek.png` }}
             style={styles.profileImage}
@@ -69,19 +69,19 @@ const LifesumCloneScreen = () => {
         </View>
       </View>
 
-      {}
+     
       <ScrollView style={styles.scrollViewContent} contentContainerStyle={{ paddingBottom: getHeight(30) }}> 
-        
+     
         <View style={styles.curatedInfo}>
           <Ionicons name="sparkles" size={getFontSize(16)} color="#6B7280" />
           <Text style={styles.curatedInfoText}>Curated for you by an expert</Text>
         </View>
 
-       
+    
         <Text style={styles.sectionTitle}>MAINTAINANCE PLANS</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
           {renderCard(
-            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/getting_fit_xlbwy0.png`,
+            `https://res.cloudinary.com/dnapppihv/image/upload/v1748621519/pexels-panther-1547248_gyepg6.jpg`,
             '3 Months to get \nin shape',
             'Vitality',
             true, // isNew
@@ -100,11 +100,11 @@ const LifesumCloneScreen = () => {
           )}
         </ScrollView>
 
-        
+     
         <Text style={styles.sectionTitle}>WEIGHT LOSS</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
           {renderCard(
-            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/losing_weight_jszw5l.png`,
+            `https://res.cloudinary.com/dnapppihv/image/upload/v1748621519/pexels-karolina-grabowska-5714340_ko9v0f.jpg`,
             '3 Months to lose \nweight',
             'Vitality',
             false, // isNew
@@ -117,7 +117,7 @@ const LifesumCloneScreen = () => {
           )}
         </ScrollView>
 
-        
+      
         <Text style={styles.sectionTitle}>MUSCLE BUILDING</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
           {renderCard(
@@ -127,14 +127,14 @@ const LifesumCloneScreen = () => {
             false,
           )}
           {renderCard(
-            ``,
+            ``, // Empty image URI
             'Bulk Up',
             'Advanced',
             false,
           )}
         </ScrollView>
 
-        
+     
         <View style={{ height: getHeight(60) }} />
       </ScrollView>
     </View>
@@ -267,4 +267,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LifesumCloneScreen;
+export default ProgramsScreen;
