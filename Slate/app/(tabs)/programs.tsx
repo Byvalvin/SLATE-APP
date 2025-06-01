@@ -51,20 +51,27 @@ const ProgramsScreen = () => {
     title: string,
     subtitle: string,
     isNew?: boolean
-  ) => (
-    <TouchableOpacity style={styles.card}>
-      {isNew && (
-        <View style={styles.newTag}>
-          <Text style={styles.newTagText}>NEW</Text>
+  ) => {
+    const validImage = imageUri && imageUri.trim() !== ''
+      ? imageUri
+      : 'https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/default_program_image.png'; // 👈 Add your fallback URL
+  
+    return (
+      <TouchableOpacity style={styles.card}>
+        {isNew && (
+          <View style={styles.newTag}>
+            <Text style={styles.newTagText}>NEW</Text>
+          </View>
+        )}
+        <Image source={{ uri: validImage }} style={styles.cardImage} />
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text>
+          <Text style={styles.cardSubtitle}>{subtitle}</Text>
         </View>
-      )}
-      <Image source={{ uri: imageUri }} style={styles.cardImage} />
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text>
-        <Text style={styles.cardSubtitle}>{subtitle}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
+  
 
   if (loading) {
     return (
