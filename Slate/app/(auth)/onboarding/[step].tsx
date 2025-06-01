@@ -69,7 +69,7 @@ const OnboardingStepScreen = () => {
         console.log('Final Form Data:', formData);
         Alert.alert('All done!', 'You’ve completed onboarding.');
         //🔄 Replace with actual backend API call
-        await submitOnboarding(`${servers[1]}/api/profile/`,formData);
+        await submitOnboarding(`${servers[2]}/api/profile/`,formData);
   
         Alert.alert('All done!', 'You’ve completed onboarding.');
   

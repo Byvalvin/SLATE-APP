@@ -3,7 +3,7 @@ import { getAccessToken } from './token';
 
 export async function hasProfile(): Promise<boolean> {
   const token = await getAccessToken();
-  const res = await fetch(`${servers[1]}/api/profile/me`, {
+  const res = await fetch(`${servers[2]}/api/profile/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

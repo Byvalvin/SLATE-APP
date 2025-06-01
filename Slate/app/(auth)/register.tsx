@@ -37,7 +37,7 @@ export default function RegisterScreen() {
     };
 
     try {
-      const response = await fetch(`${servers[1]}/api/auth/register`, {
+      const response = await fetch(`${servers[2]}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(user),

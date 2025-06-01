@@ -31,7 +31,7 @@ const ProgramsScreen = () => {
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
-        const response = await fetch(`${servers[1]}/api/programs`);
+        const response = await fetch(`${servers[2]}/api/programs`);
         if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
         setPrograms(data);

@@ -72,7 +72,7 @@ export default function HomeScreen() {
           return;
         }
 
-        const res = await fetchWithAuth(`${servers[1]}/api/auth/me`);
+        const res = await fetchWithAuth(`${servers[2]}/api/auth/me`);
 
         if (res.ok) {
           const userData = await res.json();
@@ -137,7 +137,7 @@ export default function HomeScreen() {
     const fetchExercises = async () => {
       try {
         const token = await getAccessToken();
-        const res = await fetch(`${servers[1]}/api/exercises/user-daily-exercises?date=${format(currentDate, 'yyyy-MM-dd')}`, {
+        const res = await fetch(`${servers[2]}/api/exercises/user-daily-exercises?date=${format(currentDate, 'yyyy-MM-dd')}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
