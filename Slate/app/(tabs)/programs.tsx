@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,11 @@ import {
   Dimensions,
   StatusBar,
   Platform, // Import Platform for conditional padding
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Only Ionicons is used now
 
+import { servers } from '@/constants/API';
 // Get screen dimensions for relative sizing
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -23,29 +25,54 @@ const getWidth = (size: number) => screenWidth * (size / 375);
 const getHeight = (size: number) => screenHeight * (size / 812); // Assuming base height of 812 for scaling
 
 const ProgramsScreen = () => {
+  const [programs, setPrograms] = useState<Record<string, any[]>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const response = await fetch(`${servers[1]}/api/programs`);
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        setPrograms(data);
+      } catch (error) {
+        console.error('Fetch error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrograms();
+  }, []);
+
   // --- Reusable Card Components ---
   const renderCard = (
     imageUri: string,
     title: string,
     subtitle: string,
-    isNew?: boolean,
+    isNew?: boolean
   ) => (
     <TouchableOpacity style={styles.card}>
-      
       {isNew && (
         <View style={styles.newTag}>
           <Text style={styles.newTagText}>NEW</Text>
         </View>
       )}
-      
       <Image source={{ uri: imageUri }} style={styles.cardImage} />
       <View style={styles.cardContent}>
-        <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text> 
+        <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text>
         <Text style={styles.cardSubtitle}>{subtitle}</Text>
       </View>
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <View style={[styles.fullScreenContainer, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#005B44" />
+      </View>
+    );
+  }
   return (
     <View style={styles.fullScreenContainer}>
     
@@ -78,62 +105,21 @@ const ProgramsScreen = () => {
         </View>
 
     
-        <Text style={styles.sectionTitle}>MAINTAINANCE PLANS</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-          {renderCard(
-            `https://res.cloudinary.com/dnapppihv/image/upload/v1748621519/pexels-panther-1547248_gyepg6.jpg`,
-            '3 Months to get \nin shape',
-            'Vitality',
-            true, // isNew
-          )}
-          {renderCard(
-            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/build_muscle_vq4pll.png`,
-            'Build Muscle',
-            'Performance',
-            false,
-          )}
-          {renderCard(
-            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/tone_up_yovjqr.png`,
-            'Tone Up',
-            'Vitality',
-            false,
-          )}
-        </ScrollView>
-
-     
-        <Text style={styles.sectionTitle}>WEIGHT LOSS</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-          {renderCard(
-            `https://res.cloudinary.com/dnapppihv/image/upload/v1748621519/pexels-karolina-grabowska-5714340_ko9v0f.jpg`,
-            '3 Months to lose \nweight',
-            'Vitality',
-            false, // isNew
-          )}
-          {renderCard(
-            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/lose_belly_fat_gcgejw.png`,
-            'Lose Belly Fat',
-            'Vitality',
-            false,
-          )}
-        </ScrollView>
-
-      
-        <Text style={styles.sectionTitle}>MUSCLE BUILDING</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-          {renderCard(
-            `https://res.cloudinary.com/dnapppihv/image/upload/v1748517622/build_muscle_vq4pll.png`,
-            'Gain Strength',
-            'Performance',
-            false,
-          )}
-          {renderCard(
-            ``, // Empty image URI
-            'Bulk Up',
-            'Advanced',
-            false,
-          )}
-        </ScrollView>
-
+        {Object.entries(programs).map(([category, items]) => (
+          <View key={category}>
+            <Text style={styles.sectionTitle}>{category.toUpperCase()}</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
+              {items.map(program =>
+                renderCard(
+                  program.meta.imageUrl,
+                  program.name,
+                  program.meta.focusTag,
+                  program.meta.isNew
+                )
+              )}
+            </ScrollView>
+          </View>
+        ))}
      
         <View style={{ height: getHeight(60) }} />
       </ScrollView>

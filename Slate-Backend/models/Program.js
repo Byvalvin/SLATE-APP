@@ -31,6 +31,16 @@ const ProgramSchema = new mongoose.Schema({
       },
     },
   ],
+  // 👇 NEW meta field
+  meta: {
+    imageUrl: { type: String, default: '' }, // URL for card image
+    categories: [{ type: String }], // e.g. ["Weight Loss", "Maintenance"]
+    focusTag: { type: String }, // e.g. "Vitality", "Performance"
+    isNew: { type: Boolean, default: false },
+    visibility: { type: Boolean, default: true }, // Optional
+    featured: { type: Boolean, default: false },  // Optional
+  },
+  
 });
 
 module.exports = mongoose.model('Program', ProgramSchema);

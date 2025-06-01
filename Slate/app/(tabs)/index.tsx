@@ -295,9 +295,16 @@ export default function HomeScreen() {
           { paddingBottom: accountVisible ? screenHeight * 0.3 : 0 } // Adjust padding when modal is visible
         ]}
       >
-        {exercisesForDay.map(exercise => (
-          <ExerciseItem key={exercise.id} exercise={exercise} onEdit={handleEditExercise} /> // Pass image map
-        ))}
+        {exercisesForDay.length === 0 ? (
+          <View style={styles.restContainer}>
+            <Text style={styles.restTitle}>Rest & Recover 💆‍♂️</Text>
+            <Text style={styles.restSubtitle}>No exercises scheduled for today.</Text>
+          </View>
+        ) : (
+          exercisesForDay.map(exercise => (
+            <ExerciseItem key={exercise.id} exercise={exercise} onEdit={handleEditExercise} />
+          ))
+        )}
       </ScrollView>
 
       <TouchableOpacity style={styles.addButton} onPress={handleAddExercise}>
@@ -610,6 +617,25 @@ const styles = StyleSheet.create({
     fontSize: screenWidth * 0.035,
     color: '#666',
   },
+  restContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: screenHeight * 0.05,
+    paddingHorizontal: screenWidth * 0.1,
+  },
+  restTitle: {
+    fontSize: screenWidth * 0.06,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: screenHeight * 0.01,
+  },
+  restSubtitle: {
+    fontSize: screenWidth * 0.04,
+    color: '#666',
+    textAlign: 'center',
+  },
+  
 
   // Floating Add Button Style
   addButton: {

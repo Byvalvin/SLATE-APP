@@ -9,7 +9,8 @@
     "migrate:profiles": "node scripts/migrate_userfields_to_profile.js",
     "migrate:dashboard": "node scripts/migrate_dashboard_collections.js",
     "migrate:exercises": "node scripts/migrate_correct_id_exercises.js",
-    "clean:users": "node scripts/clean_old_userfields.js"
+    "clean:users": "node scripts/clean_old_userfields.js",
+    "extend:programs": "node scripts/extend_program.js"
   },
   "keywords": [],
   "author": "",
