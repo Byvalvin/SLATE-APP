@@ -1,7 +1,11 @@
 // Example: Express route handler
-const Program = require('../models/Program');
+const express = require('express')
+const router = express.Router()
 
-app.get('/api/programs', async (req, res) => {
+const Program = require('../models/Program');
+const authMiddleware = require('../middleware/auth'); // You need to extract user ID from token
+
+app.get('/api/programs', authMiddleware, async (req, res) => {
   try {
     const categories = ['Maintenance Plans', 'Weight Loss', 'Muscle Building'];
 
