@@ -18,8 +18,7 @@ import { servers } from '@/constants/API';
 import { fetchWithAuth } from '@/utils/user';
 import AccountModal from '@/components/AccountModal';
 
-
-//LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);
+// LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -29,9 +28,8 @@ interface Exercise {
   name: string;
   sets: number;
   reps: number;
-  image_url?: string; 
+  image_url?: string;
 }
-
 
 export default function HomeScreen() {
   const [calories] = useState('2600');
@@ -54,6 +52,8 @@ export default function HomeScreen() {
   const [tempExerciseName, setTempExerciseName] = useState(''); // For manual input or selection from list
 
   const [accountVisible, setAccountVisible] = useState(false);
+  // Default profile image URL - always use this one
+  const defaultProfileImageUrl = `https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/male_green_ifnxek.png`;
 
   // Calculate timer size dynamically based on screen width - Reduced by 20% (from 0.5 to 0.4)
   const timerSize = screenWidth * 0.4;
@@ -66,12 +66,12 @@ export default function HomeScreen() {
     const fetchUser = async () => {
       try {
         const token = await getAccessToken();
-        if (!token){
+        if (!token) {
           console.log('No valid access token, redirecting to login');
-          //router.replace('/login');  // or however you navigate
+          //router.replace('/login');  // or however you navigate
           return;
         }
-        
+
         const res = await fetchWithAuth(`${servers[1]}/api/auth/me`);
 
         if (res.ok) {
@@ -82,14 +82,12 @@ export default function HomeScreen() {
             dob: new Date(userData.dob).toLocaleDateString(),
             createdAt: new Date(userData.createdAt).toLocaleDateString(),
           });
-
         } else {
           console.error('Failed to fetch user');
         }
-
       } catch (err) {
         console.error('Error fetching user:', err);
-        //router.replace('/login');  // fallback on fetch fail
+        //router.replace('/login');  // fallback on fetch fail
       } finally {
         setLoadingUser(false);
       }
@@ -144,21 +142,20 @@ export default function HomeScreen() {
             Authorization: `Bearer ${token}`
           }
         });
-  
+
         if (!res.ok) throw new Error('Failed to fetch exercises');
-  
+
         const data = await res.json();
         setExercisesForDay(data);
       } catch (err) {
         console.error(err);
       }
     };
-  
+
     fetchExercises();
   }, [currentDate]);
-  
-  // --- End Exercise Data Fetching Placeholder ---
 
+  // --- End Exercise Data Fetching Placeholder ---
 
   const getTimerColor = () => {
     return '#58F975'; // forest green
@@ -190,42 +187,41 @@ export default function HomeScreen() {
   const formattedDate = format(currentDate, 'dd MMM');
   const displayDate = isToday(currentDate) ? 'TODAY, ' + formattedDate.toUpperCase() : format(currentDate, 'EEEE, dd MMM').toUpperCase();
 
-
   // Handlers for adding/editing exercises
   const handleAddExercise = () => {
-      setSelectedExercise(null); // Clear any previously selected exercise
-      setTempExerciseName('');
-      setTempSets('3'); // Default sets
-      setTempReps('10'); // Default reps
-      setAddExerciseModalVisible(true); // Open the add exercise modal
+    setSelectedExercise(null); // Clear any previously selected exercise
+    setTempExerciseName('');
+    setTempSets('3'); // Default sets
+    setTempReps('10'); // Default reps
+    setAddExerciseModalVisible(true); // Open the add exercise modal
   };
 
   const handleEditExercise = (exercise: Exercise) => {
-      setSelectedExercise(exercise); // Set the exercise being edited
-      setTempExerciseName(exercise.name);
-      setTempSets(exercise.sets.toString());
-      setTempReps(exercise.reps.toString());
-      setAddExerciseModalVisible(true); // Open the add/edit modal
+    setSelectedExercise(exercise); // Set the exercise being edited
+    setTempExerciseName(exercise.name);
+    setTempSets(exercise.sets.toString());
+    setTempReps(exercise.reps.toString());
+    setAddExerciseModalVisible(true); // Open the add/edit modal
   }
 
   const handleSaveExercise = () => {
-      // TODO: Implement logic to save/update the exercise for the current date
-      // This would involve:
-      // 1. Getting the selected exercise ID (or name if manually entered)
-      // 2. Getting the entered sets and reps
-      // 3. Sending this data to your backend API for the specific currentDate
-      // 4. Updating the exercisesForDay state locally after successful save
+    // TODO: Implement logic to save/update the exercise for the current date
+    // This would involve:
+    // 1. Getting the selected exercise ID (or name if manually entered)
+    // 2. Getting the entered sets and reps
+    // 3. Sending this data to your backend API for the specific currentDate
+    // 4. Updating the exercisesForDay state locally after successful save
 
-      console.log("Saving Exercise:", {
-          id: selectedExercise?.id, // Will be null for new exercises
-          name: tempExerciseName,
-          sets: parseInt(tempSets, 10),
-          reps: parseInt(tempReps, 10),
-          date: format(currentDate, 'yyyy-MM-dd') // Associate with the current date
-      });
+    console.log("Saving Exercise:", {
+      id: selectedExercise?.id, // Will be null for new exercises
+      name: tempExerciseName,
+      sets: parseInt(tempSets, 10),
+      reps: parseInt(tempReps, 10),
+      date: format(currentDate, 'yyyy-MM-dd') // Associate with the current date
+    });
 
-      // Close the modal
-      setAddExerciseModalVisible(false);
+    // Close the modal
+    setAddExerciseModalVisible(false);
   };
 
   return (
@@ -237,22 +233,24 @@ export default function HomeScreen() {
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        
         <Text style={styles.headerTitle}>SLATE</Text>
         <TouchableOpacity style={styles.profileButton} onPress={() => setAccountVisible(true)}>
-          <Text style={styles.profileButtonText}>⚙️</Text>
+          {/* Always use the default Cloudinary image */}
+          <Image
+            source={{ uri: defaultProfileImageUrl }}
+            style={styles.profileImage}
+          />
         </TouchableOpacity>
 
         <View style={styles.statsContainer}>
-          
           <View style={styles.statBox}>
             <Text style={styles.statValueSmall}>{calories}</Text>
             <Text style={styles.statLabelSmall}>CALORIE</Text>
           </View>
-          
+
           <View style={styles.statBoxMiddle}>
             <View style={[styles.timerContainer, { width: timerSize, height: timerSize, borderRadius: timerBorderRadius }]}>
-              <View style={[styles.timerCircle, { borderRadius: timerBorderRadius, borderColor: 'rgba(255, 255, 255, 0.8)' }]}> 
+              <View style={[styles.timerCircle, { borderRadius: timerBorderRadius, borderColor: 'rgba(255, 255, 255, 0.8)' }]}>
                 <View style={[styles.timerFill, { backgroundColor: getTimerColor(), height: `${timerProgress}%` }]} />
                 <Text style={styles.statValueMinutes}>{formatTime(timeRemaining)}</Text>
                 <Text style={styles.statLabelMinutes}>MINS</Text>
@@ -267,7 +265,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
           </View>
-          
+
           <View style={styles.statBox}>
             <Text style={styles.statValueSmall}>{days}</Text>
             <Text style={styles.statLabelSmall}>DAYS</Text>
@@ -275,14 +273,12 @@ export default function HomeScreen() {
         </View>
       </LinearGradient>
 
-      
       <View style={styles.categorySelector}>
         <Text style={styles.categoryText}>LEG</Text>
         <Text style={styles.categoryText}>CHEST</Text>
         <Text style={styles.categoryText}>ARMS</Text>
       </View>
 
-      
       <View style={styles.dateNavigator}>
         <TouchableOpacity onPress={goToPreviousDay}>
           <AntDesign name="left" size={screenWidth * 0.05} color="#000" />
@@ -293,27 +289,21 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      
       <ScrollView style={styles.exerciseListContainer}
         contentContainerStyle={[
-          styles.exerciseListContent, 
+          styles.exerciseListContent,
           { paddingBottom: accountVisible ? screenHeight * 0.3 : 0 } // Adjust padding when modal is visible
         ]}
       >
-         
-         
-         {exercisesForDay.map(exercise => (
-              <ExerciseItem key={exercise.id} exercise={exercise} onEdit={handleEditExercise} /> // Pass image map
-         ))}
+        {exercisesForDay.map(exercise => (
+          <ExerciseItem key={exercise.id} exercise={exercise} onEdit={handleEditExercise} /> // Pass image map
+        ))}
       </ScrollView>
 
-      
       <TouchableOpacity style={styles.addButton} onPress={handleAddExercise}>
-         <AntDesign name="plus" size={screenWidth * 0.07} color="white" />
+        <AntDesign name="plus" size={screenWidth * 0.07} color="white" />
       </TouchableOpacity>
 
-
-      
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -331,46 +321,42 @@ export default function HomeScreen() {
         </View>
       </Modal>
 
-      
-       <Modal visible={addExerciseModalVisible} transparent animationType="fade">
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>{selectedExercise ? 'Edit Exercise' : 'Add Exercise'}</Text>
+      <Modal visible={addExerciseModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{selectedExercise ? 'Edit Exercise' : 'Add Exercise'}</Text>
 
-                    
-                    
-                    <TextInput
-                        placeholder="Exercise Name"
-                        style={styles.modalInput}
-                        value={tempExerciseName}
-                        onChangeText={setTempExerciseName}
-                    />
+            <TextInput
+              placeholder="Exercise Name"
+              style={styles.modalInput}
+              value={tempExerciseName}
+              onChangeText={setTempExerciseName}
+            />
 
-                    
-                    <TextInput
-                        placeholder="Sets"
-                        style={styles.modalInput}
-                        keyboardType="number-pad"
-                        value={tempSets}
-                        onChangeText={setTempSets}
-                    />
-                     <TextInput
-                        placeholder="Reps"
-                        style={styles.modalInput}
-                        keyboardType="number-pad"
-                        value={tempReps}
-                        onChangeText={setTempReps}
-                    />
+            <TextInput
+              placeholder="Sets"
+              style={styles.modalInput}
+              keyboardType="number-pad"
+              value={tempSets}
+              onChangeText={setTempSets}
+            />
+            <TextInput
+              placeholder="Reps"
+              style={styles.modalInput}
+              keyboardType="number-pad"
+              value={tempReps}
+              onChangeText={setTempReps}
+            />
 
-                    <TouchableOpacity style={styles.modalButton} onPress={handleSaveExercise}>
-                        <Text style={styles.modalButtonText}>{selectedExercise ? 'SAVE CHANGES' : 'ADD EXERCISE'}</Text>
-                    </TouchableOpacity>
-                     <TouchableOpacity style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setAddExerciseModalVisible(false)}>
-                        <Text style={styles.modalButtonText}>CANCEL</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-       </Modal>
+            <TouchableOpacity style={styles.modalButton} onPress={handleSaveExercise}>
+              <Text style={styles.modalButtonText}>{selectedExercise ? 'SAVE CHANGES' : 'ADD EXERCISE'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setAddExerciseModalVisible(false)}>
+              <Text style={styles.modalButtonText}>CANCEL</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {!loadingUser && user && (
         <AccountModal
@@ -384,22 +370,18 @@ export default function HomeScreen() {
 }
 
 // --- Separate Exercise Item Component (Recommended) ---
-// Put this in a separate file like components/ExerciseItem.tsx
-// and import it into HomeScreen.tsx.
-// Keeping it here for now for ease of illustration.
-// Remember to import Image and other necessary components if you move it.
 const ExerciseItem = ({ exercise, onEdit }: { exercise: Exercise, onEdit: (exercise: Exercise) => void }) => {
   return (
-    <TouchableOpacity style={styles.exerciseItem} onPress={() => onEdit(exercise)}> 
+    <TouchableOpacity style={styles.exerciseItem} onPress={() => onEdit(exercise)}>
       {exercise.image_url ? (
         <Image
           source={{ uri: exercise.image_url }}
-          style={styles.exerciseImagePlaceholder} // reuse this for sizing
+          style={styles.exerciseImagePlaceholder}
         />
       ) : (
-        <View style={styles.exerciseImagePlaceholder} /> // fallback gray box
+        <View style={styles.exerciseImagePlaceholder} />
       )}
-      
+
       <View style={styles.exerciseDetails}>
         <Text style={styles.exerciseTitle}>{exercise.name}</Text>
         <Text style={styles.exerciseReps}>{exercise.sets} SET - {exercise.reps} REP</Text>
@@ -409,7 +391,6 @@ const ExerciseItem = ({ exercise, onEdit }: { exercise: Exercise, onEdit: (exerc
 };
 
 // --- End Separate Exercise Item Component ---
-
 
 const styles = StyleSheet.create({
   container: {
@@ -436,25 +417,42 @@ const styles = StyleSheet.create({
 
   profileButton: {
     position: 'absolute',
-    top: 40,
+    top: 55, // Adjusted to bring it down slightly for better alignment
     right: 20,
     backgroundColor: 'rgba(255,255,255,0.9)',
-    padding: 8,
-    borderRadius: 20,
+    borderRadius: 30, // Make it circular to contain the image
+    overflow: 'hidden', // Clip image to the border radius
     zIndex: 10,
+    width: 60, // Fixed width
+    height: 60, // Fixed height
+    justifyContent: 'center', // Center content if using placeholder
+    alignItems: 'center',   // Center content if using placeholder
   },
-
+  profileImage: {
+    width: '100%', // Take full width of the parent TouchableOpacity
+    height: '100%', // Take full height of the parent TouchableOpacity
+    borderRadius: 30, // Half of width/height
+    backgroundColor: '#D9F7D9', // Placeholder background
+  },
+  // The profileImagePlaceholder style is no longer strictly needed as we always use the image
+  // but keeping it won't hurt if you decide to add a fallback text in the future.
+  profileImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 30,
+    backgroundColor: '#D9F7D9', // A default background for the placeholder
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   profileButtonText: {
     fontSize: 18,
   },
-
 
   // Stats Container Styles
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    // paddingHorizontal is now on the header itself
     alignItems: 'center',
   },
   statBox: {
@@ -483,8 +481,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: screenHeight * 0.01,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)', // Solid white background for the area inside the border
-   
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   timerCircle: {
     position: 'relative',
@@ -528,7 +525,7 @@ const styles = StyleSheet.create({
     marginHorizontal: screenWidth * 0.01,
   },
   controlButtonText: {
-    fontSize: 16, // Fixed font size
+    fontSize: 16,
     color: 'white',
     fontWeight: 'bold',
   },
@@ -576,9 +573,9 @@ const styles = StyleSheet.create({
     paddingTop: screenHeight * 0.005,
     backgroundColor: '#F2EDE9',
   },
-   exerciseListContent: { // Added content container style
-        paddingBottom: screenHeight * 0.05, // Add padding at the bottom to prevent FAB from hiding last item
-   },
+  exerciseListContent: {
+    paddingBottom: screenHeight * 0.05,
+  },
   exerciseItem: {
     flexDirection: 'row',
     backgroundColor: 'white',
@@ -598,7 +595,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#E9E2DA',
     borderRadius: 8,
     marginRight: screenWidth * 0.04,
-    // If using actual Image component, remove backgroundColor and borderRadius here
   },
   exerciseDetails: {
     flex: 1,
@@ -617,24 +613,23 @@ const styles = StyleSheet.create({
 
   // Floating Add Button Style
   addButton: {
-    position: 'absolute', // Position absolutely
-    bottom: screenHeight * 0.02, // Distance from bottom
-    right: screenWidth * 0.05, // Distance from right
-    backgroundColor: '#55F358', // Green background color
-    width: screenWidth * 0.15, // Button size
-    height: screenWidth * 0.15, // Button size (make it circular)
-    borderRadius: screenWidth * 0.075, // Half of width/height for circle
-    justifyContent: 'center', // Center icon
-    alignItems: 'center', // Center icon
-    shadowColor: '#000', // Add shadow
+    position: 'absolute',
+    bottom: screenHeight * 0.02,
+    right: screenWidth * 0.05,
+    backgroundColor: '#55F358',
+    width: screenWidth * 0.15,
+    height: screenWidth * 0.15,
+    borderRadius: screenWidth * 0.075,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 6,
   },
-   // Add button icon is styled inline in the JSX
 
-  // Modal Styles (Timer Edit) - Keeping existing styles
+  // Modal Styles (Timer Edit)
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -656,7 +651,7 @@ const styles = StyleSheet.create({
     fontSize: screenWidth * 0.045,
     marginBottom: screenHeight * 0.02,
     textAlign: 'center',
-    fontWeight: '300', // fontWeight should be a string like '300', '400', 'bold', 'normal'
+    fontWeight: '300',
     color: '#000',
   },
   modalInput: {
@@ -679,15 +674,15 @@ const styles = StyleSheet.create({
     paddingVertical: screenHeight * 0.013,
     width: '100%',
     alignItems: 'center',
-     marginTop: screenHeight * 0.01, // Add space above button if needed
+    marginTop: screenHeight * 0.01,
   },
   modalButtonText: {
     color: '#fff',
     fontSize: screenWidth * 0.04,
     fontWeight: 'bold',
   },
-  modalCancelButton: { // Style for a cancel button in the modal
-        backgroundColor: '#999', // Example: different color for cancel
-        marginTop: screenHeight * 0.01,
+  modalCancelButton: {
+    backgroundColor: '#999',
+    marginTop: screenHeight * 0.01,
   },
 });
