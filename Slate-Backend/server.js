@@ -11,7 +11,7 @@ require('./models/Profile');  // Import Profile model
 
 const authRoutes = require('./routes/auth');
 const exerciseRoutes = require('./routes/exercises'); // Import the exercises route
-const programRoutes = require('./routes/programs');   // Import the new programs route
+const programRoutes = require('./routes/program');   // Import the new programs route
 const profileRoutes = require('./routes/profile');
 
 // db setup
