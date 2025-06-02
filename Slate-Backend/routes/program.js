@@ -1,36 +1,21 @@
-// Example: Express route handler
 const express = require('express')
 const router = express.Router()
 
 const Program = require('../models/Program');
-const authMiddleware = require('../middleware/auth'); // You need to extract user ID from token
+const authMiddleware = require('../middleware/auth');
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const categories = ['maintenance plans', 'weight loss', 'muscle building'];
 
-    const pipeline = categories.map(category => ([
+    const result = await Program.aggregate([
       {
         $match: {
           'meta.visibility': true,
-          $expr: {
-            $gt: [
-              {
-                $size: {
-                  $filter: {
-                    input: '$meta.categories',
-                    as: 'cat',
-                    cond: {
-                      $eq: [
-                        { $toLower: '$$cat' },
-                        category.toLowerCase()
-                      ]
-                    }
-                  }
-                }
-              },
-              0
-            ]
+          'meta.categories': {
+            $elemMatch: {
+              $in: categories
+            }
           }
         }
       },
@@ -45,23 +30,10 @@ router.get('/', authMiddleware, async (req, res) => {
           'meta.isNew': 1,
         }
       }
-    ])).flat();
-    
+    ]);
 
-    const result = await Program.aggregate(pipeline);
     console.log(`Programs matched: ${result.length}`);
-
-    
-    // Group them by category
-    const grouped = {};
-    result.forEach(p => {
-      const cat = p.meta.categories.find(c => categories.includes(c));
-      if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push(p);
-    });
-
-    res.json(grouped);
-    
+    res.json(result);
 
   } catch (err) {
     console.error('Failed to fetch programs:', err);
