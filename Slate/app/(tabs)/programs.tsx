@@ -56,6 +56,7 @@ const ProgramsScreen = () => {
 
   const router = useRouter()
   const handleProgramPress = (programId: string) => {
+    console.log(programId);
     router.push(`/program/${programId}`);
   };
 
