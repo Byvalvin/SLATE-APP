@@ -1,4 +1,3 @@
-// ExerciseScreen.tsx
 import { servers } from '@/constants/API';
 import { getAccessToken } from '@/utils/token';
 import React, { useEffect, useState } from 'react';
@@ -43,7 +42,8 @@ interface ExerciseCardProps {
   id: string;
   title: string;
   subtitle: string;
-  imageUrl: string;
+  primaryImageUrl: string;
+  fallbackImageUrl: string;
   onPress?: () => void;
 }
 
@@ -61,6 +61,7 @@ interface Exercise {
   image_url: string;
   realistic_image_url?: string;
 }
+
 interface GroupedExercises {
   Pull: Exercise[];
   Push: Exercise[];
@@ -68,10 +69,29 @@ interface GroupedExercises {
 }
 
 // --- Card Component ---
-const ExerciseCard: React.FC<ExerciseCardProps> = ({ title, subtitle, imageUrl, onPress }) => {
+const ExerciseCard: React.FC<ExerciseCardProps> = ({
+  title,
+  subtitle,
+  primaryImageUrl,
+  fallbackImageUrl,
+  onPress,
+}) => {
+  const [imageUri, setImageUri] = useState(primaryImageUrl);
+
+  const handleImageError = () => {
+    if (imageUri !== fallbackImageUrl) {
+      console.warn(`Falling back from ${imageUri} to ${fallbackImageUrl}`);
+      setImageUri(fallbackImageUrl);
+    }
+  };
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      <Image source={{ uri: imageUrl }} style={styles.cardImage} onError={(e) => console.log("Failed to load image:", imageUrl, e.nativeEvent.error)} />
+      <Image
+        source={{ uri: imageUri }}
+        style={styles.cardImage}
+        onError={handleImageError}
+      />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={2} ellipsizeMode="tail">
           {title}
@@ -83,28 +103,24 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ title, subtitle, imageUrl, 
 };
 
 // --- Section Component ---
-const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onSeeAll }) => {
-  return (
-    <View style={styles.sectionContainer}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
-        
-      </View>
-      <FlatList
-        data={data}
-        renderItem={({ item }) => <ExerciseCard {...item} />}
-        keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.sectionListContent}
-      />
+const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data }) => (
+  <View style={styles.sectionContainer}>
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
     </View>
-  );
-};
+    <FlatList
+      data={data}
+      renderItem={({ item }) => <ExerciseCard {...item} />}
+      keyExtractor={(item) => item.id}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.sectionListContent}
+    />
+  </View>
+);
 
 // --- Main Screen Component ---
 const ExerciseScreen: React.FC = () => {
-
   const [groupedExercises, setGroupedExercises] = useState<Record<string, ExerciseCardProps[]>>({});
   const [loading, setLoading] = useState(true);
 
@@ -117,16 +133,15 @@ const ExerciseScreen: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        const data: GroupedExercises = await res.json(); // Explicitly type the response
+        const data: GroupedExercises = await res.json();
 
-        // Normalize to ExerciseCardProps[]
         const transformed = Object.entries(data).reduce((acc, [group, list]) => {
-          // TypeScript now knows `list` is an array of exercises
           acc[group] = (list as Exercise[]).map((e) => ({
             id: e.exerciseId,
             title: e.name,
             subtitle: `${e.primary_muscles?.[0] ?? 'Unknown'} muscle`,
-            imageUrl: e.image_url || e.realistic_image_url || '',
+            primaryImageUrl: e.realistic_image_url || '',
+            fallbackImageUrl: e.image_url || '',
           }));
           return acc;
         }, {} as Record<string, ExerciseCardProps[]>);
@@ -141,7 +156,7 @@ const ExerciseScreen: React.FC = () => {
 
     fetchExercises();
   }, []);
-  
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
@@ -171,7 +186,6 @@ const ExerciseScreen: React.FC = () => {
             <ExerciseSection key={category} title={category} data={exercises} />
           ))
         )}
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -285,3 +299,4 @@ const styles = StyleSheet.create({
 });
 
 export default ExerciseScreen;
+
