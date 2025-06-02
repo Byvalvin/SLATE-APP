@@ -1,5 +1,6 @@
 import { servers } from '@/constants/API';
 import { getAccessToken } from '@/utils/token';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -70,6 +71,7 @@ interface GroupedExercises {
 
 // --- Card Component ---
 const ExerciseCard: React.FC<ExerciseCardProps> = ({
+  id,
   title,
   subtitle,
   primaryImageUrl,
@@ -85,8 +87,10 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     }
   };
 
+  const router = useRouter();
+  
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity style={styles.card} onPress={() => router.push(`/exercise/${id}`)} activeOpacity={0.8}>
       <Image
         source={{ uri: imageUri }}
         style={styles.cardImage}

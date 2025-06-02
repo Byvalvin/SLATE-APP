@@ -110,6 +110,56 @@ router.get('/by-ids', authMiddleware, async (req, res) => {
   }
 });
 
+router.post('/by-ids', authMiddleware, async (req, res) => {
+  try {
+    const ids = req.body.ids;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'No exercise IDs provided or invalid format.' });
+    }
+
+    const exercises = await Exercise.find({ exerciseId: { $in: ids } });
+
+    res.json(exercises);
+  } catch (err) {
+    console.error('Error in POST /by-ids:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+/*
+const token = await getAccessToken();
+const response = await fetch(`${servers[2]}/api/exercises/by-ids`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify({ ids: idArray }),
+});
+const exerciseList = await response.json();
+*/
+
+// GET /api/exercises/:id
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const exercise = await Exercise.findOne({ exerciseId: id });
+
+    if (!exercise) {
+      return res.status(404).json({ error: 'Exercise not found.' });
+    }
+
+    return res.json(exercise);
+  } catch (err) {
+    console.error('Error fetching exercise by ID:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
+
 
 
 module.exports = router;
