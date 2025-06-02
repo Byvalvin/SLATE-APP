@@ -5,7 +5,7 @@ const router = express.Router()
 const Program = require('../models/Program');
 const authMiddleware = require('../middleware/auth'); // You need to extract user ID from token
 
-router.get('/api/programs', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const categories = ['Maintenance Plans', 'Weight Loss', 'Muscle Building'];
 
