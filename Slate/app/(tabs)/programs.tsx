@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'; // Only Ionicons is used now
 
 import { servers } from '@/constants/API';
+import { getAccessToken } from '@/utils/token';
 // Get screen dimensions for relative sizing
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -31,8 +32,13 @@ const ProgramsScreen = () => {
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
-        const response = await fetch(`${servers[2]}/api/programs`);
-        if (!response.ok) throw new Error('Failed to fetch');
+        const token = await getAccessToken();
+        const response = await fetch(`${servers[2]}/api/programs`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (!response.ok) throw new Error('Failed to fetch programs');
         const data = await response.json();
         setPrograms(data);
       } catch (error) {

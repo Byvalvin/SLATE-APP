@@ -49,43 +49,47 @@ async function connectToDatabase() {
     }
 }
 
-// Connect when this file is loaded (important for serverless cold starts)
-// In a traditional server, you might call this once and then app.listen()
-connectToDatabase();
+let app = null;
+( async ()=> {
 
-const app = express();
-const baseURL = '/api'; // Define your base API path
+    // Connect when this file is loaded (important for serverless cold starts)
+    // In a traditional server, you might call this once and then app.listen()
+    await connectToDatabase();
 
-// MIDDLEWARE
-app.use(express.json()); // Parses incoming JSON requests
+    const app = express();
+    const baseURL = '/api'; // Define your base API path
 
-// ROUTES
+    // MIDDLEWARE
+    app.use(express.json()); // Parses incoming JSON requests
 
-// ping route to check if API is live
-app.get(`${baseURL}`, (req, res) => {
-    res.send("API Live!");
+    // ROUTES
+
+    // ping route to check if API is live
+    app.get(`${baseURL}`, (req, res) => {
+        res.send("API Live!");
+    });
+
+    // auth routes (e.g., /api/auth/login, /api/auth/register)
+    app.use(`${baseURL}/auth`, authRoutes);
+
+    // profile routes
+    app.use(`${baseURL}/profile`, profileRoutes);
+
+    // exercise routes (e.g., /api/exercises/:date)
+    app.use(`${baseURL}/exercises`, exerciseRoutes);
+
+    // program routes (e.g., /api/programs, /api/programs/:id)
+    app.use(`${baseURL}/programs`, programRoutes); // Mount the new programs route
+
+    // Export the app for serverless functions (like Vercel)
+    module.exports = app;
+
+    // For local development, you might add this block:
+    /*
+    if (process.env.NODE_ENV !== 'production') {
+        const PORT = process.env.PORT || 5000; // Use port from env or default to 5000
+        app.listen(PORT, () => console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
+    }
+    */
 });
-
-// auth routes (e.g., /api/auth/login, /api/auth/register)
-app.use(`${baseURL}/auth`, authRoutes);
-
-// profile routes
-app.use(`${baseURL}/profile`, profileRoutes);
-
-// exercise routes (e.g., /api/exercises/:date)
-app.use(`${baseURL}/exercises`, exerciseRoutes);
-
-// program routes (e.g., /api/programs, /api/programs/:id)
-app.use(`${baseURL}/programs`, programRoutes); // Mount the new programs route
-
-// Export the app for serverless functions (like Vercel)
-module.exports = app;
-
-// For local development, you might add this block:
-/*
-if (process.env.NODE_ENV !== 'production') {
-    const PORT = process.env.PORT || 5000; // Use port from env or default to 5000
-    app.listen(PORT, () => console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
-}
-*/
 
