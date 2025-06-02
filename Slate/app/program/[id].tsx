@@ -17,27 +17,51 @@ const ProgramDetail = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [program, setProgram] = useState<any>(null);
+  const [exercisesMap, setExercisesMap] = useState<{ [key: string]: any }>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProgram = async () => {
+    const fetchProgramWithExercises = async () => {
       try {
         const token = await getAccessToken();
+
+        // Step 1: Fetch Program
         const res = await fetch(`${servers[2]}/api/programs/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-        setProgram(data);
+        const programData = await res.json();
+        setProgram(programData);
+
+        // Step 2: Extract unique exercise IDs
+        const allExerciseIds = new Set<string>();
+        programData.months?.forEach((month: any) => {
+          Object.values(month.weekly_plan || {}).forEach((dayPlan: any) => {
+            dayPlan.forEach((ex: any) => allExerciseIds.add(ex.exercise_id));
+          });
+        });
+
+        if (allExerciseIds.size > 0) {
+          const ids = Array.from(allExerciseIds).join(',');
+          const exerciseRes = await fetch(`${servers[2]}/api/exercises/by-ids?ids=${ids}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const exerciseData = await exerciseRes.json();
+
+          // Map exercises by ID for quick lookup
+          const map: { [key: string]: any } = {};
+          exerciseData.forEach((ex: any) => {
+            map[ex.exerciseId] = ex;
+          });
+          setExercisesMap(map);
+        }
       } catch (err) {
-        console.error('Error fetching program:', err);
+        console.error('Error fetching program or exercises:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProgram();
+    fetchProgramWithExercises();
   }, [id]);
 
   if (loading) {
@@ -52,19 +76,16 @@ const ProgramDetail = () => {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={28} color="#111827" />
         <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
 
-      {/* Header Image */}
       <Image
         source={{ uri: program.meta?.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image' }}
         style={styles.image}
       />
 
-      {/* Content */}
       <View style={styles.content}>
         <Text style={styles.title}>{program.name}</Text>
         <Text style={styles.tag}>{program.meta?.focusTag}</Text>
@@ -73,14 +94,11 @@ const ProgramDetail = () => {
         <Text style={styles.meta}>Focus: {program.focus || 'N/A'}</Text>
       </View>
 
-      {/* Months + Weekly Plan */}
       {program.months?.length > 0 ? (
         program.months.map((month: any) => (
           <View key={month.month_number} style={styles.monthContainer}>
             <Text style={styles.monthTitle}>Month {month.month_number}</Text>
-            {month.description ? (
-              <Text style={styles.monthDescription}>{month.description}</Text>
-            ) : null}
+            {month.description && <Text style={styles.monthDescription}>{month.description}</Text>}
 
             {daysOfWeek.map((day) => {
               const dayPlan = month.weekly_plan?.[day];
@@ -89,15 +107,25 @@ const ProgramDetail = () => {
               return (
                 <View key={day} style={styles.dayContainer}>
                   <Text style={styles.dayTitle}>{day.charAt(0).toUpperCase() + day.slice(1)}</Text>
-                  {dayPlan.map((exercise: any, index: number) => (
-                    <View key={index} style={styles.exerciseItem}>
-                      <Text style={styles.exerciseText}>• {exercise.exercise_id}</Text>
-                      <Text style={styles.exerciseMeta}>
-                        {exercise.sets} sets × {exercise.reps} reps
-                      </Text>
-                      {exercise.notes && <Text style={styles.exerciseNotes}>💬 {exercise.notes}</Text>}
-                    </View>
-                  ))}
+                  {dayPlan.map((exercise: any, index: number) => {
+                    const details = exercisesMap[exercise.exercise_id];
+
+                    return (
+                      <View key={index} style={styles.exerciseItem}>
+                        <Text style={styles.exerciseText}>• {details?.name || exercise.exercise_id}</Text>
+                        <Text style={styles.exerciseMeta}>
+                          {exercise.sets} sets × {exercise.reps} reps
+                        </Text>
+                        {details?.image_url && (
+                          <Image
+                            source={{ uri: details.image_url }}
+                            style={{ width: 100, height: 70, borderRadius: 6, marginTop: 4 }}
+                          />
+                        )}
+                        {exercise.notes && <Text style={styles.exerciseNotes}>💬 {exercise.notes}</Text>}
+                      </View>
+                    );
+                  })}
                 </View>
               );
             })}

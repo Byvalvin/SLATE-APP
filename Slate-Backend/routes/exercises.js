@@ -92,5 +92,24 @@ router.get('/grouped', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/exercises/by-ids?ids=abc123,def456,ghi789
+router.get('/by-ids', authMiddleware, async (req, res) => {
+  try {
+    const idsParam = req.query.ids;
+    if (!idsParam) {
+      return res.status(400).json({ error: 'No exercise IDs provided.' });
+    }
+
+    const ids = idsParam.split(',').map(id => id.trim());
+    const exercises = await Exercise.find({ exerciseId: { $in: ids } });
+
+    res.json(exercises);
+  } catch (err) {
+    console.error('Error in /by-ids:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 module.exports = router;
