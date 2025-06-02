@@ -1,5 +1,5 @@
-const express = require('express')
-const router = express.Router()
+const express = require('express');
+const router = express.Router();
 
 const Program = require('../models/Program');
 const authMiddleware = require('../middleware/auth');
@@ -19,7 +19,7 @@ router.get('/', authMiddleware, async (req, res) => {
           }
         }
       },
-      { $sample: { size: 3 } },
+      { $sample: { size: 10 } }, // sample more so we can fill up each category
       {
         $project: {
           programId: 1,
@@ -32,8 +32,15 @@ router.get('/', authMiddleware, async (req, res) => {
       }
     ]);
 
-    console.log(`Programs matched: ${result.length}`);
-    res.json(result);
+    // Group programs into categories
+    const grouped = {};
+    for (const category of categories) {
+      grouped[category] = result.filter(p =>
+        p.meta.categories?.some(cat => cat.toLowerCase() === category.toLowerCase())
+      ).slice(0, 3); // at most 3 per category
+    }
+
+    res.json(grouped);
 
   } catch (err) {
     console.error('Failed to fetch programs:', err);
