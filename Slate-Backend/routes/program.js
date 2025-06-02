@@ -10,7 +10,7 @@ router.get('/', authMiddleware, async (req, res) => {
     const categories = ['Maintenance Plans', 'Weight Loss', 'Muscle Building'];
 
     const pipeline = categories.map(category => ([
-      { $match: { 'meta.visibility': true, 'meta.categories': category } },
+      { $match: { 'meta.visibility': true, 'meta.categories': { $in: [category] } } },
       { $sample: { size: 3 } }, // random 3
       { $project: {
           programId: 1,
