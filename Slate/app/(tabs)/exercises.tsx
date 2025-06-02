@@ -1,5 +1,7 @@
 // ExerciseScreen.tsx
-import React from 'react';
+import { servers } from '@/constants/API';
+import { getAccessToken } from '@/utils/token';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -51,69 +53,19 @@ interface ExerciseSectionProps {
   onSeeAll?: () => void;
 }
 
-// --- Dummy Data ---
-const pullExercises: ExerciseCardProps[] = [
-  {
-    id: '1',
-    title: 'Pull-ups',
-    subtitle: '150 kcal',
-    imageUrl: 'https://res.cloudinary.com/dnapppihv/image/upload/v1748620470/pexels-niko-twisty-12895247_xvqwke.jpg',
-  },
-  {
-    id: '2',
-    title: 'Deadlifts',
-    subtitle: '400 kcal',
-    imageUrl: 'https://res.cloudinary.com/dnapppihv/image/upload/v1748620790/pexels-amar-13965339_kdwhjb.jpg',
-  },
-  {
-    id: '3',
-    title: 'Bicep Curls',
-    subtitle: '100 kcal',
-    imageUrl: 'https://res.cloudinary.com/dnapppihv/image/upload/v1748620791/pexels-leonardho-1552106_ziwfx8.jpg',
-  },
-];
-
-const pushExercises: ExerciseCardProps[] = [
-  {
-    id: '4',
-    title: 'Push-ups',
-    subtitle: '200 kcal',
-    imageUrl: 'https://res.cloudinary.com/dnapppihv/image/upload/v1748620791/pexels-dejan-krstevski-724759-1582161_nequjf.jpg',
-  },
-  {
-    id: '5',
-    title: 'Bench Press',
-    subtitle: '350 kcal',
-    imageUrl: 'https://res.cloudinary.com/dnapppihv/image/upload/v1748620791/pexels-tima-miroshnichenko-5327556_qoagqq.jpg',
-  },
-  {
-    id: '6',
-    title: 'Overhead Press',
-    subtitle: '300 kcal',
-    imageUrl: 'https://res.cloudinary.com/dnapppihv/image/upload/v1748620792/pexels-marcuschanmedia-17898145_tghmkh.jpg',
-  },
-];
-
-const legExercises: ExerciseCardProps[] = [
-  {
-    id: '7',
-    title: 'Squats',
-    subtitle: '450 kcal',
-    imageUrl: 'https://res.cloudinary.com/dnapppihv/image/upload/v1748620791/pexels-tima-miroshnichenko-5327526_zgyg7e.jpg',
-  },
-  {
-    id: '8',
-    title: 'Lunges',
-    subtitle: '250 kcal',
-    imageUrl: 'https://res.cloudinary.com/dnapppihv/image/upload/v1748620792/pexels-victorfreitas-2261477_fqgpav.jpg',
-  },
-  {
-    id: '9',
-    title: 'Calf Raises',
-    subtitle: '120 kcal',
-    imageUrl: 'https://res.cloudinary.com/dnapppihv/image/upload/v1748620792/pexels-ivan-samkov-4162487_bxnyyo.jpg',
-  },
-];
+interface Exercise {
+  exerciseId: string;
+  name: string;
+  primary_muscles: string[];
+  secondary_muscles: string[];
+  image_url: string;
+  realistic_image_url?: string;
+}
+interface GroupedExercises {
+  Pull: Exercise[];
+  Push: Exercise[];
+  Legs: Exercise[];
+}
 
 // --- Card Component ---
 const ExerciseCard: React.FC<ExerciseCardProps> = ({ title, subtitle, imageUrl, onPress }) => {
@@ -152,6 +104,44 @@ const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onSeeAll
 
 // --- Main Screen Component ---
 const ExerciseScreen: React.FC = () => {
+
+  const [groupedExercises, setGroupedExercises] = useState<Record<string, ExerciseCardProps[]>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchExercises = async () => {
+      try {
+        const token = await getAccessToken();
+        const res = await fetch(`${servers[2]}/api/exercises/grouped`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data: GroupedExercises = await res.json(); // Explicitly type the response
+
+        // Normalize to ExerciseCardProps[]
+        const transformed = Object.entries(data).reduce((acc, [group, list]) => {
+          // TypeScript now knows `list` is an array of exercises
+          acc[group] = (list as Exercise[]).map((e) => ({
+            id: e.exerciseId,
+            title: e.name,
+            subtitle: `${e.primary_muscles?.[0] ?? 'Unknown'} muscle`,
+            imageUrl: e.image_url || e.realistic_image_url || '',
+          }));
+          return acc;
+        }, {} as Record<string, ExerciseCardProps[]>);
+
+        setGroupedExercises(transformed);
+      } catch (err) {
+        console.error('Failed to load exercises', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExercises();
+  }, []);
+  
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
@@ -174,21 +164,14 @@ const ExerciseScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        <ExerciseSection
-          title="Pull"
-          data={pullExercises}
-          onSeeAll={() => console.log('See all Pull Exercises')}
-        />
-        <ExerciseSection
-          title="Push"
-          data={pushExercises}
-          onSeeAll={() => console.log('See all Push Exercises')}
-        />
-        <ExerciseSection
-          title="Leg"
-          data={legExercises}
-          onSeeAll={() => console.log('See all Leg Exercises')}
-        />
+        {loading ? (
+          <Text>Loading exercises...</Text>
+        ) : (
+          Object.entries(groupedExercises).map(([category, exercises]) => (
+            <ExerciseSection key={category} title={category} data={exercises} />
+          ))
+        )}
+
       </ScrollView>
     </SafeAreaView>
   );

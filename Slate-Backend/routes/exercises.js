@@ -51,4 +51,46 @@ router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
   }
 });
 
+
+router.get('/grouped', authMiddleware, async (req, res) => {
+  try {
+    const pullMuscles = ['Lats', 'Biceps', 'Trapezius'];
+    const pushMuscles = ['Chest', 'Triceps', 'Shoulders'];
+    const legMuscles = ['Quadriceps', 'Hamstrings', 'Glutes', 'Calves'];
+
+    const exercises = await Exercise.find({
+      image_url: { $exists: true, $ne: '' }
+    });
+
+    const grouped = {
+      Pull: [],
+      Push: [],
+      Legs: []
+    };
+
+    exercises.forEach(ex => {
+      const allMuscles = [...(ex.primary_muscles || []), ...(ex.secondary_muscles || [])].map(m => m.toLowerCase());
+
+      if (allMuscles.some(m => pullMuscles.map(pm => pm.toLowerCase()).includes(m))) {
+        grouped.Pull.push(ex);
+      } else if (allMuscles.some(m => pushMuscles.map(pm => pm.toLowerCase()).includes(m))) {
+        grouped.Push.push(ex);
+      } else if (allMuscles.some(m => legMuscles.map(pm => pm.toLowerCase()).includes(m))) {
+        grouped.Legs.push(ex);
+      }
+    });
+
+    // Optionally limit to 5 per category
+    for (const key in grouped) {
+      grouped[key] = grouped[key].slice(0, 5);
+    }
+
+    res.json(grouped);
+  } catch (err) {
+    console.error('Error grouping exercises:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 module.exports = router;

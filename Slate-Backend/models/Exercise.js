@@ -11,7 +11,9 @@ const ExerciseSchema = new mongoose.Schema({
   secondary_muscles: [String],
   equipment: [String],
   category: String,
+  //movement_type: { type: String }, // NEW: "Pull", "Push", "Leg"
   image_url: String, // Store the image URL directly
+  realistic_image_url: String,
 });
 
 module.exports = mongoose.model('Exercise', ExerciseSchema);
