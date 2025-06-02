@@ -7,12 +7,36 @@ const authMiddleware = require('../middleware/auth'); // You need to extract use
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const categories = ['Maintenance Plans', 'Weight Loss', 'Muscle Building'];
+    const categories = ['maintenance plans', 'weight loss', 'muscle building'];
 
     const pipeline = categories.map(category => ([
-      { $match: { 'meta.visibility': true, 'meta.categories': { $in: [category] } } },
-      { $sample: { size: 3 } }, // random 3
-      { $project: {
+      {
+        $match: {
+          'meta.visibility': true,
+          $expr: {
+            $gt: [
+              {
+                $size: {
+                  $filter: {
+                    input: '$meta.categories',
+                    as: 'cat',
+                    cond: {
+                      $eq: [
+                        { $toLower: '$$cat' },
+                        category.toLowerCase()
+                      ]
+                    }
+                  }
+                }
+              },
+              0
+            ]
+          }
+        }
+      },
+      { $sample: { size: 3 } },
+      {
+        $project: {
           programId: 1,
           name: 1,
           'meta.imageUrl': 1,
@@ -22,8 +46,11 @@ router.get('/', authMiddleware, async (req, res) => {
         }
       }
     ])).flat();
+    
 
     const result = await Program.aggregate(pipeline);
+    console.log(`Programs matched: ${result.length}`);
+
     
     // Group them by category
     const grouped = {};
@@ -34,6 +61,7 @@ router.get('/', authMiddleware, async (req, res) => {
     });
 
     res.json(grouped);
+    
 
   } catch (err) {
     console.error('Failed to fetch programs:', err);

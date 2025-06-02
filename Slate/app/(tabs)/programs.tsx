@@ -40,6 +40,8 @@ const ProgramsScreen = () => {
         });
         if (!response.ok) throw new Error('Failed to fetch programs');
         const data = await response.json();
+        console.log('Fetched programs:', JSON.stringify(data, null, 2));
+
         setPrograms(data);
       } catch (error) {
         console.error('Fetch error:', error);
