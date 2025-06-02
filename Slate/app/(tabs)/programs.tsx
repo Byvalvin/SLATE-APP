@@ -40,7 +40,7 @@ const ProgramsScreen = () => {
         });
         if (!response.ok) throw new Error('Failed to fetch programs');
         const data = await response.json();
-        console.log('Fetched programs:', JSON.stringify(data, null, 2));
+        // console.log('Fetched programs:', JSON.stringify(data, null, 2));
 
         setPrograms(data);
       } catch (error) {
@@ -55,6 +55,7 @@ const ProgramsScreen = () => {
 
   // --- Reusable Card Components ---
   const renderCard = (
+    key: string,
     imageUri: string,
     title: string,
     subtitle: string,
@@ -65,7 +66,7 @@ const ProgramsScreen = () => {
       : 'https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/default_program_image.png'; // 👈 Add your fallback URL
   
     return (
-      <TouchableOpacity style={styles.card}>
+      <TouchableOpacity style={styles.card} key={key}>
         {isNew && (
           <View style={styles.newTag}>
             <Text style={styles.newTagText}>NEW</Text>
@@ -124,14 +125,16 @@ const ProgramsScreen = () => {
           <View key={category}>
             <Text style={styles.sectionTitle}>{category.toUpperCase()}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-              {items.map(program =>
-                renderCard(
-                  program.meta.imageUrl,
-                  program.name,
-                  program.meta.focusTag,
-                  program.meta.isNew
-                )
-              )}
+            {items.map(program =>
+              renderCard(
+                program.programId || program._id || `${program.name}-${category}`, // fallback if no ID
+                program.meta.imageUrl,
+                program.name,
+                program.meta.focusTag,
+                program.meta.isNew
+              )
+            )}
+
             </ScrollView>
           </View>
         ))}
