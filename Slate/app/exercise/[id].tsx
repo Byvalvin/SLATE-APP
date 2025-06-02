@@ -11,6 +11,7 @@ const ExerciseDetail = () => {
 
   const [exercise, setExercise] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchExercise = async () => {
@@ -20,7 +21,18 @@ const ExerciseDetail = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        setExercise(data[0]); // the API returns array of exercises by IDs
+        const ex = data[0];
+        setExercise(ex);
+
+        // Pre-set image fallback chain
+        if (ex?.realistic_image_url) {
+          setImageUri(ex.realistic_image_url);
+        } else if (ex?.image_url) {
+          setImageUri(ex.image_url);
+        } else {
+          setImageUri(null);
+        }
+
       } catch (err) {
         console.error('Error fetching exercise:', err);
       } finally {
@@ -30,6 +42,14 @@ const ExerciseDetail = () => {
 
     if (id) fetchExercise();
   }, [id]);
+
+  const handleImageError = () => {
+    if (imageUri === exercise?.realistic_image_url && exercise?.image_url) {
+      setImageUri(exercise.image_url); // Try fallback to image_url
+    } else {
+      setImageUri(null); // No good image, clear it
+    }
+  };
 
   if (loading) return <ActivityIndicator style={{ marginTop: 100 }} size="large" color="#005B44" />;
 
@@ -44,13 +64,18 @@ const ExerciseDetail = () => {
         </TouchableOpacity>
 
         <Text style={styles.title}>{exercise.name}</Text>
-        {exercise.realistic_image_url || exercise.image_url ? (
+        {imageUri ? (
           <Image
-            source={{ uri: exercise.realistic_image_url || exercise.image_url }}
+            source={{ uri: imageUri }}
             style={styles.image}
             resizeMode="contain"
+            onError={handleImageError}
           />
-        ) : null}
+        ) : (
+          <View style={[styles.image, { justifyContent: 'center', alignItems: 'center' }]}>
+            <Text style={{ color: '#aaa' }}>No image available</Text>
+          </View>
+        )}
 
         <Text style={styles.sectionTitle}>Description</Text>
         <Text style={styles.text}>{exercise.description || 'No description available.'}</Text>
