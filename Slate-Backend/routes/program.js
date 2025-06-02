@@ -6,7 +6,7 @@ const authMiddleware = require('../middleware/auth');
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const categories = ['maintenance plans', 'weight loss', 'muscle building'];
+    const categories = ['Maintenance Plans', 'Weight Loss', 'Muscle Building'];
 
     const result = await Program.aggregate([
       {
