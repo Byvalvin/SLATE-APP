@@ -48,4 +48,18 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/:id', authMiddleware, async (req, res) => {
+  try {
+    const program = await Program.findById(req.params.id);
+    if (!program || !program.meta.visibility) {
+      return res.status(404).json({ error: 'Program not found' });
+    }
+    res.json(program);
+  } catch (err) {
+    console.error('Failed to fetch program details:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 module.exports = router;

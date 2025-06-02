@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons'; // Only Ionicons is used now
 
 import { servers } from '@/constants/API';
 import { getAccessToken } from '@/utils/token';
+import { useRouter } from 'expo-router';
 // Get screen dimensions for relative sizing
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -53,9 +54,15 @@ const ProgramsScreen = () => {
     fetchPrograms();
   }, []);
 
+  const router = useRouter()
+  const handleProgramPress = (programId: string) => {
+    router.push(`/program/${programId}`);
+  };
+
+
   // --- Reusable Card Components ---
   const renderCard = (
-    key: string,
+    programId: string,
     imageUri: string,
     title: string,
     subtitle: string,
@@ -66,7 +73,7 @@ const ProgramsScreen = () => {
       : 'https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/default_program_image.png'; // 👈 Add your fallback URL
   
     return (
-      <TouchableOpacity style={styles.card} key={key}>
+      <TouchableOpacity style={styles.card} key={programId} onPress={() => handleProgramPress(programId)}>
         {isNew && (
           <View style={styles.newTag}>
             <Text style={styles.newTagText}>NEW</Text>
