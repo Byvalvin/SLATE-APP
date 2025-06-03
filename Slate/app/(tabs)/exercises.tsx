@@ -263,8 +263,9 @@ const styles = StyleSheet.create({
     color: '#1F2937',
   },
   sectionListContent: {
-    paddingHorizontal: getWidth(20),
-  },
+  paddingHorizontal: getWidth(20),
+  paddingVertical: getHeight(6),     // NEW
+ },
   card: {
     width: getWidth(180),
     height: getHeight(220),

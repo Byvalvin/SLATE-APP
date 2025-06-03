@@ -32,12 +32,11 @@ interface Exercise {
 }
 
 export default function HomeScreen() {
-  const [calories] = useState('2600');
+  const [calories, setCalories] = useState('00'); // Made editable
   //const [days] = useState('7');
   const [streak, setStreak] = useState<number | null>(null);
 
-
-  const [initialMinutes, setInitialMinutes] = useState('5');
+  const [initialMinutes, setInitialMinutes] = useState('45');
   const [totalTime, setTotalTime] = useState(300);
   const [timeRemaining, setTimeRemaining] = useState(totalTime);
   const [isRunning, setIsRunning] = useState(false);
@@ -58,6 +57,10 @@ export default function HomeScreen() {
   // Default profile image URL - always use this one
   const defaultProfileImageUrl = `https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/male_green_ifnxek.png`;
 
+  // New state for calorie modal and temp input
+  const [calorieModalVisible, setCalorieModalVisible] = useState(false);
+  const [tempCalories, setTempCalories] = useState(calories);
+
   // Calculate timer size dynamically based on screen width - Reduced by 20% (from 0.5 to 0.4)
   const timerSize = screenWidth * 0.4;
   const timerBorderRadius = timerSize / 2;
@@ -71,7 +74,7 @@ export default function HomeScreen() {
         const token = await getAccessToken();
         if (!token) {
           console.log('No valid access token, redirecting to login');
-          //router.replace('/login');  // or however you navigate
+          //router.replace('/login');   // or however you navigate
           return;
         }
 
@@ -90,7 +93,7 @@ export default function HomeScreen() {
         }
       } catch (err) {
         console.error('Error fetching user:', err);
-        //router.replace('/login');  // fallback on fetch fail
+        //router.replace('/login');   // fallback on fetch fail
       } finally {
         setLoadingUser(false);
       }
@@ -107,19 +110,18 @@ export default function HomeScreen() {
             Authorization: `Bearer ${token}`
           }
         });
-  
+
         if (!res.ok) throw new Error('Failed to fetch profile');
-  
+
         const profile = await res.json();
         setStreak(profile.streak ?? 0);
       } catch (err) {
         console.error('Error fetching streak:', err);
       }
     };
-  
+
     fetchStreak();
   }, []);
-  
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -200,6 +202,24 @@ export default function HomeScreen() {
     setModalVisible(false);
   };
 
+  // New functions for calorie editing
+  const handleEditCalories = () => {
+    setTempCalories(calories); // Set temp state to current calories
+    setCalorieModalVisible(true);
+  };
+
+  const confirmEditCalories = () => {
+    // Basic validation: ensure it's a number
+    if (!isNaN(parseInt(tempCalories, 10)) && tempCalories.trim() !== '') {
+      setCalories(tempCalories);
+    } else {
+      // Optionally, show an alert or handle invalid input
+      console.warn('Invalid calorie input. Please enter a number.');
+      setCalories('0'); // Reset to a default or keep previous valid value
+    }
+    setCalorieModalVisible(false);
+  };
+
   // Date navigator handlers
   const goToPreviousDay = () => {
     setCurrentDate(subDays(currentDate, 1));
@@ -228,7 +248,7 @@ export default function HomeScreen() {
     setTempSets(exercise.sets.toString());
     setTempReps(exercise.reps.toString());
     setAddExerciseModalVisible(true); // Open the add/edit modal
-  }
+  };
 
   const handleSaveExercise = () => {
     // TODO: Implement logic to save/update the exercise for the current date
@@ -250,6 +270,36 @@ export default function HomeScreen() {
     setAddExerciseModalVisible(false);
   };
 
+  // Hardcoded exercise counts for the green bars
+  const legExercises = 2;
+  const chestExercises = 3;
+  const armExercises = 1;
+// --- NEW VERSION ---
+  const renderExerciseBar = (count: number) => {
+  /** 
+   * We interleave green “segments” with thin white “separators”.
+   *  ┌───┬─┬─┐     for   count = 3
+   *  │███│ │ │
+   *  └───┴─┴─┘
+   */
+    const items = [];
+
+    for (let i = 0; i < count; i++) {
+    // green segment
+    items.push(
+      <View key={`seg-${i}`} style={styles.exerciseBarSegment} />
+    );
+
+    // separator (don’t add one after the last segment)
+      if (i < count - 1) {
+        items.push(
+        <View key={`sep-${i}`} style={styles.exerciseBarSeparator} />
+      );
+    }
+  }
+
+  return <View style={styles.exerciseBarContainer}>{items}</View>;
+  };
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -269,10 +319,11 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <View style={styles.statsContainer}>
-          <View style={styles.statBox}>
+          {/* Calorie Stat Box - Now editable */}
+          <TouchableOpacity style={styles.statBox} onPress={handleEditCalories}>
             <Text style={styles.statValueSmall}>{calories}</Text>
             <Text style={styles.statLabelSmall}>CALORIE</Text>
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.statBoxMiddle}>
             <View style={[styles.timerContainer, { width: timerSize, height: timerSize, borderRadius: timerBorderRadius }]}>
@@ -295,15 +346,23 @@ export default function HomeScreen() {
           <View style={styles.statBox}>
             <Text style={styles.statValueSmall}>{streak !== null ? streak : '--'}</Text>
             <Text style={styles.statLabelSmall}>DAYS</Text>
-
           </View>
         </View>
       </LinearGradient>
 
       <View style={styles.categorySelector}>
-        <Text style={styles.categoryText}>LEG</Text>
-        <Text style={styles.categoryText}>CHEST</Text>
-        <Text style={styles.categoryText}>ARMS</Text>
+        <View style={styles.categoryColumn}>
+          <Text style={styles.categoryText}>LEG</Text>
+          {renderExerciseBar(legExercises)}
+        </View>
+        <View style={styles.categoryColumn}>
+          <Text style={styles.categoryText}>CHEST</Text>
+          {renderExerciseBar(chestExercises)}
+        </View>
+        <View style={styles.categoryColumn}>
+          <Text style={styles.categoryText}>ARMS</Text>
+          {renderExerciseBar(armExercises)}
+        </View>
       </View>
 
       <View style={styles.dateNavigator}>
@@ -324,7 +383,7 @@ export default function HomeScreen() {
       >
         {exercisesForDay.length === 0 ? (
           <View style={styles.restContainer}>
-            <Text style={styles.restTitle}>Rest & Recover 💆‍♂️</Text>
+            <Text style={styles.restTitle}>Rest & Recover </Text>
             <Text style={styles.restSubtitle}>No exercises scheduled for today.</Text>
           </View>
         ) : (
@@ -350,6 +409,27 @@ export default function HomeScreen() {
             />
             <TouchableOpacity style={styles.modalButton} onPress={confirmEditTimer}>
               <Text style={styles.modalButtonText}>CONFIRM</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* New Modal for Calorie Editing */}
+      <Modal visible={calorieModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>How many calories did you consume today?</Text>
+            <TextInput
+              style={styles.modalInput}
+              keyboardType="number-pad"
+              value={tempCalories}
+              onChangeText={setTempCalories}
+            />
+            <TouchableOpacity style={styles.modalButton} onPress={confirmEditCalories}>
+              <Text style={styles.modalButtonText}>CONFIRM</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setCalorieModalVisible(false)}>
+              <Text style={styles.modalButtonText}>CANCEL</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -449,34 +529,26 @@ const styles = StyleSheet.create({
     marginBottom: screenHeight * 0.03, // Adjusted margin bottom
   },
 
+  // Adjusted profileButton and profileImage for relative sizing
   profileButton: {
     position: 'absolute',
-    top: 55, // Adjusted to bring it down slightly for better alignment
-    right: 20,
+   
+    top: screenHeight * 0.05, // Adjusted to be relative to screen height
+    right: screenWidth * 0.05, // Adjusted to be relative to screen width
     backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 30, // Make it circular to contain the image
+    borderRadius: (screenWidth * 0.15) / 2, // Make it circular (half of width/height)
     overflow: 'hidden', // Clip image to the border radius
     zIndex: 10,
-    width: 60, // Fixed width
-    height: 60, // Fixed height
-    justifyContent: 'center', // Center content if using placeholder
-    alignItems: 'center',   // Center content if using placeholder
+    width: screenWidth * 0.13, // Relative width
+    height: screenWidth * 0.13, // Relative height, making it a circle
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileImage: {
     width: '100%', // Take full width of the parent TouchableOpacity
     height: '100%', // Take full height of the parent TouchableOpacity
-    borderRadius: 30, // Half of width/height
+    borderRadius: (screenWidth * 0.15) / 2, // Half of width/height for perfect circle
     backgroundColor: '#D9F7D9', // Placeholder background
-  },
-  // The profileImagePlaceholder style is no longer strictly needed as we always use the image
-  // but keeping it won't hurt if you decide to add a fallback text in the future.
-  profileImagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 30,
-    backgroundColor: '#D9F7D9', // A default background for the placeholder
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   profileButtonText: {
     fontSize: 18,
@@ -579,11 +651,35 @@ const styles = StyleSheet.create({
     elevation: 3,
     zIndex: 1,
   },
+  categoryColumn: {
+    alignItems: 'center',
+  },
   categoryText: {
     fontWeight: '600',
     color: '#999',
     fontSize: screenWidth * 0.035,
+    marginBottom: screenHeight * 0.005, // Space between text and bar
   },
+exerciseBarContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  height: screenHeight * 0.008,
+  borderRadius: 2,
+  overflow: 'hidden',
+  width: screenWidth * 0.15,
+},
+
+exerciseBarSegment: {
+  flex: 1,                       // each segment grows evenly
+  height: '100%',
+  backgroundColor: '#58F975',    // green fill
+},
+
+exerciseBarSeparator: {
+  width: 2,                      // tweak thickness here
+  height: '100%',
+  backgroundColor: '#FFFFFF',    // separator colour
+},
 
   // Date Navigator Styles
   dateNavigator: {
@@ -662,7 +758,6 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
-  
 
   // Floating Add Button Style
   addButton: {
