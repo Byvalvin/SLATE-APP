@@ -29,6 +29,7 @@ interface Exercise {
   sets: number;
   reps: number;
   image_url?: string;
+  category?: string;
 }
 
 export default function HomeScreen() {
@@ -174,6 +175,7 @@ export default function HomeScreen() {
         if (!res.ok) throw new Error('Failed to fetch exercises');
 
         const data = await res.json();
+        console.log(data)
         setExercisesForDay(data);
       } catch (err) {
         console.error(err);
@@ -323,9 +325,31 @@ export default function HomeScreen() {
       );
     }
   }
-
   return <View style={styles.exerciseBarContainer}>{items}</View>;
   };
+
+  const groupExercisesByCategory = (exercises: Exercise[]) => {
+    const categoryMap: { [category: string]: number } = {};
+
+    exercises.forEach((exercise) => {
+      const category = exercise.category || 'Uncategorized';
+      categoryMap[category] = (categoryMap[category] || 0) + 1;
+    });
+
+    return categoryMap;
+  };
+
+  const CATEGORY_ORDER = ['Legs', 'Chest', 'Back', 'Arms', 'Core', 'Shoulders', 'Glutes'];
+
+  // 👇 Declare this properly with type annotation for TS
+  const orderedCategories: [string, number][] = Object.entries(groupExercisesByCategory(exercisesForDay)).sort(
+    ([a], [b]) => {
+      const indexA = CATEGORY_ORDER.indexOf(a);
+      const indexB = CATEGORY_ORDER.indexOf(b);
+      return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+    }
+  );
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -377,19 +401,14 @@ export default function HomeScreen() {
       </LinearGradient>
 
       <View style={styles.categorySelector}>
-        <View style={styles.categoryColumn}>
-          <Text style={styles.categoryText}>LEG</Text>
-          {renderExerciseBar(legExercises)}
-        </View>
-        <View style={styles.categoryColumn}>
-          <Text style={styles.categoryText}>CHEST</Text>
-          {renderExerciseBar(chestExercises)}
-        </View>
-        <View style={styles.categoryColumn}>
-          <Text style={styles.categoryText}>ARMS</Text>
-          {renderExerciseBar(armExercises)}
-        </View>
+        {orderedCategories.map(([category, count]) => (
+          <View key={category} style={styles.categoryColumn}>
+            <Text style={styles.categoryText}>{category.toUpperCase()}</Text>
+            {renderExerciseBar(count)}
+          </View>
+        ))}
       </View>
+
 
       <View style={styles.dateNavigator}>
         <TouchableOpacity onPress={goToPreviousDay}>

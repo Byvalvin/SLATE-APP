@@ -37,6 +37,7 @@ router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
       const exerciseDetails = exercises.find(ex => ex.exerciseId === e.exercise_id);
       return {
         name: exerciseDetails?.name || 'Unknown',
+        category: exerciseDetails?.category || 'Unknown',
         image_url: exerciseDetails?.image_url || '',
         sets: e.sets,
         reps: e.reps,
@@ -155,11 +156,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
-
-
-
 
 
 module.exports = router;

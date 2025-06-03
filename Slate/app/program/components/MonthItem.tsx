@@ -66,3 +66,5 @@ const styles = StyleSheet.create({
   exerciseMeta: { fontSize: 14, color: '#6B7280' },
   exerciseNotes: { fontSize: 13, fontStyle: 'italic', color: '#9CA3AF' },
 });
+
+export default MonthItem;
