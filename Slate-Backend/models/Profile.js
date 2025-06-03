@@ -26,6 +26,7 @@ const ProfileSchema = new mongoose.Schema({
   selected_program_id: { type: String, ref: 'Program' }, // Match programId in Program
 
   streak: Number,
+  lastStreakUpdate: { type: Date },
 });
 
 module.exports = mongoose.model('Profile', ProfileSchema);

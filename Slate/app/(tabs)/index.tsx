@@ -195,7 +195,33 @@ export default function HomeScreen() {
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
-  const handleStartPause = () => setIsRunning(!isRunning);
+  const handleStartPause = async () => {
+    const newRunningState = !isRunning;
+    setIsRunning(newRunningState);
+  
+    if (newRunningState) {
+      try {
+        const token = await getAccessToken();
+        const res = await fetch(`${servers[2]}/api/profile/update-streak`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+  
+        if (res.ok) {
+          const data = await res.json();
+          setStreak(data.streak); // update UI with new streak
+        } else {
+          console.warn('Failed to update streak');
+        }
+      } catch (err) {
+        console.error('Error updating streak:', err);
+      }
+    }
+  };
+  
   const handleEditTimer = () => setModalVisible(true);
   const confirmEditTimer = () => {
     setInitialMinutes(tempMinutes);

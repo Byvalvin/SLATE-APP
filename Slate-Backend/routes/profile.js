@@ -61,4 +61,29 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// Update streak if not already updated today
+router.post('/update-streak', authMiddleware, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ userId: req.user.userId });
+    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to midnight
+
+    const lastUpdate = profile.lastStreakUpdate || new Date(0);
+    lastUpdate.setHours(0, 0, 0, 0);
+
+    if (today.getTime() !== lastUpdate.getTime()) {
+      profile.streak = (profile.streak || 0) + 1;
+      profile.lastStreakUpdate = new Date();
+      await profile.save();
+    }
+
+    return res.status(200).json({ streak: profile.streak });
+  } catch (err) {
+    console.error('Error updating streak:', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
