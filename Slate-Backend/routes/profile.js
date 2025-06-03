@@ -67,23 +67,60 @@ router.post('/update-streak', authMiddleware, async (req, res) => {
     const profile = await Profile.findOne({ userId: req.user.userId });
     if (!profile) return res.status(404).json({ message: 'Profile not found' });
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize to midnight
-
-    const lastUpdate = profile.lastStreakUpdate || new Date(0);
-    lastUpdate.setHours(0, 0, 0, 0);
-
-    if (today.getTime() !== lastUpdate.getTime()) {
-      profile.streak = (profile.streak || 0) + 1;
-      profile.lastStreakUpdate = new Date();
-      await profile.save();
+    const program = await Program.findOne({ programId: profile.selected_program_id });
+    if (!program || !program.months?.length) {
+      return res.status(400).json({ message: 'User has no assigned program' });
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let lastUpdate = profile.lastStreakUpdate || profile.program_start_date || new Date();
+    lastUpdate.setHours(0, 0, 0, 0);
+
+    // Don't reset if streak is already 0
+    if ((profile.streak ?? 0) > 0) {
+      let missedWorkout = false;
+
+      let current = new Date(lastUpdate);
+      current.setDate(current.getDate() + 1); // Start from next day after last update
+
+      while (current < today) {
+        const dayOfWeek = format(current, 'eeee').toLowerCase(); // e.g., 'monday'
+        const daysSinceStart = differenceInCalendarDays(current, profile.program_start_date);
+        const currentMonthIndex = Math.floor(daysSinceStart / 28); // approx 4 weeks per month
+        const currentMonth = program.months[currentMonthIndex];
+
+        if (!currentMonth) break; // No data for this month (end of program)
+
+        const exercisesForDay = currentMonth.weekly_plan?.[dayOfWeek] || [];
+
+        if (exercisesForDay.length > 0) {
+          missedWorkout = true;
+          break;
+        }
+
+        current.setDate(current.getDate() + 1); // Move to next day
+      }
+
+      if (missedWorkout) {
+        profile.streak = 0;
+      }
+    }
+
+    // Only increment streak if today isn't already counted
+    if (today.getTime() !== (profile.lastStreakUpdate?.getTime() || 0)) {
+      profile.streak = (profile.streak || 0) + 1;
+      profile.lastStreakUpdate = new Date();
+    }
+
+    await profile.save();
     return res.status(200).json({ streak: profile.streak });
   } catch (err) {
     console.error('Error updating streak:', err);
     return res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 module.exports = router;
