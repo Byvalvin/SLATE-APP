@@ -175,7 +175,7 @@ export default function HomeScreen() {
         if (!res.ok) throw new Error('Failed to fetch exercises');
 
         const data = await res.json();
-        console.log(data)
+        //console.log(data)
         setExercisesForDay(data);
       } catch (err) {
         console.error(err);
