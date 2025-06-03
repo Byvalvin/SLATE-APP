@@ -10,7 +10,8 @@
     "migrate:dashboard": "node scripts/migrate_dashboard_collections.js",
     "migrate:exercises": "node scripts/migrate_correct_id_exercises.js",
     "clean:users": "node scripts/clean_old_userfields.js",
-    "extend:programs": "node scripts/extend_program.js"
+    "extend:programs": "node scripts/extend_program.js",
+    "migrate:streaks": "node scripts/migrate_profile_streak.js"
   },
   "keywords": [],
   "author": "",

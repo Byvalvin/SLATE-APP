@@ -33,7 +33,10 @@ interface Exercise {
 
 export default function HomeScreen() {
   const [calories] = useState('2600');
-  const [days] = useState('7');
+  //const [days] = useState('7');
+  const [streak, setStreak] = useState<number | null>(null);
+
+
   const [initialMinutes, setInitialMinutes] = useState('5');
   const [totalTime, setTotalTime] = useState(300);
   const [timeRemaining, setTimeRemaining] = useState(totalTime);
@@ -94,6 +97,29 @@ export default function HomeScreen() {
     };
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    const fetchStreak = async () => {
+      try {
+        const token = await getAccessToken();
+        const res = await fetch(`${servers[2]}/api/profile/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+  
+        if (!res.ok) throw new Error('Failed to fetch profile');
+  
+        const profile = await res.json();
+        setStreak(profile.streak ?? 0);
+      } catch (err) {
+        console.error('Error fetching streak:', err);
+      }
+    };
+  
+    fetchStreak();
+  }, []);
+  
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -267,8 +293,9 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.statBox}>
-            <Text style={styles.statValueSmall}>{days}</Text>
+            <Text style={styles.statValueSmall}>{streak !== null ? streak : '--'}</Text>
             <Text style={styles.statLabelSmall}>DAYS</Text>
+
           </View>
         </View>
       </LinearGradient>

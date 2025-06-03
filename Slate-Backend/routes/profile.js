@@ -38,7 +38,7 @@ router.post('/', authMiddleware, async (req, res) => {
     // Create or update profile
     const profile = await Profile.findOneAndUpdate(
       { userId: req.user.userId },
-      { $set: { ...formData, userId: req.user.userId } },
+      { $set: { ...formData, userId: req.user.userId, streak:0 } },
       { new: true, upsert: true }
     );    
 
