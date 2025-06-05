@@ -121,6 +121,44 @@ router.post('/user-daily-exercises', authMiddleware, async (req, res) => {
   }
 });
 
+/*
+router.post('/user-daily-exercises', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { date, exercises } = req.body;
+
+    // Validate exercises array
+    if (!Array.isArray(exercises) || exercises.length === 0) {
+      return res.status(400).json({ error: 'Exercises must be a non-empty array.' });
+    }
+
+    // Validate each exercise object
+    const invalidExercises = exercises.filter(exercise => {
+      return !exercise.exercise_id || typeof exercise.exercise_id !== 'string' ||
+             !exercise.sets || typeof exercise.sets !== 'number' ||
+             !exercise.reps || typeof exercise.reps !== 'number';
+    });
+
+    if (invalidExercises.length > 0) {
+      return res.status(400).json({ error: 'One or more exercises have invalid data.', invalidExercises });
+    }
+
+    let userOverride = await UserExerciseOverride.findOne({ userId, date });
+
+    if (!userOverride) {
+      userOverride = new UserExerciseOverride({ userId, date, exercises });
+    } else {
+      userOverride.exercises = exercises; // Replace with validated exercises
+    }
+
+    await userOverride.save();
+    res.status(200).json({ message: 'Exercises updated successfully.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+*/
 
 
 router.get('/grouped', authMiddleware, async (req, res) => {
