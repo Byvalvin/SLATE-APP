@@ -594,31 +594,30 @@ export default function HomeScreen() {
             </TouchableOpacity>
 
             {selectedExercise?.isCustom && (
-              <>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.deleteButton]}
-                  onPress={() => {
-                    Alert.alert(
-                      'Delete Exercise',
-                      'Are you sure you want to delete this custom exercise?',
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        {
-                          text: 'Delete',
-                          style: 'destructive',
-                          onPress: () => {
-                            handleDeleteExercise(selectedExercise.id);
-                            setAddExerciseModalVisible(false); // Close modal after delete
-                          }
-                        }
-                      ]
-                    );
-                  }}
-                >
-                  <Text style={[styles.modalButtonText, { color: 'white' }]}>DELETE EXERCISE</Text>
-                </TouchableOpacity>
-              </>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.deleteButton]}
+                onPress={() => {
+                  Alert.alert(
+                    'Delete Exercise',
+                    'Are you sure you want to delete this custom exercise?',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Delete',
+                        style: 'destructive',
+                        onPress: () => {
+                          handleDeleteExercise(selectedExercise.id);
+                          setAddExerciseModalVisible(false);
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
+                <Text style={styles.modalButtonText}>DELETE EXERCISE</Text>
+              </TouchableOpacity>
             )}
+
 
           </View>
         </View>
@@ -851,14 +850,12 @@ modalPicker: {
   marginBottom: 16,
 },
 deleteButton: {
-  position: 'absolute',
-  borderWidth: 1, borderColor: 'red',
-  right: 10,
-  top: 10,
-  padding: 4,
-  backgroundColor: '#fff',
-  borderRadius: 20,
+  backgroundColor: '#FF4D4D',
+  marginTop: 10,
+  paddingVertical: 10,
+  borderRadius: 6,
 },
+
 
 
 

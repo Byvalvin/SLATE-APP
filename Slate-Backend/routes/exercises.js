@@ -99,44 +99,28 @@ router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
 router.post('/user-daily-exercises', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { date, exercises } = req.body; // { date: 'YYYY-MM-DD', exercises: [...] }
+    const { date, exercises } = req.body;
 
-    if (!Array.isArray(exercises) || exercises.length === 0) {
+    if (!Array.isArray(exercises)) {
       return res.status(400).json({ error: 'Invalid exercises format.' });
     }
 
-    // Check if the user already has overrides for the given date
     let userOverride = await UserExerciseOverride.findOne({ userId, date });
 
     if (!userOverride) {
-      // If no override exists, create a new one
       userOverride = new UserExerciseOverride({ userId, date, exercises });
-      await userOverride.save();
     } else {
-      // If override exists, update the exercises
-      exercises.forEach(newExercise => {
-        const existingExercise = userOverride.exercises.find(e => e.exercise_id === newExercise.exercise_id);
-        if (existingExercise) {
-          existingExercise.sets = newExercise.sets || existingExercise.sets;
-          existingExercise.reps = newExercise.reps || existingExercise.reps;
-          existingExercise.notes = newExercise.notes || existingExercise.notes;
-          existingExercise.isCustom = newExercise.isCustom || existingExercise.isCustom;
-          existingExercise.name = newExercise.name || existingExercise.name;
-          existingExercise.category = newExercise.category || existingExercise.category; // ✅ Add this line
-        } else {
-          userOverride.exercises.push(newExercise);
-        }
-      });
-
-      await userOverride.save();
+      userOverride.exercises = exercises; // ✅ REPLACE
     }
 
+    await userOverride.save();
     res.status(200).json({ message: 'Exercises updated successfully.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 
