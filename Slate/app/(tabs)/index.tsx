@@ -30,6 +30,8 @@ interface Exercise {
   reps: number;
   image_url?: string;
   category?: string;
+  isCustom: boolean, // mark as custom if user added it manually
+  notes: string,
 }
 
 export default function HomeScreen() {
@@ -278,25 +280,56 @@ export default function HomeScreen() {
     setAddExerciseModalVisible(true); // Open the add/edit modal
   };
 
-  const handleSaveExercise = () => {
-    // TODO: Implement logic to save/update the exercise for the current date
-    // This would involve:
-    // 1. Getting the selected exercise ID (or name if manually entered)
-    // 2. Getting the entered sets and reps
-    // 3. Sending this data to your backend API for the specific currentDate
-    // 4. Updating the exercisesForDay state locally after successful save
-
-    console.log("Saving Exercise:", {
-      id: selectedExercise?.id, // Will be null for new exercises
+  const handleSaveExercise = async () => {
+    const exercisePayload = {
+      id: selectedExercise?.id || Date.now().toString(), // Generate a temp ID if it's a custom one
       name: tempExerciseName,
       sets: parseInt(tempSets, 10),
       reps: parseInt(tempReps, 10),
-      date: format(currentDate, 'yyyy-MM-dd') // Associate with the current date
-    });
-
-    // Close the modal
-    setAddExerciseModalVisible(false);
+      isCustom: !selectedExercise, // mark as custom if user added it manually
+    };
+  
+    const updatedExercises = [...exercisesForDay];
+  
+    const index = updatedExercises.findIndex(ex => ex.id === selectedExercise?.id);
+    if (index > -1) {
+      // If editing, replace
+      updatedExercises[index] = { ...updatedExercises[index], ...exercisePayload };
+    } else {
+      // If new, push
+      updatedExercises.push(exercisePayload as Exercise);
+    }
+  
+    try {
+      const token = await getAccessToken();
+      const res = await fetch(`${servers[2]}/api/exercises/user-daily-exercises`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: format(currentDate, 'yyyy-MM-dd'),
+          exercises: updatedExercises.map(e => ({
+            exercise_id: e.id,
+            sets: e.sets,
+            reps: e.reps,
+            notes: e.notes || '',
+            isCustom: e.isCustom || false,
+            name: e.name,
+          }))
+        })
+      });
+  
+      if (!res.ok) throw new Error('Failed to save exercises');
+  
+      setExercisesForDay(updatedExercises);
+      setAddExerciseModalVisible(false); // Close modal
+    } catch (err) {
+      console.error('Failed to save exercise:', err);
+    }
   };
+  
 
   // Hardcoded exercise counts for the green bars
   const legExercises = 2;

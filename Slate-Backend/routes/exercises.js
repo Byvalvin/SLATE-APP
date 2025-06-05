@@ -4,6 +4,7 @@ const router = express.Router();
 const Profile = require('../models/Profile');
 const Program = require('../models/Program');
 const Exercise = require('../models/Exercise');
+const UserExerciseOverride = require('../models/UserExerciseOverride'); // for custom exercising
 const { getDay, differenceInCalendarWeeks } = require('date-fns');
 const authMiddleware = require('../middleware/auth'); // You need to extract user ID from token
 
@@ -30,18 +31,45 @@ router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
     const todayPlan = monthData.weekly_plan[dayOfWeek];
     if (!todayPlan) return res.status(404).json({ error: 'No plan for today' });
 
-    const exerciseIds = todayPlan.map(e => e.exercise_id);
+    // Check if the user has overridden exercises for today
+    const userOverride = await UserExerciseOverride.findOne({ userId, date: today.toISOString().split('T')[0] });
+
+    // Default: If no override, use the original program's exercise plan
+    let exercisesToReturn = todayPlan.map(e => ({
+      exercise_id: e.exercise_id,
+      sets: e.sets,
+      reps: e.reps
+    }));
+
+    // If the user has an override, merge the overrides with the default exercises
+    if (userOverride) {
+      exercisesToReturn = exercisesToReturn.map(exercise => {
+        const override = userOverride.exercises.find(o => o.exercise_id === exercise.exercise_id);
+        if (override) {
+          return { ...exercise, ...override._doc };  // Merge override (sets, reps, etc.)
+        }
+        return exercise;
+      });
+
+      // Add any custom exercises the user added
+      userOverride.exercises.filter(e => e.isCustom).forEach(customExercise => {
+        exercisesToReturn.push(customExercise);
+      });
+    }
+
+    // Now, fetch the full exercise details (name, category, etc.)
+    const exerciseIds = exercisesToReturn.map(e => e.exercise_id);
     const exercises = await Exercise.find({ exerciseId: { $in: exerciseIds } });
 
-    const result = todayPlan.map(e => {
-      const exerciseDetails = exercises.find(ex => ex.exerciseId === e.exercise_id);
+    const result = exercisesToReturn.map(ex => {
+      const exerciseDetails = exercises.find(exDetail => exDetail.exerciseId === ex.exercise_id);
       return {
         name: exerciseDetails?.name || 'Unknown',
         category: exerciseDetails?.category || 'Unknown',
         image_url: exerciseDetails?.image_url || '',
-        sets: e.sets,
-        reps: e.reps,
-        id: e.exercise_id
+        sets: ex.sets,
+        reps: ex.reps,
+        id: ex.exercise_id
       };
     });
 
@@ -51,6 +79,50 @@ router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// routes/api/exercises.js -> TO UPDATE EXERCISES
+router.post('/user-daily-exercises', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { date, exercises } = req.body; // { date: 'YYYY-MM-DD', exercises: [...] }
+
+    if (!Array.isArray(exercises) || exercises.length === 0) {
+      return res.status(400).json({ error: 'Invalid exercises format.' });
+    }
+
+    // Check if the user already has overrides for the given date
+    let userOverride = await UserExerciseOverride.findOne({ userId, date });
+
+    if (!userOverride) {
+      // If no override exists, create a new one
+      userOverride = new UserExerciseOverride({ userId, date, exercises });
+      await userOverride.save();
+    } else {
+      // If override exists, update the exercises
+      exercises.forEach(newExercise => {
+        const existingExercise = userOverride.exercises.find(e => e.exercise_id === newExercise.exercise_id);
+        if (existingExercise) {
+          existingExercise.sets = newExercise.sets || existingExercise.sets;
+          existingExercise.reps = newExercise.reps || existingExercise.reps;
+          existingExercise.notes = newExercise.notes || existingExercise.notes;
+          existingExercise.isCustom = newExercise.isCustom || existingExercise.isCustom;
+          existingExercise.name = newExercise.name || existingExercise.name;
+        } else {
+          userOverride.exercises.push(newExercise);
+        }
+      });
+
+      await userOverride.save();
+    }
+
+    res.status(200).json({ message: 'Exercises updated successfully.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 
 router.get('/grouped', authMiddleware, async (req, res) => {
