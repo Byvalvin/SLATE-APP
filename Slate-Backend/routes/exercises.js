@@ -95,7 +95,7 @@ router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
   }
 });
 
-// routes/api/exercises.js -> TO UPDATE EXERCISES
+// routes/api/exercises.js -> TO UPDATE CUSTOM EXERCISES
 router.post('/user-daily-exercises', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -120,8 +120,6 @@ router.post('/user-daily-exercises', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
 
 
 

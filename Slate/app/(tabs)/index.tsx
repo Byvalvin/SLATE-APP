@@ -278,7 +278,7 @@ export default function HomeScreen() {
   };
 
   const handleEditExercise = (exercise: Exercise) => {
-    console.log('Selected for edit:', selectedExercise);
+    //console.log('Selected for edit:', selectedExercise);
     setSelectedExercise(exercise); // Set the exercise being edited
     setTempExerciseName(exercise.name);
     setTempSets(exercise.sets.toString());
@@ -299,7 +299,6 @@ export default function HomeScreen() {
     };
   
     const updatedExercises = [...exercisesForDay];
-  
     const index = updatedExercises.findIndex(ex => ex.id === selectedExercise?.id);
     if (index > -1) {
       // If editing, replace
@@ -339,6 +338,7 @@ export default function HomeScreen() {
       console.error('Failed to save exercise:', err);
     }
   };
+  
   const handleDeleteExercise = async (idToDelete: string) => {
     const updatedExercises = exercisesForDay.filter(ex => ex.id !== idToDelete);
     setExercisesForDay(updatedExercises);
