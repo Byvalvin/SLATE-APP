@@ -71,6 +71,7 @@ router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
           sets: ex.sets,
           reps: ex.reps,
           id: ex.exercise_id,
+          isCustom: true, // ✅ ADD THIS LINE
         };
       }
     
@@ -83,6 +84,7 @@ router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
         sets: ex.sets,
         reps: ex.reps,
         id: ex.exercise_id,
+        isCustom: false, // ✅ ADD THIS TOO
       };
     });
     

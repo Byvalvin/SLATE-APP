@@ -8,7 +8,8 @@ import {
   Modal,
   Dimensions,
   ScrollView,
-  Image, // Import the Image component
+  Image,
+  Alert, // Import the Image component
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AntDesign } from '@expo/vector-icons'; // Import icons for the date navigator and add button
@@ -277,12 +278,14 @@ export default function HomeScreen() {
   };
 
   const handleEditExercise = (exercise: Exercise) => {
+    console.log('Selected for edit:', selectedExercise);
     setSelectedExercise(exercise); // Set the exercise being edited
     setTempExerciseName(exercise.name);
     setTempSets(exercise.sets.toString());
     setTempReps(exercise.reps.toString());
     setAddExerciseModalVisible(true); // Open the add/edit modal
     setTempCategory(exercise.category || 'Legs');
+    
   };
 
   const handleSaveExercise = async () => {
@@ -291,7 +294,7 @@ export default function HomeScreen() {
       name: tempExerciseName,
       sets: parseInt(tempSets, 10),
       reps: parseInt(tempReps, 10),
-      isCustom: !selectedExercise, // mark as custom if user added it manually
+      isCustom: selectedExercise?.isCustom ?? true, // instead of just !selectedExercise
       category: tempCategory,
     };
   
@@ -336,6 +339,36 @@ export default function HomeScreen() {
       console.error('Failed to save exercise:', err);
     }
   };
+  const handleDeleteExercise = async (idToDelete: string) => {
+    const updatedExercises = exercisesForDay.filter(ex => ex.id !== idToDelete);
+    setExercisesForDay(updatedExercises);
+  
+    try {
+      const token = await getAccessToken();
+      await fetch(`${servers[2]}/api/exercises/user-daily-exercises`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          date: format(currentDate, 'yyyy-MM-dd'),
+          exercises: updatedExercises.map(e => ({
+            exercise_id: e.id,
+            sets: e.sets,
+            reps: e.reps,
+            notes: e.notes || '',
+            isCustom: e.isCustom || false,
+            name: e.name,
+            category: e.category || '',
+          }))
+        })
+      });
+    } catch (err) {
+      console.error('Error deleting exercise:', err);
+    }
+  };
+  
   
 
 // --- NEW VERSION ---
@@ -527,7 +560,6 @@ export default function HomeScreen() {
               onChangeText={setTempExerciseName}
             />
 
-            <Text style={styles.modalLabel}>Category</Text>
             <Picker
               selectedValue={tempCategory}
               style={styles.modalPicker}
@@ -560,6 +592,34 @@ export default function HomeScreen() {
             <TouchableOpacity style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setAddExerciseModalVisible(false)}>
               <Text style={styles.modalButtonText}>CANCEL</Text>
             </TouchableOpacity>
+
+            {selectedExercise?.isCustom && (
+              <>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.deleteButton]}
+                  onPress={() => {
+                    Alert.alert(
+                      'Delete Exercise',
+                      'Are you sure you want to delete this custom exercise?',
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        {
+                          text: 'Delete',
+                          style: 'destructive',
+                          onPress: () => {
+                            handleDeleteExercise(selectedExercise.id);
+                            setAddExerciseModalVisible(false); // Close modal after delete
+                          }
+                        }
+                      ]
+                    );
+                  }}
+                >
+                  <Text style={[styles.modalButtonText, { color: 'white' }]}>DELETE EXERCISE</Text>
+                </TouchableOpacity>
+              </>
+            )}
+
           </View>
         </View>
       </Modal>
@@ -576,7 +636,7 @@ export default function HomeScreen() {
 }
 
 // --- Separate Exercise Item Component (Recommended) ---
-const ExerciseItem = ({ exercise, onEdit }: { exercise: Exercise, onEdit: (exercise: Exercise) => void }) => {
+const ExerciseItem = ({ exercise, onEdit }: { exercise: Exercise, onEdit: (exercise: Exercise) => void, }) => {
   return (
     <TouchableOpacity style={styles.exerciseItem} onPress={() => onEdit(exercise)}>
       {exercise.image_url ? (
@@ -790,6 +850,16 @@ modalPicker: {
   backgroundColor: '#fff',
   marginBottom: 16,
 },
+deleteButton: {
+  position: 'absolute',
+  borderWidth: 1, borderColor: 'red',
+  right: 10,
+  top: 10,
+  padding: 4,
+  backgroundColor: '#fff',
+  borderRadius: 20,
+},
+
 
 
   // Date Navigator Styles

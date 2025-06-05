@@ -12,6 +12,7 @@ const UserExerciseOverrideSchema = new mongoose.Schema({
       notes: { type: String },
       isCustom: { type: Boolean, default: false }, // True if the user added this exercise
       name: { type: String }, // User-customized exercise name (optional)
+      category: String, // <--- this needs to be in your schema
     }
   ]
 });
