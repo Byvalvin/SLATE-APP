@@ -17,6 +17,8 @@ import { getAccessToken } from '@/utils/token';
 import { servers } from '@/constants/API';
 import { fetchWithAuth } from '@/utils/user';
 import AccountModal from '@/components/AccountModal';
+import { Picker } from '@react-native-picker/picker';
+
 
 // LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);
 
@@ -55,6 +57,8 @@ export default function HomeScreen() {
   const [tempSets, setTempSets] = useState('3');
   const [tempReps, setTempReps] = useState('10');
   const [tempExerciseName, setTempExerciseName] = useState(''); // For manual input or selection from list
+  const [tempCategory, setTempCategory] = useState('Legs'); // Default to 'Legs'
+
 
   const [accountVisible, setAccountVisible] = useState(false);
   // Default profile image URL - always use this one
@@ -278,6 +282,7 @@ export default function HomeScreen() {
     setTempSets(exercise.sets.toString());
     setTempReps(exercise.reps.toString());
     setAddExerciseModalVisible(true); // Open the add/edit modal
+    setTempCategory(exercise.category || 'Legs');
   };
 
   const handleSaveExercise = async () => {
@@ -287,6 +292,7 @@ export default function HomeScreen() {
       sets: parseInt(tempSets, 10),
       reps: parseInt(tempReps, 10),
       isCustom: !selectedExercise, // mark as custom if user added it manually
+      category: tempCategory,
     };
   
     const updatedExercises = [...exercisesForDay];
@@ -317,6 +323,7 @@ export default function HomeScreen() {
             notes: e.notes || '',
             isCustom: e.isCustom || false,
             name: e.name,
+            category: e.category, // ✅ Include category here too
           }))
         })
       });
@@ -331,10 +338,6 @@ export default function HomeScreen() {
   };
   
 
-  // Hardcoded exercise counts for the green bars
-  const legExercises = 2;
-  const chestExercises = 3;
-  const armExercises = 1;
 // --- NEW VERSION ---
   const renderExerciseBar = (count: number) => {
   /** 
@@ -373,7 +376,6 @@ export default function HomeScreen() {
   };
 
   const CATEGORY_ORDER = ['Legs', 'Chest', 'Back', 'Arms', 'Core', 'Shoulders', 'Glutes'];
-
   // 👇 Declare this properly with type annotation for TS
   const orderedCategories: [string, number][] = Object.entries(groupExercisesByCategory(exercisesForDay)).sort(
     ([a], [b]) => {
@@ -524,6 +526,18 @@ export default function HomeScreen() {
               value={tempExerciseName}
               onChangeText={setTempExerciseName}
             />
+
+            <Text style={styles.modalLabel}>Category</Text>
+            <Picker
+              selectedValue={tempCategory}
+              style={styles.modalPicker}
+              onValueChange={(itemValue) => setTempCategory(itemValue)}
+            >
+              {CATEGORY_ORDER.map(category => (
+                <Picker.Item key={category} label={category} value={category} />
+              ))}
+            </Picker>
+
 
             <TextInput
               placeholder="Sets"
@@ -758,6 +772,25 @@ exerciseBarSeparator: {
   height: '100%',
   backgroundColor: '#FFFFFF',    // separator colour
 },
+
+modalLabel: {
+  fontSize: 16,
+  fontWeight: '600',
+  marginBottom: 8,
+  marginTop: 12,
+  color: '#333',
+},
+
+modalPicker: {
+  height: 50,
+  width: '100%',
+  borderColor: '#ccc',
+  borderWidth: 1,
+  borderRadius: 6,
+  backgroundColor: '#fff',
+  marginBottom: 16,
+},
+
 
   // Date Navigator Styles
   dateNavigator: {

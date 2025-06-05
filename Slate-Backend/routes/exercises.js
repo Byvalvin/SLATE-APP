@@ -62,17 +62,30 @@ router.get('/user-daily-exercises', authMiddleware, async (req, res) => {
     const exercises = await Exercise.find({ exerciseId: { $in: exerciseIds } });
 
     const result = exercisesToReturn.map(ex => {
+      // For custom exercises, take the name/category directly from the override
+      if (ex.isCustom) {
+        return {
+          name: ex.name || 'Custom',
+          category: ex.category || 'Uncategorized',
+          image_url: ex.image_url || '',
+          sets: ex.sets,
+          reps: ex.reps,
+          id: ex.exercise_id,
+        };
+      }
+    
       const exerciseDetails = exercises.find(exDetail => exDetail.exerciseId === ex.exercise_id);
+    
       return {
         name: exerciseDetails?.name || 'Unknown',
         category: exerciseDetails?.category || 'Unknown',
         image_url: exerciseDetails?.image_url || '',
         sets: ex.sets,
         reps: ex.reps,
-        id: ex.exercise_id
+        id: ex.exercise_id,
       };
     });
-
+    
     return res.json(result);
   } catch (err) {
     console.error(err);
@@ -107,6 +120,7 @@ router.post('/user-daily-exercises', authMiddleware, async (req, res) => {
           existingExercise.notes = newExercise.notes || existingExercise.notes;
           existingExercise.isCustom = newExercise.isCustom || existingExercise.isCustom;
           existingExercise.name = newExercise.name || existingExercise.name;
+          existingExercise.category = newExercise.category || existingExercise.category; // ✅ Add this line
         } else {
           userOverride.exercises.push(newExercise);
         }
