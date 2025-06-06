@@ -9,7 +9,6 @@ import {
   Dimensions,
   ScrollView,
   Image,
-  Alert, // Import the Image component
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AntDesign } from '@expo/vector-icons'; // Import icons for the date navigator and add button
@@ -17,29 +16,22 @@ import { format, addDays, subDays, isToday } from 'date-fns'; // Import date man
 import { getAccessToken } from '@/utils/token';
 import { servers } from '@/constants/API';
 import { fetchWithAuth } from '@/utils/user';
+import { Exercise } from '../home/Interfaces';
 import AccountModal from '@/components/AccountModal';
-import { Picker } from '@react-native-picker/picker';
+import ExerciseItem from '../home/components/ExerciseItem';
+import ExerciseModal from '../home/components/Modals/ExerciseModal';
+import CategorySummary from '../home/components/CategorySummary';
+import WorkoutTimer from '../home/components/WorkoutTimer';
+import DateNavigator from '../home/components/DateNavigator';
+import EditableStatBox from '../home/components/EditableStatBox';
 
 
 // LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-// Placeholder for exercise data structure (you'll fetch this from your API)
-interface Exercise {
-  id: string;
-  name: string;
-  sets: number;
-  reps: number;
-  image_url?: string;
-  category?: string;
-  isCustom: boolean, // mark as custom if user added it manually
-  notes: string,
-}
-
 export default function HomeScreen() {
   const [calories, setCalories] = useState('00'); // Made editable
-  //const [days] = useState('7');
   const [streak, setStreak] = useState<number | null>(null);
 
   const [initialMinutes, setInitialMinutes] = useState('45');
@@ -47,9 +39,7 @@ export default function HomeScreen() {
   const [timeRemaining, setTimeRemaining] = useState(totalTime);
   const [isRunning, setIsRunning] = useState(false);
   const [timerProgress, setTimerProgress] = useState(0);
-  const [modalVisible, setModalVisible] = useState(false); // Modal for timer edit
   const [addExerciseModalVisible, setAddExerciseModalVisible] = useState(false); // Modal for adding exercise
-  const [tempMinutes, setTempMinutes] = useState(initialMinutes);
   const [currentDate, setCurrentDate] = useState(new Date()); // State for the date navigator
 
   const [exercisesForDay, setExercisesForDay] = useState<Exercise[]>([]);
@@ -64,14 +54,6 @@ export default function HomeScreen() {
   const [accountVisible, setAccountVisible] = useState(false);
   // Default profile image URL - always use this one
   const defaultProfileImageUrl = `https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/male_green_ifnxek.png`;
-
-  // New state for calorie modal and temp input
-  const [calorieModalVisible, setCalorieModalVisible] = useState(false);
-  const [tempCalories, setTempCalories] = useState(calories);
-
-  // Calculate timer size dynamically based on screen width - Reduced by 20% (from 0.5 to 0.4)
-  const timerSize = screenWidth * 0.4;
-  const timerBorderRadius = timerSize / 2;
 
   const [user, setUser] = useState<any>(null);
   const [loadingUser, setLoadingUser] = useState(true);
@@ -191,18 +173,7 @@ export default function HomeScreen() {
 
     fetchExercises();
   }, [currentDate]);
-
   // --- End Exercise Data Fetching Placeholder ---
-
-  const getTimerColor = () => {
-    return '#58F975'; // forest green
-  };
-
-  const formatTime = (timeInSeconds: number): string => {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
 
   const handleStartPause = async () => {
     const newRunningState = !isRunning;
@@ -231,39 +202,15 @@ export default function HomeScreen() {
     }
   };
   
-  const handleEditTimer = () => setModalVisible(true);
-  const confirmEditTimer = () => {
-    setInitialMinutes(tempMinutes);
-    setModalVisible(false);
-  };
 
-  // New functions for calorie editing
-  const handleEditCalories = () => {
-    setTempCalories(calories); // Set temp state to current calories
-    setCalorieModalVisible(true);
-  };
-
-  const confirmEditCalories = () => {
-    // Basic validation: ensure it's a number
-    if (!isNaN(parseInt(tempCalories, 10)) && tempCalories.trim() !== '') {
-      setCalories(tempCalories);
-    } else {
-      // Optionally, show an alert or handle invalid input
-      console.warn('Invalid calorie input. Please enter a number.');
-      setCalories('0'); // Reset to a default or keep previous valid value
-    }
-    setCalorieModalVisible(false);
-  };
 
   // Date navigator handlers
   const goToPreviousDay = () => {
     setCurrentDate(subDays(currentDate, 1));
   };
-
   const goToNextDay = () => {
     setCurrentDate(addDays(currentDate, 1));
   };
-
   // Format date for display, show "TODAY" if it's today
   const formattedDate = format(currentDate, 'dd MMM');
   const displayDate = isToday(currentDate) ? 'TODAY, ' + formattedDate.toUpperCase() : format(currentDate, 'EEEE, dd MMM').toUpperCase();
@@ -276,7 +223,6 @@ export default function HomeScreen() {
     setTempReps('10'); // Default reps
     setAddExerciseModalVisible(true); // Open the add exercise modal
   };
-
   const handleEditExercise = (exercise: Exercise) => {
     //console.log('Selected for edit:', selectedExercise);
     setSelectedExercise(exercise); // Set the exercise being edited
@@ -287,58 +233,6 @@ export default function HomeScreen() {
     setTempCategory(exercise.category || 'Legs');
     
   };
-
-  const handleSaveExercise = async () => {
-    const exercisePayload = {
-      id: selectedExercise?.id || Date.now().toString(), // Generate a temp ID if it's a custom one
-      name: tempExerciseName,
-      sets: parseInt(tempSets, 10),
-      reps: parseInt(tempReps, 10),
-      isCustom: selectedExercise?.isCustom ?? true, // instead of just !selectedExercise
-      category: tempCategory,
-    };
-  
-    const updatedExercises = [...exercisesForDay];
-    const index = updatedExercises.findIndex(ex => ex.id === selectedExercise?.id);
-    if (index > -1) {
-      // If editing, replace
-      updatedExercises[index] = { ...updatedExercises[index], ...exercisePayload };
-    } else {
-      // If new, push
-      updatedExercises.push(exercisePayload as Exercise);
-    }
-  
-    try {
-      const token = await getAccessToken();
-      const res = await fetch(`${servers[2]}/api/exercises/user-daily-exercises`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          date: format(currentDate, 'yyyy-MM-dd'),
-          exercises: updatedExercises.map(e => ({
-            exercise_id: e.id,
-            sets: e.sets,
-            reps: e.reps,
-            notes: e.notes || '',
-            isCustom: e.isCustom || false,
-            name: e.name,
-            category: e.category, // ✅ Include category here too
-          }))
-        })
-      });
-  
-      if (!res.ok) throw new Error('Failed to save exercises');
-  
-      setExercisesForDay(updatedExercises);
-      setAddExerciseModalVisible(false); // Close modal
-    } catch (err) {
-      console.error('Failed to save exercise:', err);
-    }
-  };
-  
   const handleDeleteExercise = async (idToDelete: string) => {
     const updatedExercises = exercisesForDay.filter(ex => ex.id !== idToDelete);
     setExercisesForDay(updatedExercises);
@@ -368,55 +262,45 @@ export default function HomeScreen() {
       console.error('Error deleting exercise:', err);
     }
   };
+  const handleSaveExerciseWrapper = async (exercise: Exercise) => {
+    const updated = [...exercisesForDay];
+    const index = updated.findIndex(e => e.id === exercise.id);
   
+    if (index > -1) {
+      updated[index] = exercise;
+    } else {
+      updated.push(exercise);
+    }
   
-
-// --- NEW VERSION ---
-  const renderExerciseBar = (count: number) => {
-  /** 
-   * We interleave green “segments” with thin white “separators”.
-   *  ┌───┬─┬─┐     for   count = 3
-   *  │███│ │ │
-   *  └───┴─┴─┘
-   */
-    const items = [];
-
-    for (let i = 0; i < count; i++) {
-    // green segment
-    items.push(
-      <View key={`seg-${i}`} style={styles.exerciseBarSegment} />
-    );
-
-    // separator (don’t add one after the last segment)
-      if (i < count - 1) {
-        items.push(
-        <View key={`sep-${i}`} style={styles.exerciseBarSeparator} />
-      );
+    // Save to API
+    try {
+      const token = await getAccessToken();
+      await fetch(`${servers[2]}/api/exercises/user-daily-exercises`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: format(currentDate, 'yyyy-MM-dd'),
+          exercises: updated.map(e => ({
+            exercise_id: e.id,
+            sets: e.sets,
+            reps: e.reps,
+            notes: e.notes || '',
+            isCustom: e.isCustom,
+            name: e.name,
+            category: e.category || '',
+          })),
+        }),
+      });
+  
+      setExercisesForDay(updated);
+    } catch (err) {
+      console.error('Failed to save exercise:', err);
     }
-  }
-  return <View style={styles.exerciseBarContainer}>{items}</View>;
   };
-
-  const groupExercisesByCategory = (exercises: Exercise[]) => {
-    const categoryMap: { [category: string]: number } = {};
-
-    exercises.forEach((exercise) => {
-      const category = exercise.category || 'Uncategorized';
-      categoryMap[category] = (categoryMap[category] || 0) + 1;
-    });
-
-    return categoryMap;
-  };
-
-  const CATEGORY_ORDER = ['Legs', 'Chest', 'Back', 'Arms', 'Core', 'Shoulders', 'Glutes'];
-  // 👇 Declare this properly with type annotation for TS
-  const orderedCategories: [string, number][] = Object.entries(groupExercisesByCategory(exercisesForDay)).sort(
-    ([a], [b]) => {
-      const indexA = CATEGORY_ORDER.indexOf(a);
-      const indexB = CATEGORY_ORDER.indexOf(b);
-      return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-    }
-  );
+  
 
   return (
     <View style={styles.container}>
@@ -437,29 +321,22 @@ export default function HomeScreen() {
         </TouchableOpacity>
 
         <View style={styles.statsContainer}>
-          {/* Calorie Stat Box - Now editable */}
-          <TouchableOpacity style={styles.statBox} onPress={handleEditCalories}>
-            <Text style={styles.statValueSmall}>{calories}</Text>
-            <Text style={styles.statLabelSmall}>CALORIE</Text>
-          </TouchableOpacity>
+          <EditableStatBox
+            label="CALORIE"
+            value={calories}
+            title="How many calories did you consume today?"
+            placeholder="e.g. 2200"
+            keyboardType="number-pad"
+            onConfirmValue={(val) => setCalories(val)}
+          />
 
-          <View style={styles.statBoxMiddle}>
-            <View style={[styles.timerContainer, { width: timerSize, height: timerSize, borderRadius: timerBorderRadius }]}>
-              <View style={[styles.timerCircle, { borderRadius: timerBorderRadius, borderColor: 'rgba(255, 255, 255, 0.8)' }]}>
-                <View style={[styles.timerFill, { backgroundColor: getTimerColor(), height: `${timerProgress}%` }]} />
-                <Text style={styles.statValueMinutes}>{formatTime(timeRemaining)}</Text>
-                <Text style={styles.statLabelMinutes}>MINS</Text>
-              </View>
-            </View>
-            <View style={styles.timerControls}>
-              <TouchableOpacity style={styles.controlButton} onPress={handleStartPause}>
-                <Text style={styles.controlButtonText}>{isRunning ? 'PAUSE' : 'START'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.controlButton} onPress={handleEditTimer}>
-                <Text style={styles.controlButtonText}>EDIT</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <WorkoutTimer
+            timeRemaining={timeRemaining}
+            totalTime={totalTime}
+            isRunning={isRunning}
+            onStartPause={handleStartPause}
+            onTimeChange={(newMinutes) => setInitialMinutes(newMinutes.toString())}
+          />
 
           <View style={styles.statBox}>
             <Text style={styles.statValueSmall}>{streak !== null ? streak : '--'}</Text>
@@ -468,25 +345,13 @@ export default function HomeScreen() {
         </View>
       </LinearGradient>
 
-      <View style={styles.categorySelector}>
-        {orderedCategories.map(([category, count]) => (
-          <View key={category} style={styles.categoryColumn}>
-            <Text style={styles.categoryText}>{category.toUpperCase()}</Text>
-            {renderExerciseBar(count)}
-          </View>
-        ))}
-      </View>
+      <CategorySummary exercises={exercisesForDay} />
 
-
-      <View style={styles.dateNavigator}>
-        <TouchableOpacity onPress={goToPreviousDay}>
-          <AntDesign name="left" size={screenWidth * 0.05} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.dateText}>{displayDate}</Text>
-        <TouchableOpacity onPress={goToNextDay}>
-          <AntDesign name="right" size={screenWidth * 0.05} color="#000" />
-        </TouchableOpacity>
-      </View>
+      <DateNavigator
+        onPrev={goToPreviousDay}
+        onNext={goToNextDay}
+        displayDate={displayDate}
+      />
 
       <ScrollView style={styles.exerciseListContainer}
         contentContainerStyle={[
@@ -510,118 +375,15 @@ export default function HomeScreen() {
         <AntDesign name="plus" size={screenWidth * 0.07} color="white" />
       </TouchableOpacity>
 
-      <Modal visible={modalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>How long do you want your workout to be?</Text>
-            <TextInput
-              style={styles.modalInput}
-              keyboardType="number-pad"
-              value={tempMinutes}
-              onChangeText={setTempMinutes}
-            />
-            <TouchableOpacity style={styles.modalButton} onPress={confirmEditTimer}>
-              <Text style={styles.modalButtonText}>CONFIRM</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
-      {/* New Modal for Calorie Editing */}
-      <Modal visible={calorieModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>How many calories did you consume today?</Text>
-            <TextInput
-              style={styles.modalInput}
-              keyboardType="number-pad"
-              value={tempCalories}
-              onChangeText={setTempCalories}
-            />
-            <TouchableOpacity style={styles.modalButton} onPress={confirmEditCalories}>
-              <Text style={styles.modalButtonText}>CONFIRM</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setCalorieModalVisible(false)}>
-              <Text style={styles.modalButtonText}>CANCEL</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal visible={addExerciseModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{selectedExercise ? 'Edit Exercise' : 'Add Exercise'}</Text>
-
-            <TextInput
-              placeholder="Exercise Name"
-              style={styles.modalInput}
-              value={tempExerciseName}
-              onChangeText={setTempExerciseName}
-            />
-
-            <Picker
-              selectedValue={tempCategory}
-              style={styles.modalPicker}
-              onValueChange={(itemValue) => setTempCategory(itemValue)}
-            >
-              {CATEGORY_ORDER.map(category => (
-                <Picker.Item key={category} label={category} value={category} />
-              ))}
-            </Picker>
-
-
-            <TextInput
-              placeholder="Sets"
-              style={styles.modalInput}
-              keyboardType="number-pad"
-              value={tempSets}
-              onChangeText={setTempSets}
-            />
-            <TextInput
-              placeholder="Reps"
-              style={styles.modalInput}
-              keyboardType="number-pad"
-              value={tempReps}
-              onChangeText={setTempReps}
-            />
-
-            <TouchableOpacity style={styles.modalButton} onPress={handleSaveExercise}>
-              <Text style={styles.modalButtonText}>{selectedExercise ? 'SAVE CHANGES' : 'ADD EXERCISE'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setAddExerciseModalVisible(false)}>
-              <Text style={styles.modalButtonText}>CANCEL</Text>
-            </TouchableOpacity>
-
-            {selectedExercise?.isCustom && (
-              <TouchableOpacity
-                style={[styles.modalButton, styles.deleteButton]}
-                onPress={() => {
-                  Alert.alert(
-                    'Delete Exercise',
-                    'Are you sure you want to delete this custom exercise?',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      {
-                        text: 'Delete',
-                        style: 'destructive',
-                        onPress: () => {
-                          handleDeleteExercise(selectedExercise.id);
-                          setAddExerciseModalVisible(false);
-                        },
-                      },
-                    ]
-                  );
-                }}
-              >
-                <Text style={styles.modalButtonText}>DELETE EXERCISE</Text>
-              </TouchableOpacity>
-            )}
-
-
-          </View>
-        </View>
-      </Modal>
+      {/*Other Modals */}
+      <ExerciseModal
+        visible={addExerciseModalVisible}
+        onClose={() => setAddExerciseModalVisible(false)}
+        initialExercise={selectedExercise as Exercise}
+        onSave={(exercise) => handleSaveExerciseWrapper(exercise)}
+        onDelete={handleDeleteExercise}
+      />
 
       {!loadingUser && user && (
         <AccountModal
@@ -633,29 +395,6 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-// --- Separate Exercise Item Component (Recommended) ---
-const ExerciseItem = ({ exercise, onEdit }: { exercise: Exercise, onEdit: (exercise: Exercise) => void, }) => {
-  return (
-    <TouchableOpacity style={styles.exerciseItem} onPress={() => onEdit(exercise)}>
-      {exercise.image_url ? (
-        <Image
-          source={{ uri: exercise.image_url }}
-          style={styles.exerciseImagePlaceholder}
-        />
-      ) : (
-        <View style={styles.exerciseImagePlaceholder} />
-      )}
-
-      <View style={styles.exerciseDetails}>
-        <Text style={styles.exerciseTitle}>{exercise.name}</Text>
-        <Text style={styles.exerciseReps}>{exercise.sets} SET - {exercise.reps} REP</Text>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-// --- End Separate Exercise Item Component ---
 
 const styles = StyleSheet.create({
   container: {
@@ -717,11 +456,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  statBoxMiddle: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 2,
-  },
   statValueSmall: {
     fontSize: screenWidth * 0.055,
     color: 'white',
@@ -733,146 +467,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // Timer Styles
-  timerContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: screenHeight * 0.01,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  timerCircle: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  timerFill: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    width: '100%',
-    backgroundColor: '#55F358',
-  },
-  statValueMinutes: {
-    fontSize: screenWidth * 0.08,
-    color: 'white',
-    fontWeight: 'bold',
-    zIndex: 1,
-  },
-  statLabelMinutes: {
-    fontSize: screenWidth * 0.035,
-    color: 'white',
-    marginTop: 4,
-    zIndex: 1,
-  },
-  timerControls: {
-    flexDirection: 'row',
-    marginTop: screenHeight * 0.01,
-  },
-  controlButton: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    paddingVertical: screenHeight * 0.01,
-    paddingHorizontal: screenWidth * 0.04,
-    borderRadius: 20,
-    marginHorizontal: screenWidth * 0.01,
-  },
-  controlButtonText: {
-    fontSize: 16,
-    color: 'white',
-    fontWeight: 'bold',
-  },
-
-  // Category Selector Styles
-  categorySelector: {
-    backgroundColor: 'white',
-    marginHorizontal: screenWidth * 0.05,
-    marginTop: -screenHeight * 0.04,
-    borderRadius: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: screenHeight * 0.015,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-    zIndex: 1,
-  },
-  categoryColumn: {
-    alignItems: 'center',
-  },
-  categoryText: {
-    fontWeight: '600',
-    color: '#999',
-    fontSize: screenWidth * 0.035,
-    marginBottom: screenHeight * 0.005, // Space between text and bar
-  },
-exerciseBarContainer: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  height: screenHeight * 0.008,
-  borderRadius: 2,
-  overflow: 'hidden',
-  width: screenWidth * 0.15,
-},
-
-exerciseBarSegment: {
-  flex: 1,                       // each segment grows evenly
-  height: '100%',
-  backgroundColor: '#58F975',    // green fill
-},
-
-exerciseBarSeparator: {
-  width: 2,                      // tweak thickness here
-  height: '100%',
-  backgroundColor: '#FFFFFF',    // separator colour
-},
-
-modalLabel: {
-  fontSize: 16,
-  fontWeight: '600',
-  marginBottom: 8,
-  marginTop: 12,
-  color: '#333',
-},
-
-modalPicker: {
-  height: 50,
-  width: '100%',
-  borderColor: '#ccc',
-  borderWidth: 1,
-  borderRadius: 6,
-  backgroundColor: '#fff',
-  marginBottom: 16,
-},
-deleteButton: {
-  backgroundColor: '#FF4D4D',
-  marginTop: 10,
-  paddingVertical: 10,
-  borderRadius: 6,
-},
-
-
-
-
-  // Date Navigator Styles
-  dateNavigator: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: screenWidth * 0.05,
-    paddingVertical: screenHeight * 0.02,
-    backgroundColor: '#F2EDE9',
-  },
-  dateText: {
-    fontSize: screenWidth * 0.04,
-    fontWeight: '600',
-    color: '#000',
-  },
 
   // Exercise List Styles
   exerciseListContainer: {
@@ -883,40 +477,6 @@ deleteButton: {
   },
   exerciseListContent: {
     paddingBottom: screenHeight * 0.05,
-  },
-  exerciseItem: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: screenWidth * 0.03,
-    marginBottom: screenHeight * 0.01,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  exerciseImagePlaceholder: {
-    width: screenWidth * 0.14,
-    height: screenWidth * 0.14,
-    backgroundColor: '#E9E2DA',
-    borderRadius: 8,
-    marginRight: screenWidth * 0.04,
-  },
-  exerciseDetails: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  exerciseTitle: {
-    fontSize: screenWidth * 0.045,
-    fontWeight: '400',
-    color: '#333',
-    marginBottom: screenHeight * 0.005,
-  },
-  exerciseReps: {
-    fontSize: screenWidth * 0.035,
-    color: '#666',
   },
   restContainer: {
     alignItems: 'center',
@@ -955,60 +515,4 @@ deleteButton: {
     elevation: 6,
   },
 
-  // Modal Styles (Timer Edit)
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#F2EDE9',
-    padding: screenWidth * 0.05,
-    borderRadius: 12,
-    width: '80%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: screenWidth * 0.045,
-    marginBottom: screenHeight * 0.02,
-    textAlign: 'center',
-    fontWeight: '300',
-    color: '#000',
-  },
-  modalInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: screenWidth * 0.035,
-    fontSize: screenWidth * 0.04,
-    width: '100%',
-    marginBottom: screenHeight * 0.02,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    color: '#000',
-    textAlign: 'center',
-  },
-  modalButton: {
-    backgroundColor: '#55F358',
-    borderRadius: 12,
-    paddingVertical: screenHeight * 0.013,
-    width: '100%',
-    alignItems: 'center',
-    marginTop: screenHeight * 0.01,
-  },
-  modalButtonText: {
-    color: '#fff',
-    fontSize: screenWidth * 0.04,
-    fontWeight: 'bold',
-  },
-  modalCancelButton: {
-    backgroundColor: '#999',
-    marginTop: screenHeight * 0.01,
-  },
 });
