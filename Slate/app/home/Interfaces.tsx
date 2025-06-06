@@ -10,3 +10,5 @@ export interface Exercise {
     isCustom: boolean, // mark as custom if user added it manually
     notes: string,
   }
+
+export default Exercise;
