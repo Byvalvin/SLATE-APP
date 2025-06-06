@@ -4,7 +4,7 @@ import { AntDesign } from '@expo/vector-icons'; // Assuming you have @expo/vecto
 
 const { width, height } = Dimensions.get('window');
 
-export default function ProgressScreen() {
+export default function PremiumScreen() {
   // State to manage the selected pricing plan
   const [selectedPlan, setSelectedPlan] = useState('12_months');// Default to 12 months as "MOST POPULAR"
 
