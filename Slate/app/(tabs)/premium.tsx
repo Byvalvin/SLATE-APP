@@ -103,9 +103,8 @@ export default function PremiumScreen() {
               ]}
               onPress={() => handlePlanSelect('12_months')}
             >
-              <Text style={[styles.pricingDuration, selectedPlan === '12_months' && styles.popularDuration]}>12</Text>
+              <Text style={[styles.pricingDuration, selectedPlan === '12_months' && styles.popularDuration]}>2</Text>
               <Text style={[styles.pricingUnit, selectedPlan === '12_months' && styles.popularUnit]}>months</Text>
-              <Text style={[styles.originalPrice, selectedPlan === '12_months' && styles.popularOriginalPrice]}>$ 119.99</Text>
               <Text style={[styles.discountedPrice, selectedPlan === '12_months' && styles.popularDiscountedPrice]}>$ 40</Text>
               <Text style={[styles.billingDetails, selectedPlan === '12_months' && styles.popularBillingDetails]}>$ 10/month</Text>
               <Text style={[styles.billingType, selectedPlan === '12_months' && styles.popularBillingType]}>Thank you!!!</Text>
