@@ -29,9 +29,7 @@ export default function PremiumScreen() {
 
         {/* Content Section */}
         <View style={styles.contentCard}>
-          <View style={styles.offerBanner}>
-            <Text style={styles.offerBannerText}>LIMITED TIME OFFER</Text>
-          </View>
+          
 
           <Text style={styles.mainTitle}>
               We’re still building Premium. Chip in to keep Slate growing!
@@ -94,7 +92,7 @@ export default function PremiumScreen() {
               <Text style={[styles.originalPrice, selectedPlan === '1_month' && styles.popularOriginalPrice]}>$ 19.99</Text>
               <Text style={[styles.discountedPrice, selectedPlan === '1_month' && styles.popularDiscountedPrice]}>$10</Text>
               <Text style={[styles.billingDetails, selectedPlan === '1_month' && styles.popularBillingDetails]}>$ 10/month</Text>
-              <Text style={[styles.billingType, selectedPlan === '1_month' && styles.popularBillingType]}>Billed monthly</Text>
+              <Text style={[styles.billingType, selectedPlan === '1_month' && styles.popularBillingType]}>Thank you!</Text>
             </TouchableOpacity>
 
             {/* 12 Months Card (Most Popular) */}
@@ -110,7 +108,7 @@ export default function PremiumScreen() {
               <Text style={[styles.originalPrice, selectedPlan === '12_months' && styles.popularOriginalPrice]}>$ 119.99</Text>
               <Text style={[styles.discountedPrice, selectedPlan === '12_months' && styles.popularDiscountedPrice]}>$ 40</Text>
               <Text style={[styles.billingDetails, selectedPlan === '12_months' && styles.popularBillingDetails]}>$ 10/month</Text>
-              <Text style={[styles.billingType, selectedPlan === '12_months' && styles.popularBillingType]}>Billed yearly</Text>
+              <Text style={[styles.billingType, selectedPlan === '12_months' && styles.popularBillingType]}>Thank you!!!</Text>
             </TouchableOpacity>
 
             {/* 3 Months Card */}
@@ -126,7 +124,7 @@ export default function PremiumScreen() {
               <Text style={[styles.originalPrice, selectedPlan === '3_months' && styles.popularOriginalPrice]}>$ 39.99</Text>
               <Text style={[styles.discountedPrice, selectedPlan === '3_months' && styles.popularDiscountedPrice]}>$ 20</Text>
               <Text style={[styles.billingDetails, selectedPlan === '3_months' && styles.popularBillingDetails]}>$ 10/month</Text>
-              <Text style={[styles.billingType, selectedPlan === '3_months' && styles.popularBillingType]}>Billed quarterly</Text>
+              <Text style={[styles.billingType, selectedPlan === '3_months' && styles.popularBillingType]}>Thank you!!</Text>
             </TouchableOpacity>
           </View>
         </View>
