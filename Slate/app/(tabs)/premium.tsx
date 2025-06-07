@@ -136,14 +136,8 @@ export default function PremiumScreen() {
           <Text style={styles.continueButtonText}>CONTINUE</Text>
         </TouchableOpacity>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <AntDesign name="checkcircleo" size={width * 0.04} color="#A0A0A0" style={styles.footerCheckIcon} />
-          <Text style={styles.footerText}>Secured with Google Play. Auto-renewable billing. Cancel anytime.</Text>
-          <TouchableOpacity>
-            <Text style={styles.privacyTermsText}>Privacy Policy & Terms of Use</Text>
-          </TouchableOpacity>
-        </View>
+        
+        
       </View>
     </ScrollView>
   );
