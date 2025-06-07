@@ -89,7 +89,7 @@ export default function PremiumScreen() {
             >
               <Text style={[styles.pricingDuration, selectedPlan === '1_month' && styles.popularDuration]}>1</Text>
               <Text style={[styles.pricingUnit, selectedPlan === '1_month' && styles.popularUnit]}>month</Text>
-              <Text style={[styles.originalPrice, selectedPlan === '1_month' && styles.popularOriginalPrice]}>$ 19.99</Text>
+             
               <Text style={[styles.discountedPrice, selectedPlan === '1_month' && styles.popularDiscountedPrice]}>$10</Text>
               <Text style={[styles.billingDetails, selectedPlan === '1_month' && styles.popularBillingDetails]}>$ 10/month</Text>
               <Text style={[styles.billingType, selectedPlan === '1_month' && styles.popularBillingType]}>Thank you!</Text>
@@ -120,7 +120,7 @@ export default function PremiumScreen() {
             >
               <Text style={[styles.pricingDuration, selectedPlan === '3_months' && styles.popularDuration]}>3</Text>
               <Text style={[styles.pricingUnit, selectedPlan === '3_months' && styles.popularUnit]}>months</Text>
-              <Text style={[styles.originalPrice, selectedPlan === '3_months' && styles.popularOriginalPrice]}>$ 39.99</Text>
+            
               <Text style={[styles.discountedPrice, selectedPlan === '3_months' && styles.popularDiscountedPrice]}>$ 20</Text>
               <Text style={[styles.billingDetails, selectedPlan === '3_months' && styles.popularBillingDetails]}>$ 10/month</Text>
               <Text style={[styles.billingType, selectedPlan === '3_months' && styles.popularBillingType]}>Thank you!!</Text>
