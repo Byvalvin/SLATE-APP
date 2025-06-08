@@ -102,6 +102,14 @@ const ExerciseScreen: React.FC = () => {
   const [page, setPage] = useState(1); // Pagination state for the entire screen
   const [isFetching, setIsFetching] = useState(false);
 
+  const [categoryPages, setCategoryPages] = useState<Record<string, number>>(
+    CATEGORY_ORDER.reduce((acc, category) => {
+      acc[category] = 1;  // Initialize with page 1 for each category
+      return acc;
+    }, {} as Record<string, number>)
+  );
+  
+
   const router = useRouter();
 
   useEffect(() => {
@@ -109,17 +117,23 @@ const ExerciseScreen: React.FC = () => {
       setIsFetching(true);
       try {
         const token = await getAccessToken();
-        const res = await fetch(`${servers[2]}/api/exercises/by-category?page=${page}&limit=5&categories=${selectedCategory}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `${servers[2]}/api/exercises/by-category?page=${categoryPages[selectedCategory] || 1}&limit=5&categories=${selectedCategory}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const data = await res.json();
-
-        // If the data is properly returned, update groupedExercises
+  
+        // Add the new data to the existing data for the selected category
         setGroupedExercises((prevState) => ({
           ...prevState,
-          ...data, // Append new data for each category
+          [selectedCategory]: [
+            ...(prevState[selectedCategory] || []),
+            ...(data[selectedCategory] || []),
+          ],
         }));
       } catch (err) {
         console.error('Failed to load exercises', err);
@@ -128,20 +142,33 @@ const ExerciseScreen: React.FC = () => {
         setIsFetching(false);
       }
     };
-
-    fetchExercises();
-  }, [page, selectedCategory]);
-
+  
+    if (selectedCategory) {
+      fetchExercises();
+    }
+  }, [selectedCategory, categoryPages[selectedCategory]]);
+  
   const handleSearchSubmit = () => {
-    setPage(1); // Reset to page 1 for new search
-    setGroupedExercises({});
-  };
+    setCategoryPages(
+      CATEGORY_ORDER.reduce((acc, category) => {
+        acc[category] = 1; // Reset pagination for all categories
+        return acc;
+      }, {} as { [key: string]: number }) // Explicitly type the accumulator as an object with string keys and number values
+    );
+  
+    setGroupedExercises({}); // If needed, specify its type similarly
+  };  
+  
 
   const handleEndReached = (category: string) => {
     if (!isFetching) {
-      setPage((prevPage) => prevPage + 1); // Increment page for pagination
+      setCategoryPages((prev) => ({
+        ...prev,
+        [category]: prev[category] + 1, // Increment the page for that category
+      }));
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -150,7 +177,7 @@ const ExerciseScreen: React.FC = () => {
         <View style={styles.headerContainer}>
           <Text style={styles.headerTitle}>STANDARD</Text>
         </View>
-
+  
         <SearchWithFilterBar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -158,7 +185,7 @@ const ExerciseScreen: React.FC = () => {
           setSelectedCategory={setSelectedCategory}
           onSearchSubmit={handleSearchSubmit}
         />
-
+  
         {loading ? (
           <Text>Loading exercises...</Text>
         ) : (
@@ -175,6 +202,7 @@ const ExerciseScreen: React.FC = () => {
       </ScrollView>
     </SafeAreaView>
   );
+  
 };
 
 const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onEndReached }) => (
@@ -185,7 +213,7 @@ const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onEndRea
     <FlatList
       data={data}
       renderItem={({ item }) => <ExerciseCard {...item} />}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => `${item.id || item.title}-${index}`} // Ensure uniqueness by concatenating id and index
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.sectionListContent}

@@ -165,16 +165,26 @@ router.get('/grouped', authMiddleware, async (req, res) => {
 router.get('/by-category', authMiddleware, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
-    const page = parseInt(req.query.page) || 1;  // Pagination for each category
+    const page = parseInt(req.query.page) || 1; // Pagination for each category
     const skip = (page - 1) * limit;
 
     const categoriesParam = req.query.categories; // e.g. "Arms,Back,Legs"
     const includeUncategorized = req.query.includeUncategorized === 'true';
 
-    // Fetch all exercises with images
-    const exercises = await Exercise.find({
-      image_url: { $exists: true, $ne: '' },
-    });
+    const categories = categoriesParam ? categoriesParam.split(',').map(c => c.trim()) : null;
+
+    // Fetch exercises with images, only from the requested categories
+    let exercisesQuery = { image_url: { $exists: true, $ne: '' } };
+
+    if (categories && categories.length > 0) {
+      exercisesQuery.category = { $in: categories }; // Filter by selected categories
+    } else if (!includeUncategorized) {
+      exercisesQuery.category = { $ne: 'Uncategorized' }; // Exclude 'Uncategorized' if not needed
+    }
+
+    const exercises = await Exercise.find(exercisesQuery)
+      .skip(skip)
+      .limit(limit);
 
     // Group exercises by category
     const grouped = exercises.reduce((acc, exercise) => {
@@ -186,36 +196,13 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       return acc;
     }, {});
 
-    // Filter categories if categoriesParam specified
-    let filteredGrouped = grouped;
-    if (categoriesParam) {
-      const allowedCategories = categoriesParam.split(',').map(c => c.trim());
-      filteredGrouped = Object.keys(grouped).reduce((acc, key) => {
-        if (allowedCategories.includes(key)) {
-          acc[key] = grouped[key];
-        }
-        return acc;
-      }, {});
-    }
-
-    // Remove Uncategorized if not included
-    if (!includeUncategorized) {
-      delete filteredGrouped['Uncategorized'];
-    }
-
-    // Apply pagination per category
-    const paginatedGrouped = {};
-    Object.keys(filteredGrouped).forEach((key) => {
-      const categoryExercises = filteredGrouped[key];
-      paginatedGrouped[key] = categoryExercises.slice(skip, skip + limit);
-    });
-
-    res.json(paginatedGrouped);
+    res.json(grouped);
   } catch (err) {
     console.error('Error grouping exercises by category:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 
