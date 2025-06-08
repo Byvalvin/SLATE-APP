@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 const messages : string[] = [
-    "Stay safe. Go at your own pace.",
+    "Correct form is crucial for injury prevention. Slate is not liable for injuries",
     "Perform all exercises safely and at your own pace. Stop if you feel pain or discomfort.",
     "Follow the steps carefully and stop if you feel discomfort.",
     "Consult your physician before starting a new exercise routine." 

@@ -125,7 +125,7 @@ const ProgramsScreen = () => {
      
         <View style={styles.curatedInfo}>
           <Ionicons name="sparkles" size={getFontSize(16)} color="#6B7280" />
-          <Text style={styles.curatedInfoText}>Curated for you by an expert</Text>
+          <Text style={styles.curatedInfoText}>Curated for you </Text>
         </View>
 
     
