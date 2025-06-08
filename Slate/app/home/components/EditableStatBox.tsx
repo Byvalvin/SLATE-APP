@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
     fontSize: screenWidth * 0.035,
     color: 'white',
     marginTop: 4,
+    fontWeight:'bold',
   },
 
 });

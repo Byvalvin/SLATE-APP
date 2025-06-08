@@ -440,8 +440,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: screenWidth * 0.1, // Relative font size for title (adjust as needed)
     color: 'white',
-    fontWeight: 'bold',
-    marginBottom: screenHeight * 0.03, // Adjusted margin bottom
+    fontWeight: 'semibold',
+    marginBottom: screenHeight * 0.03,
+    fontFamily: "Antic-Regular" // Adjusted margin bottom
   },
 
   // Adjusted profileButton and profileImage for relative sizing
@@ -488,6 +489,7 @@ const styles = StyleSheet.create({
   },
   statLabelSmall: {
     fontSize: screenWidth * 0.035,
+    fontWeight: 'bold',
     color: 'white',
     marginTop: 4,
   },
