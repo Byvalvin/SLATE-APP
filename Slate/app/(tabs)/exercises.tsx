@@ -104,64 +104,66 @@ const ExerciseScreen: React.FC = () => {
 
   const [categoryPages, setCategoryPages] = useState<Record<string, number>>(
     CATEGORY_ORDER.reduce((acc, category) => {
-      acc[category] = 1;  // Initialize with page 1 for each category
+      acc[category] = 1; // Initialize with page 1 for each category
       return acc;
     }, {} as Record<string, number>)
   );
   
+  
 
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchExercises = async () => {
-      setIsFetching(true);
-      try {
-        const token = await getAccessToken();
-        // Fetch data for all categories initially
-        const res = await fetch(
-          `${servers[2]}/api/exercises/by-category?page=${page}&limit=5`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = await res.json();
-    
-        // Merge the data into the groupedExercises state
-        setGroupedExercises((prevState) => ({
-          ...prevState,
-          ...data,
-        }));
-      } catch (err) {
-        console.error('Failed to load exercises', err);
-      } finally {
-        setLoading(false);
-        setIsFetching(false);
-      }
-    };
-  
-    // Fetch exercises only if the page is greater than 1, to prevent re-fetching on first render
-    if (page === 1) {
-      fetchExercises();
+  const fetchExercisesForCategory = async (category: string, page: number, searchQuery: string) => {
+    setIsFetching(true);
+    try {
+      const token = await getAccessToken();
+      const res = await fetch(
+        `${servers[2]}/api/exercises/by-category?page=${page}&limit=5&categories=${category}&searchQuery=${searchQuery}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await res.json();
+      
+      setGroupedExercises((prevState) => ({
+        ...prevState,
+        [category]: [...(prevState[category] || []), ...(data[category] || [])],
+      }));
+    } catch (err) {
+      console.error('Failed to load exercises', err);
+    } finally {
+      setIsFetching(false);
     }
-  }, [page]);  // Now triggers when page changes, including initial load
+  };
+  useEffect(() => {
+    CATEGORY_ORDER.forEach((category) => {
+      if (categoryPages[category]) {
+        fetchExercisesForCategory(category, categoryPages[category], searchQuery);
+      }
+    });
+  }, [categoryPages, searchQuery]); // Trigger re-fetching when page or search changes
   
+  
+
   // Handle category change, reset pagination for all categories
   const handleSearchSubmit = () => {
-    setCategoryPages(
-      CATEGORY_ORDER.reduce((acc, category) => {
-        acc[category] = 1; // Reset pagination for all categories
-        return acc;
-      }, {} as { [key: string]: number })
-    );
-    setGroupedExercises({}); // Clear existing exercises when search is applied
+    setGroupedExercises({});
+    setCategoryPages(CATEGORY_ORDER.reduce((acc, category) => {
+      acc[category] = 1;
+      return acc;
+    }, {} as {[key:string]: number}));
   };
   
+  
   // Handle infinite scroll / pagination
-  const handleEndReached = () => {
+  const handleEndReached = (category: string) => {
     if (!isFetching) {
-      setPage((prevPage) => prevPage + 1);  // Increment the global page number
+      setCategoryPages((prev) => ({
+        ...prev,
+        [category]: prev[category] + 1, // Increment page for the selected category
+      }));
     }
   };
   
@@ -184,18 +186,18 @@ const ExerciseScreen: React.FC = () => {
         />
   
         {loading ? (
-          <Text>Loading exercises...</Text>
+        <Text>Loading exercises...</Text>
         ) : (
-          CATEGORY_ORDER.filter(category => groupedExercises[category]) // Only include categories that have exercises
-            .map(category => (
-              <ExerciseSection
-                key={category}
-                title={category}
-                data={groupedExercises[category]}
-                onEndReached={() => handleEndReached()} // Pass category for handling scrolling
-              />
-            ))
-        )}
+        CATEGORY_ORDER.map(category => (
+          <ExerciseSection
+            key={category}
+            title={category}
+            data={groupedExercises[category] || []}
+            onEndReached={() => handleEndReached(category)}
+          />
+        ))
+      )}
+
       </ScrollView>
     </SafeAreaView>
   );

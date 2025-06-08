@@ -168,6 +168,11 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     const page = parseInt(req.query.page) || 1; // Pagination for each category
     const skip = (page - 1) * limit;
 
+    const searchQuery = req.query.searchQuery || "";
+    if (searchQuery) {
+      exercisesQuery.title = { $regex: searchQuery, $options: "i" }; // Case-insensitive search by title
+    }
+
     const categoriesParam = req.query.categories; // e.g. "Arms,Back,Legs"
     const includeUncategorized = req.query.includeUncategorized === 'true';
 
