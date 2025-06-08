@@ -271,8 +271,11 @@ router.get('/:id', authMiddleware, async (req, res) => {
 router.get('/search', authMiddleware, async (req, res) => {
   try {
     const query = req.query.query?.trim().toLowerCase() || '';
-
     const category = req.query.category;
+
+    console.log('Search query:', query);
+    console.log('Search category:', category);
+
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;

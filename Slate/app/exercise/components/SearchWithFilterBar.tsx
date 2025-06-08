@@ -1,25 +1,15 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, PixelRatio, Dimensions } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FilterModal from '../Modals/FilterModal'; // import FilterModal
+import FilterModal from '../Modals/FilterModal';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
 
 // Scaling functions remain the same
 const getFontSize = (size: number): number => {
   const scale = screenWidth / 375;
   const newSize = size * scale;
   return PixelRatio.roundToNearestPixel(newSize);
-};
-
-const getWidth = (size: number): number => {
-  const scale = screenWidth / 375;
-  return PixelRatio.roundToNearestPixel(scale * size);
-};
-
-const getHeight = (size: number): number => {
-  const scale = screenHeight / 812;
-  return PixelRatio.roundToNearestPixel(scale * size);
 };
 
 interface Props {
@@ -30,8 +20,6 @@ interface Props {
   onSearchSubmit: () => void;
 }
 
-const CATEGORIES = ['Chest', 'Back', 'Legs', 'Arms', 'Shoulders', 'Core'];
-
 const SearchWithFilterBar: React.FC<Props> = ({
   searchQuery,
   setSearchQuery,
@@ -39,11 +27,11 @@ const SearchWithFilterBar: React.FC<Props> = ({
   setSelectedCategory,
   onSearchSubmit,
 }) => {
-  const [showFilterModal, setShowFilterModal] = useState(false); // State to manage modal visibility
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
   const handleFilterApply = (category: string) => {
     setSelectedCategory(category);
-    setShowFilterModal(false); // Close the modal after applying the filter
+    setShowFilterModal(false);
   };
 
   return (
@@ -56,7 +44,7 @@ const SearchWithFilterBar: React.FC<Props> = ({
           style={styles.searchInput}
           value={searchQuery}
           onChangeText={setSearchQuery}
-          onSubmitEditing={onSearchSubmit}
+          onSubmitEditing={onSearchSubmit} // Ensure this triggers on search submit
         />
       </View>
 
@@ -66,10 +54,9 @@ const SearchWithFilterBar: React.FC<Props> = ({
 
       {selectedCategory && <Text style={styles.selectedCategory}>{selectedCategory}</Text>}
 
-      {/* The FilterModal is now integrated here */}
       <FilterModal
         visible={showFilterModal}
-        onClose={() => setShowFilterModal(false)} // Close modal when clicked outside or cancel
+        onClose={() => setShowFilterModal(false)}
         onApply={handleFilterApply}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
