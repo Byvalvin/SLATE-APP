@@ -171,11 +171,13 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     const categoriesParam = req.query.categories; // e.g. "Arms,Back,Legs"
     const includeUncategorized = req.query.includeUncategorized === 'true';
 
-    const categories = categoriesParam ? categoriesParam.split(',').map(c => c.trim()) : null;
+    // If categoriesParam exists, split by comma and trim whitespace
+    const categories = categoriesParam ? categoriesParam.split(',').map(c => c.trim().toLowerCase()) : null;
 
-    // Fetch exercises with images, only from the requested categories
+    // Fetch exercises with images, only from the requested categories (if specified)
     let exercisesQuery = { image_url: { $exists: true, $ne: '' } };
 
+    // If categories are provided, only fetch exercises in those categories
     if (categories && categories.length > 0) {
       exercisesQuery.category = { $in: categories }; // Filter by selected categories
     } else if (!includeUncategorized) {
@@ -186,9 +188,9 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    // Group exercises by category
+    // Group exercises by category (using lower case for case insensitivity)
     const grouped = exercises.reduce((acc, exercise) => {
-      const category = exercise.category || 'Uncategorized';
+      const category = (exercise.category || 'Uncategorized').toLowerCase();
       if (!acc[category]) {
         acc[category] = [];
       }

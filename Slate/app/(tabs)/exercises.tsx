@@ -117,8 +117,9 @@ const ExerciseScreen: React.FC = () => {
       setIsFetching(true);
       try {
         const token = await getAccessToken();
+        // Fetch data for all categories initially
         const res = await fetch(
-          `${servers[2]}/api/exercises/by-category?page=${categoryPages[selectedCategory] || 1}&limit=5&categories=${selectedCategory}`,
+          `${servers[2]}/api/exercises/by-category?page=${page}&limit=5`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -126,14 +127,11 @@ const ExerciseScreen: React.FC = () => {
           }
         );
         const data = await res.json();
-  
-        // Add the new data to the existing data for the selected category
+    
+        // Merge the data into the groupedExercises state
         setGroupedExercises((prevState) => ({
           ...prevState,
-          [selectedCategory]: [
-            ...(prevState[selectedCategory] || []),
-            ...(data[selectedCategory] || []),
-          ],
+          ...data,
         }));
       } catch (err) {
         console.error('Failed to load exercises', err);
@@ -143,31 +141,30 @@ const ExerciseScreen: React.FC = () => {
       }
     };
   
-    if (selectedCategory) {
+    // Fetch exercises only if the page is greater than 1, to prevent re-fetching on first render
+    if (page === 1) {
       fetchExercises();
     }
-  }, [selectedCategory, categoryPages[selectedCategory]]);
+  }, [page]);  // Now triggers when page changes, including initial load
   
+  // Handle category change, reset pagination for all categories
   const handleSearchSubmit = () => {
     setCategoryPages(
       CATEGORY_ORDER.reduce((acc, category) => {
         acc[category] = 1; // Reset pagination for all categories
         return acc;
-      }, {} as { [key: string]: number }) // Explicitly type the accumulator as an object with string keys and number values
+      }, {} as { [key: string]: number })
     );
+    setGroupedExercises({}); // Clear existing exercises when search is applied
+  };
   
-    setGroupedExercises({}); // If needed, specify its type similarly
-  };  
-  
-
-  const handleEndReached = (category: string) => {
+  // Handle infinite scroll / pagination
+  const handleEndReached = () => {
     if (!isFetching) {
-      setCategoryPages((prev) => ({
-        ...prev,
-        [category]: prev[category] + 1, // Increment the page for that category
-      }));
+      setPage((prevPage) => prevPage + 1);  // Increment the global page number
     }
   };
+  
   
 
   return (
@@ -195,7 +192,7 @@ const ExerciseScreen: React.FC = () => {
                 key={category}
                 title={category}
                 data={groupedExercises[category]}
-                onEndReached={() => handleEndReached(category)} // Pass category for handling scrolling
+                onEndReached={() => handleEndReached()} // Pass category for handling scrolling
               />
             ))
         )}
