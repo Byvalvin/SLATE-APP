@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { AntDesign } from '@expo/vector-icons'; // Assuming you have @expo/vector-icons installed for checkmarks
+import { AntDesign } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
 export default function PremiumScreen() {
-  // State to manage the selected pricing plan
-  const [selectedPlan, setSelectedPlan] = useState('12_months');// Default to 12 months as "MOST POPULAR"
+  // State to manage the selected donation amount
+  const [selectedDonation, setSelectedDonation] = useState('40_dollars'); // Default to $40 as suggested
 
-  // Fix: Explicitly type the 'plan' parameter as string
-  const handlePlanSelect = (plan: string) => {
-    setSelectedPlan(plan);
+  const handleDonationSelect = (amount: string) => {
+    setSelectedDonation(amount);
   };
 
   return (
@@ -18,54 +17,50 @@ export default function PremiumScreen() {
       <View style={styles.container}>
         {/* Header Section */}
         <View style={styles.headerBackground}>
-          {/* Placeholder for the person image - replace with actual image if available */}
           <Image
-            source={{ uri: 'https://placehold.co/150x150/F2EDE9/000000?text=Person' }} // Placeholder image
+            source={{ uri: 'https://placehold.co/150x150/F2EDE9/000000?text=Person' }}
             style={styles.personImage}
             resizeMode="contain"
           />
-          {/* Removed food images as requested */}
         </View>
 
         {/* Content Section */}
         <View style={styles.contentCard}>
-          
-
           <Text style={styles.mainTitle}>
-              We’re still building Premium. Chip in to keep Slate growing!
+            We’re still building Slate. Chip in to keep Slate growing!
           </Text>
 
           {/* Feature List */}
           <View style={styles.featureList}>
-            {/* Feature Item 1: Progress tracking for your health */}
+            {/* Feature Item 1: Comprehensive Health Progress Tracking */}
             <View style={styles.featureItem}>
               <AntDesign name="checkcircle" size={width * 0.05} color="#60B95B" style={styles.checkIcon} />
               <Text style={styles.featureText}>
                 <Text style={styles.boldText}>Comprehensive Health Progress Tracking</Text> for detailed insights into your well-being.
               </Text>
             </View>
-            {/* Feature Item 2: Super personalized recommendations from your AI health partner */}
+            {/* Feature Item 2: AI-Powered Personalized Recommendations */}
             <View style={styles.featureItem}>
               <AntDesign name="checkcircle" size={width * 0.05} color="#60B95B" style={styles.checkIcon} />
               <Text style={styles.featureText}>
                 <Text style={styles.boldText}>AI-Powered Personalized Recommendations</Text> from your dedicated health partner.
               </Text>
             </View>
-            {/* Feature Item 3: Daily tracking for gym consistency */}
+            {/* Feature Item 3: Daily Gym Consistency Tracking */}
             <View style={styles.featureItem}>
               <AntDesign name="checkcircle" size={width * 0.05} color="#60B95B" style={styles.checkIcon} />
               <Text style={styles.featureText}>
                 <Text style={styles.boldText}>Daily Gym Consistency Tracking</Text> to help you maintain your fitness routine.
               </Text>
             </View>
-            {/* Feature Item 4: Advanced nutritional insights and meal planning */}
+            {/* Feature Item 4: Advanced Nutritional Insights */}
             <View style={styles.featureItem}>
               <AntDesign name="checkcircle" size={width * 0.05} color="#60B95B" style={styles.checkIcon} />
               <Text style={styles.featureText}>
                 <Text style={styles.boldText}>Advanced Nutritional Insights</Text> and personalized meal planning.
               </Text>
             </View>
-            {/* Feature Item 5: Real-time performance analytics for workouts */}
+            {/* Feature Item 5: Real-time Workout Performance Analytics */}
             <View style={styles.featureItem}>
               <AntDesign name="checkcircle" size={width * 0.05} color="#60B95B" style={styles.checkIcon} />
               <Text style={styles.featureText}>
@@ -75,55 +70,47 @@ export default function PremiumScreen() {
           </View>
         </View>
 
-        {/* Pricing Section */}
+        {/* Donation Section */}
         <View style={styles.pricingContainer}>
-          <Text style={styles.mostPopularText}>SUPPORT SLATE</Text>
+          <Text style={styles.supportText}>SUPPORT SLATE</Text>
           <View style={styles.pricingCardsWrapper}>
-            {/* 1 Month Card */}
+            {/* $10 Donation Card */}
             <TouchableOpacity
               style={[
                 styles.pricingCard,
-                selectedPlan === '1_month' && styles.popularCard,
+                selectedDonation === '10_dollars' && styles.popularCard,
               ]}
-              onPress={() => handlePlanSelect('1_month')}
+              onPress={() => handleDonationSelect('10_dollars')}
             >
-              <Text style={[styles.pricingDuration, selectedPlan === '1_month' && styles.popularDuration]}>1</Text>
-              <Text style={[styles.pricingUnit, selectedPlan === '1_month' && styles.popularUnit]}>month</Text>
-             
-              <Text style={[styles.discountedPrice, selectedPlan === '1_month' && styles.popularDiscountedPrice]}>$10</Text>
-              <Text style={[styles.billingDetails, selectedPlan === '1_month' && styles.popularBillingDetails]}>$ 10/month</Text>
-              <Text style={[styles.billingType, selectedPlan === '1_month' && styles.popularBillingType]}>Thank you!</Text>
+              <Text style={[styles.donationAmount, selectedDonation === '10_dollars' && styles.popularDonationAmount]}>$10</Text>
+              <Text style={[styles.donationLabel, selectedDonation === '10_dollars' && styles.popularDonationLabel]}>Donation</Text>
+              <Text style={[styles.thankYouText, selectedDonation === '10_dollars' && styles.popularThankYouText]}>Thank you!</Text>
             </TouchableOpacity>
 
-            {/* 12 Months Card (Most Popular) */}
+            {/* $40 Donation Card (Highlighted) */}
             <TouchableOpacity
               style={[
                 styles.pricingCard,
-                selectedPlan === '12_months' && styles.popularCard,
+                selectedDonation === '40_dollars' && styles.popularCard,
               ]}
-              onPress={() => handlePlanSelect('12_months')}
+              onPress={() => handleDonationSelect('40_dollars')}
             >
-              <Text style={[styles.pricingDuration, selectedPlan === '12_months' && styles.popularDuration]}>2</Text>
-              <Text style={[styles.pricingUnit, selectedPlan === '12_months' && styles.popularUnit]}>months</Text>
-              <Text style={[styles.discountedPrice, selectedPlan === '12_months' && styles.popularDiscountedPrice]}>$ 40</Text>
-              <Text style={[styles.billingDetails, selectedPlan === '12_months' && styles.popularBillingDetails]}>$ 10/month</Text>
-              <Text style={[styles.billingType, selectedPlan === '12_months' && styles.popularBillingType]}>Thank you!!!</Text>
+              <Text style={[styles.donationAmount, selectedDonation === '40_dollars' && styles.popularDonationAmount]}>$40</Text>
+              <Text style={[styles.donationLabel, selectedDonation === '40_dollars' && styles.popularDonationLabel]}>Donation</Text>
+              <Text style={[styles.thankYouText, selectedDonation === '40_dollars' && styles.popularThankYouText]}>Thank you!!!</Text>
             </TouchableOpacity>
 
-            {/* 3 Months Card */}
+            {/* $20 Donation Card */}
             <TouchableOpacity
               style={[
                 styles.pricingCard,
-                selectedPlan === '3_months' && styles.popularCard,
+                selectedDonation === '20_dollars' && styles.popularCard,
               ]}
-              onPress={() => handlePlanSelect('3_months')}
+              onPress={() => handleDonationSelect('20_dollars')}
             >
-              <Text style={[styles.pricingDuration, selectedPlan === '3_months' && styles.popularDuration]}>3</Text>
-              <Text style={[styles.pricingUnit, selectedPlan === '3_months' && styles.popularUnit]}>months</Text>
-            
-              <Text style={[styles.discountedPrice, selectedPlan === '3_months' && styles.popularDiscountedPrice]}>$ 20</Text>
-              <Text style={[styles.billingDetails, selectedPlan === '3_months' && styles.popularBillingDetails]}>$ 10/month</Text>
-              <Text style={[styles.billingType, selectedPlan === '3_months' && styles.popularBillingType]}>Thank you!!</Text>
+              <Text style={[styles.donationAmount, selectedDonation === '20_dollars' && styles.popularDonationAmount]}>$20</Text>
+              <Text style={[styles.donationLabel, selectedDonation === '20_dollars' && styles.popularDonationLabel]}>Donation</Text>
+              <Text style={[styles.thankYouText, selectedDonation === '20_dollars' && styles.popularThankYouText]}>Thank you!!</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -132,9 +119,6 @@ export default function PremiumScreen() {
         <TouchableOpacity style={styles.continueButton}>
           <Text style={styles.continueButtonText}>CONTINUE</Text>
         </TouchableOpacity>
-
-        
-        
       </View>
     </ScrollView>
   );
@@ -143,83 +127,70 @@ export default function PremiumScreen() {
 const styles = StyleSheet.create({
   scrollViewContainer: {
     flex: 1,
-    backgroundColor: '#F2EDE9', // Background color for the entire screen
+    backgroundColor: '#F2EDE9',
   },
   container: {
     flex: 1,
     alignItems: 'center',
     backgroundColor: '#F2EDE9',
-    paddingBottom: height * 0.02, // Add some padding at the bottom
+    paddingBottom: height * 0.02,
   },
   headerBackground: {
     width: '100%',
-    height: height * 0.15, // Adjust height as needed, relative to screen height
-    backgroundColor: '#C0B3A2', // A light green color to simulate the background behind the person
-    borderBottomLeftRadius: width * 0.25, // Relative border radius (half of previous)
-    borderBottomRightRadius: width * 0.25, // Relative border radius (half of previous)
-    justifyContent: 'center', // Center content vertically
-    alignItems: 'center', // Center content horizontally
-    marginBottom: -height * 0.06, // Overlap with the content card, relative to screen height
+    height: height * 0.15,
+    backgroundColor: '#C0B3A2',
+    borderBottomLeftRadius: width * 0.25,
+    borderBottomRightRadius: width * 0.25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: -height * 0.06,
   },
   personImage: {
-    width: width * 0.35, // Relative width
-    height: width * 0.35, // Relative height to maintain aspect ratio
-    borderRadius: (width * 0.35) / 2, // Make it circular, relative to size
+    width: width * 0.35,
+    height: width * 0.35,
+    borderRadius: (width * 0.35) / 2,
     position: 'absolute',
-    bottom: -height * 0.09, // Adjust to position relative to the header background, relative to screen height
-    zIndex: 1, // Ensure it's above other elements if needed
-    // You'll need to replace the placeholder with the actual image from the screenshot
-    // For now, it's a simple placeholder
+    bottom: -height * 0.09,
+    zIndex: 1,
   },
   contentCard: {
     backgroundColor: '#FFFFFF',
     width: '90%',
-    borderRadius: width * 0.05, // Relative border radius
-    padding: width * 0.05, // Relative padding
+    borderRadius: width * 0.05,
+    padding: width * 0.05,
     alignItems: 'flex-start',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: height * 0.002 }, // Relative shadow offset
+    shadowOffset: { width: 0, height: height * 0.002 },
     shadowOpacity: 0.1,
-    shadowRadius: width * 0.012, // Relative shadow radius
+    shadowRadius: width * 0.012,
     elevation: 5,
-    marginTop: height * 0.06, // Adjust based on header overlap, relative to screen height
-  },
-  offerBanner: {
-    backgroundColor: '#FFDDC1', // Light orange background
-    borderRadius: width * 0.035, // Relative border radius
-    paddingVertical: height * 0.01, // Relative padding
-    paddingHorizontal: width * 0.04, // Relative padding
-    marginBottom: height * 0.02, // Relative margin
-    alignSelf: 'flex-start', // Align to the left
-  },
-  offerBannerText: {
-    color: '#E07B00', // Darker orange text
-    fontWeight: 'bold',
-    fontSize: width * 0.03, // Relative font size
+    marginTop: height * 0.06,
   },
   mainTitle: {
-    fontSize: width * 0.055, // Relative font size
+    fontSize: width * 0.055,
     fontWeight: 'bold',
-    marginBottom: height * 0.02, // Relative margin
+    marginBottom: height * 0.02,
     color: '#333',
+    textAlign: 'center',
+    width: '100%',
   },
   featureList: {
     width: '100%',
   },
   featureItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start', // Align text to the top if it wraps
-    marginBottom: height * 0.018, // Relative margin
+    alignItems: 'flex-start',
+    marginBottom: height * 0.018,
   },
   checkIcon: {
-    marginRight: width * 0.025, // Relative margin
-    marginTop: height * 0.002, // Adjust to align with text, relative to screen height
+    marginRight: width * 0.025,
+    marginTop: height * 0.002,
   },
   featureText: {
-    flex: 1, // Allow text to wrap
-    fontSize: width * 0.04, // Relative font size
+    flex: 1,
+    fontSize: width * 0.04,
     color: '#555',
-    lineHeight: height * 0.028, // Improve readability, relative to screen height
+    lineHeight: height * 0.028,
   },
   boldText: {
     fontWeight: 'bold',
@@ -227,126 +198,90 @@ const styles = StyleSheet.create({
   pricingContainer: {
     width: '100%',
     alignItems: 'center',
-    marginTop: height * 0.035, // Relative margin
+    marginTop: height * 0.035,
   },
-  mostPopularText: {
-    fontSize: width * 0.03, // Relative font size
+  supportText: {
+    fontSize: width * 0.035,
     fontWeight: 'bold',
     color: '#888',
-    marginBottom: height * 0.012, // Relative margin
+    marginBottom: height * 0.012,
   },
   pricingCardsWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '95%',
-    flexWrap: 'wrap', // Allow cards to wrap on smaller screens
+    flexWrap: 'wrap',
+    // Key change: Vertically align items within the flex container
+    alignItems: 'center',
   },
   pricingCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: width * 0.035, // Relative border radius
-    padding: width * 0.035, // Relative padding
+    borderRadius: width * 0.035,
+    padding: width * 0.035,
     alignItems: 'center',
     justifyContent: 'center',
-    width: width * 0.28, // Roughly 1/3 of screen width minus spacing
-    marginHorizontal: width * 0.012, // Relative margin
-    marginVertical: height * 0.012, // Relative margin
+    width: width * 0.28,
+    marginHorizontal: width * 0.012,
+    // Adjust marginVertical to give more vertical space
+    marginVertical: height * 0.02, // Increased from 0.012 to give more room for scaling
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: height * 0.002 }, // Relative shadow offset
+    shadowOffset: { width: 0, height: height * 0.002 },
     shadowOpacity: 0.1,
-    shadowRadius: width * 0.012, // Relative shadow radius
+    shadowRadius: width * 0.012,
     elevation: 5,
-    height: height * 0.20, // Fixed height for consistency, relative to screen height
+    height: height * 0.18,
+    transitionProperty: 'transform, background-color, shadow-color',
+    transitionDuration: '200ms',
   },
   popularCard: {
-    backgroundColor: '#FF9800', // Orange background for most popular
+    backgroundColor: '#FF9800',
     shadowColor: '#FF9800',
     shadowOpacity: 0.3,
-    shadowRadius: width * 0.025, // Relative shadow radius
+    shadowRadius: width * 0.025,
+    transform: [{ scale: 1.15 }],
+    // No need for specific margin adjustments here if alignItems is used on wrapper
+    // The marginVertical on pricingCard should now provide enough base spacing
   },
-  pricingDuration: {
-    fontSize: width * 0.07, // Relative font size
+  donationAmount: {
+    fontSize: width * 0.065,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: height * 0.005,
   },
-  pricingUnit: {
-    fontSize: width * 0.035, // Relative font size
+  donationLabel: {
+    fontSize: width * 0.035,
     color: '#555',
-    marginBottom: height * 0.006, // Relative margin
+    marginBottom: height * 0.01,
   },
-  originalPrice: {
-    fontSize: width * 0.035, // Relative font size
-    color: '#888',
-    textDecorationLine: 'line-through',
-    marginBottom: height * 0.002, // Relative margin
-  },
-  discountedPrice: {
-    fontSize: width * 0.045, // Relative font size
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: height * 0.012, // Relative margin
-  },
-  billingDetails: {
-    fontSize: width * 0.03, // Relative font size
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  billingType: {
-    fontSize: width * 0.025, // Relative font size
+  thankYouText: {
+    fontSize: width * 0.028,
     color: '#666',
   },
-  popularDuration: {
+  popularDonationAmount: {
     color: '#FFF',
   },
-  popularUnit: {
+  popularDonationLabel: {
     color: '#FFF',
   },
-  popularOriginalPrice: {
-    color: '#FFF',
-  },
-  popularDiscountedPrice: {
-    color: '#FFF',
-  },
-  popularBillingDetails: {
-    color: '#FFF',
-  },
-  popularBillingType: {
+  popularThankYouText: {
     color: '#FFF',
   },
   continueButton: {
-    backgroundColor: '#FF9800', // Orange button
+    backgroundColor: '#FF9800',
     width: '90%',
-    paddingVertical: height * 0.018, // Relative padding
-    borderRadius: width * 0.075, // Relative border radius
+    paddingVertical: height * 0.018,
+    borderRadius: width * 0.075,
     alignItems: 'center',
-    marginTop: height * 0.035, // Relative margin
+    marginTop: height * 0.035,
     shadowColor: '#FF9800',
-    shadowOffset: { width: 0, height: height * 0.006 }, // Relative shadow offset
+    shadowOffset: { width: 0, height: height * 0.006 },
     shadowOpacity: 0.3,
-    shadowRadius: width * 0.025, // Relative shadow radius
+    shadowRadius: width * 0.025,
     elevation: 5,
   },
   continueButtonText: {
     color: '#FFFFFF',
-    fontSize: width * 0.045, // Relative font size
+    fontSize: width * 0.045,
     fontWeight: 'bold',
-  },
-  footer: {
-    marginTop: height * 0.025, // Relative margin
-    alignItems: 'center',
-    paddingHorizontal: width * 0.05, // Relative padding
-  },
-  footerCheckIcon: {
-    marginBottom: height * 0.006, // Relative margin
-  },
-  footerText: {
-    fontSize: width * 0.03, // Relative font size
-    color: '#888',
-    textAlign: 'center',
-    marginBottom: height * 0.012, // Relative margin
-  },
-  privacyTermsText: {
-    fontSize: width * 0.03, // Relative font size
-    color: '#888',
-    textDecorationLine: 'underline',
   },
 });
