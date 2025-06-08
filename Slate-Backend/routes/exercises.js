@@ -202,6 +202,7 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       acc[category].push(exercise);
       return acc;
     }, {});
+    console.log(grouped);
 
     res.json(grouped);
   } catch (err) {

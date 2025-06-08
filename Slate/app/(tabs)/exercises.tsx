@@ -126,6 +126,7 @@ const ExerciseScreen: React.FC = () => {
         }
       );
       const data = await res.json();
+      console.log(category,data)
       
       setGroupedExercises((prevState) => ({
         ...prevState,
