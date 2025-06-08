@@ -139,6 +139,10 @@ const styles = StyleSheet.create({
     color: 'white',
     marginTop: 4,
     zIndex: 1,
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.1)', // Black with 25% opacity
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 0.2,
   },
   timerControls: {
     flexDirection: 'row',
@@ -152,9 +156,13 @@ const styles = StyleSheet.create({
     marginHorizontal: screenWidth * 0.01,
   },
   controlButtonText: {
-    fontSize: 16,
+    fontSize: 18,
     color: 'white',
     fontWeight: 'bold',
+    fontFamily:'Poppins-Regular',
+    textShadowColor: 'rgba(0, 0, 0, 0.1)', // Black with 25% opacity
+    textShadowOffset: { width: 0.5, height: 0.5 },
+    textShadowRadius: 0.1,
   },
   // Modal Styles
   modalOverlay: {
