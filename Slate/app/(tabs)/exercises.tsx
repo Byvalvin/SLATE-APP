@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { CATEGORY_ORDER } from '../home/components/CategorySummary';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -132,15 +133,18 @@ const ExerciseScreen: React.FC = () => {
     const fetchExercises = async () => {
       try {
         const token = await getAccessToken();
-        const res = await fetch(`${servers[2]}/api/exercises/grouped`, {
+        const res = await fetch(`${servers[2]}/api/exercises/by-category?limit=5`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const data: GroupedExercises = await res.json();
+        const data: Record<string, Exercise[]> = await res.json();
+        
 
-        const transformed = Object.entries(data).reduce((acc, [group, list]) => {
-          acc[group] = (list as Exercise[]).map((e) => ({
+        const transformed = Object.entries(data).reduce((acc, [category, list]) => {
+          if (category === 'Uncategorized') return acc; // Skip Uncategorized
+        
+          acc[category] = list.map((e) => ({
             id: e.exerciseId,
             title: e.name,
             subtitle: `${e.primary_muscles?.[0] ?? 'Unknown'} muscle`,
@@ -149,6 +153,8 @@ const ExerciseScreen: React.FC = () => {
           }));
           return acc;
         }, {} as Record<string, ExerciseCardProps[]>);
+        
+        
 
         setGroupedExercises(transformed);
       } catch (err) {
@@ -185,11 +191,17 @@ const ExerciseScreen: React.FC = () => {
 
         {loading ? (
           <Text>Loading exercises...</Text>
-        ) : (
-          Object.entries(groupedExercises).map(([category, exercises]) => (
-            <ExerciseSection key={category} title={category} data={exercises} />
-          ))
+          ) : (
+          CATEGORY_ORDER.filter(category => groupedExercises[category]) // Only include ones that exist
+            .map(category => (
+              <ExerciseSection
+                key={category}
+                title={category}
+                data={groupedExercises[category]}
+              />
+            ))
         )}
+
       </ScrollView>
     </SafeAreaView>
   );

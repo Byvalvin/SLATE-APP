@@ -201,6 +201,58 @@ router.get('/grouped', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/by-category', authMiddleware, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    const categoriesParam = req.query.categories; // e.g. "Arms,Back,Legs"
+    const includeUncategorized = req.query.includeUncategorized === 'true';
+
+    // Fetch all exercises with images
+    const exercises = await Exercise.find({
+      image_url: { $exists: true, $ne: '' },
+    });
+
+    // Group exercises by category
+    const grouped = exercises.reduce((acc, exercise) => {
+      const category = exercise.category || 'Uncategorized';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(exercise);
+      return acc;
+    }, {});
+
+    // Filter categories if categoriesParam specified
+    let filteredGrouped = grouped;
+    if (categoriesParam) {
+      const allowedCategories = categoriesParam.split(',').map(c => c.trim());
+      filteredGrouped = Object.keys(grouped).reduce((acc, key) => {
+        if (allowedCategories.includes(key)) {
+          acc[key] = grouped[key];
+        }
+        return acc;
+      }, {});
+    }
+
+    // Remove Uncategorized if not included
+    if (!includeUncategorized) {
+      delete filteredGrouped['Uncategorized'];
+    }
+
+    // Apply limit per category
+    Object.keys(filteredGrouped).forEach((key) => {
+      filteredGrouped[key] = filteredGrouped[key].slice(0, limit);
+    });
+
+    res.json(filteredGrouped);
+  } catch (err) {
+    console.error('Error grouping exercises by category:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
 // GET /api/exercises/by-ids?ids=abc123,def456,ghi789
 router.get('/by-ids', authMiddleware, async (req, res) => {
   try {

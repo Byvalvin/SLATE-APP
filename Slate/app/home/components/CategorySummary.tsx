@@ -8,7 +8,7 @@ type Props = {
   exercises: Exercise[];
 };
 
-const CATEGORY_ORDER = ['Legs', 'Chest', 'Back', 'Arms', 'Core', 'Shoulders', 'Glutes'];
+export const CATEGORY_ORDER = ['Legs', 'Chest', 'Back', 'Arms', 'Core', 'Shoulders', 'Glutes'];
 
 const CategorySummary: React.FC<Props> = ({ exercises }) => {
   const groupExercisesByCategory = (exercises: Exercise[]) => {
