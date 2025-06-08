@@ -1,10 +1,21 @@
+// app/exercise/[id].tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, SafeAreaView, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken } from '@/utils/token';
 import { servers } from '@/constants/API';
 import MiniWarning from '../home/components/MiniWarning';
+
+// Get screen dimensions for relative sizing
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+// Helper to get relative font size
+const getFontSize = (size: number) => screenWidth * (size / 375); // Assuming base width of 375 for scaling
+
+// Helper to get relative spacing
+const getWidth = (size: number) => screenWidth * (size / 375);
+const getHeight = (size: number) => screenHeight * (size / 812); // Assuming base height of 812 for scaling
 
 const ExerciseDetail = () => {
   const { id } = useLocalSearchParams();
@@ -22,10 +33,9 @@ const ExerciseDetail = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        const ex = data[0];
+        const ex = data[0]; // Assuming the API returns an array even for single ID
         setExercise(ex);
 
-        // Pre-set image fallback chain
         if (ex?.realistic_image_url) {
           setImageUri(ex.realistic_image_url);
         } else if (ex?.image_url) {
@@ -41,110 +51,236 @@ const ExerciseDetail = () => {
       }
     };
 
-    if (id) fetchExercise();
+    if (id) {
+      fetchExercise();
+    } else {
+      setLoading(false); // If no ID, stop loading
+    }
   }, [id]);
 
   const handleImageError = () => {
+    // Only try image_url if realistic_image_url was the current one
     if (imageUri === exercise?.realistic_image_url && exercise?.image_url) {
-      setImageUri(exercise.image_url); // Try fallback to image_url
+      setImageUri(exercise.image_url);
     } else {
       setImageUri(null); // No good image, clear it
     }
   };
 
-  if (loading) return <ActivityIndicator style={{ marginTop: 100 }} size="large" color="#005B44" />;
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#005B44" />
+      </SafeAreaView>
+    );
+  }
 
-  if (!exercise) return <Text style={{ marginTop: 100, textAlign: 'center' }}>Exercise not found.</Text>;
+  if (!exercise) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <Text style={styles.errorText}>Exercise not found or failed to load.</Text>
+        <TouchableOpacity style={styles.backButtonBottom} onPress={() => router.push('/exercises')}>
+          <Text style={styles.backButtonBottomText}>Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <ScrollView style={styles.container}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/exercises')}>
-          <Ionicons name="chevron-back" size={28} color="#111827" />
-          <Text style={styles.backText}>Back</Text>
+    <SafeAreaView style={styles.fullScreen}>
+      <ScrollView style={styles.scrollView}>
+       
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(tabs)/programs')}>
+          <Ionicons name="chevron-back" size={getFontSize(24)} color="#374151" />
+          <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
 
+     
         <Text style={styles.title}>{exercise.name}</Text>
-        {imageUri ? (
-          <Image
-            source={{ uri: imageUri }}
-            style={styles.image}
-            resizeMode="contain"
-            onError={handleImageError}
-          />
-        ) : (
-          <View style={[styles.image, { justifyContent: 'center', alignItems: 'center' }]}>
-            <Text style={{ color: '#aaa' }}>No image available</Text>
+
+  
+        <View style={styles.imageCard}>
+          {imageUri ? (
+            <Image
+              source={{ uri: imageUri }}
+              style={styles.image}
+              resizeMode="contain" // Ensures the whole image is visible
+              onError={handleImageError}
+            />
+          ) : (
+            <View style={styles.noImageContainer}>
+              <Text style={styles.noImageText}>No image available</Text>
+            </View>
+          )}
+        </View>
+
+     
+        <View style={styles.warningContainer}>
+          <MiniWarning />
+        </View>
+
+ 
+        <View style={styles.contentCard}>
+          <Text style={styles.sectionTitle}>Description</Text>
+          <Text style={styles.text}>{exercise.description || 'No description available for this exercise.'}</Text>
+        </View>
+
+      
+        {exercise.instructions?.length > 0 && (
+          <View style={styles.contentCard}>
+            <Text style={styles.sectionTitle}>Instructions</Text>
+            {exercise.instructions.map((inst: string, idx: number) => (
+              <Text key={idx} style={styles.listItemText}>
+                <Text style={styles.bulletPoint}>• </Text>{inst}
+              </Text>
+            ))}
           </View>
         )}
 
-        <Text style={styles.sectionTitle}>Description</Text>
-        <Text style={styles.text}>{exercise.description || 'No description available.'}</Text>
+      
+        <View style={styles.contentCard}>
+          <Text style={styles.sectionTitle}>Primary Muscles</Text>
+          <Text style={styles.text}>{exercise.primary_muscles?.join(', ') || 'N/A'}</Text>
+        </View>
 
-        {exercise.instructions?.length > 0 && (
-          <>
-            <Text style={styles.sectionTitle}>Instructions</Text>
-            {exercise.instructions.map((inst: string, idx: number) => (
-              <Text key={idx} style={styles.text}>
-                {idx + 1}. {inst}
-              </Text>
-            ))}
-          </>
+   
+        {exercise.secondary_muscles?.length > 0 && (
+          <View style={styles.contentCard}>
+            <Text style={styles.sectionTitle}>Secondary Muscles</Text>
+            <Text style={styles.text}>{exercise.secondary_muscles?.join(', ') || 'N/A'}</Text>
+          </View>
         )}
 
-        <Text style={styles.sectionTitle}>Primary Muscles</Text>
-        <Text style={styles.text}>{exercise.primary_muscles?.join(', ') || 'N/A'}</Text>
+        <View style={styles.contentCard}>
+          <Text style={styles.sectionTitle}>Equipment</Text>
+          <Text style={styles.text}>{exercise.equipment?.join(', ') || 'None'}</Text>
+        </View>
 
-        <Text style={styles.sectionTitle}>Secondary Muscles</Text>
-        <Text style={styles.text}>{exercise.secondary_muscles?.join(', ') || 'N/A'}</Text>
-
-        <Text style={styles.sectionTitle}>Equipment</Text>
-        <Text style={styles.text}>{exercise.equipment?.join(', ') || 'None'}</Text>
-
-        <MiniWarning />
-        
-        <View style={{ height: 40 }} />
+        <View style={{ height: getHeight(30) }} /> 
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 20, backgroundColor: '#fff', flex: 1 },
+  fullScreen: {
+    flex: 1,
+    backgroundColor: '#F7F3EF', // Figma background color
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F7F3EF',
+  },
+  errorText: {
+    fontSize: getFontSize(16),
+    color: '#D32F2F',
+    marginBottom: getHeight(10),
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: getWidth(20), // Consistent horizontal padding
+  },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    // --- ADJUSTED marginTop HERE ---
+    marginTop: Platform.OS === 'ios' ? getHeight(40) : getHeight(40), // Increased from 10/20 to 40/30
+    marginBottom: getHeight(10),
+    marginLeft: -getWidth(8), // Adjust to align with content padding
   },
-  backText: {
-    fontSize: 16,
-    marginLeft: 6,
-    color: '#111827',
+  backButtonText: {
+    fontSize: getFontSize(16),
+    color: '#374151',
+    fontWeight: '500',
+    marginLeft: getWidth(2),
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#111827',
+    fontSize: getFontSize(24),
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: getHeight(12),
+  },
+  imageCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: getWidth(12),
+    marginBottom: getHeight(20),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: getHeight(2) },
+    shadowOpacity: 0.1,
+    shadowRadius: getWidth(6),
+    elevation: 3,
+    padding: getWidth(10),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
     width: '100%',
-    height: 250,
-    borderRadius: 12,
-    marginBottom: 20,
-    backgroundColor: '#f0f0f0',
+    height: getHeight(250),
+    borderRadius: getWidth(8),
+    backgroundColor: '#F7F3EF',
+  },
+  noImageContainer: {
+    width: '100%',
+    height: getHeight(250),
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F0F0F0',
+    borderRadius: getWidth(8),
+  },
+  noImageText: {
+    color: '#A0A0A0',
+    fontSize: getFontSize(14),
+  },
+  warningContainer: {
+    marginBottom: getHeight(20),
+  },
+  contentCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: getWidth(12),
+    padding: getWidth(20),
+    marginBottom: getHeight(10),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: getHeight(2) },
+    shadowOpacity: 0.1,
+    shadowRadius: getWidth(6),
+    elevation: 3,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: getFontSize(18),
     fontWeight: '600',
-    marginTop: 15,
-    marginBottom: 6,
-    color: '#333',
+    color: '#1F2937',
+    marginBottom: getHeight(8),
   },
   text: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 6,
+    fontSize: getFontSize(14),
+    color: '#374151',
+    lineHeight: getFontSize(20),
+  },
+  listItemText: {
+    fontSize: getFontSize(14),
+    color: '#374151',
+    lineHeight: getFontSize(22),
+    marginBottom: getHeight(4),
+    paddingLeft: getWidth(5),
+  },
+  bulletPoint: {
+    color: '#005B44',
+    fontSize: getFontSize(18),
+    lineHeight: getFontSize(22),
+  },
+  backButtonBottom: {
+    marginTop: getHeight(20),
+    paddingVertical: getHeight(10),
+    paddingHorizontal: getWidth(20),
+    backgroundColor: '#005B44',
+    borderRadius: getWidth(8),
+  },
+  backButtonBottomText: {
+    fontSize: getFontSize(16),
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
 });
 
