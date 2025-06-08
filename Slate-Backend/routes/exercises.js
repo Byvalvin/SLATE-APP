@@ -165,6 +165,9 @@ router.get('/grouped', authMiddleware, async (req, res) => {
 router.get('/by-category', authMiddleware, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
+    const page = parseInt(req.query.page) || 1;  // Pagination for each category
+    const skip = (page - 1) * limit;
+
     const categoriesParam = req.query.categories; // e.g. "Arms,Back,Legs"
     const includeUncategorized = req.query.includeUncategorized === 'true';
 
@@ -200,17 +203,20 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       delete filteredGrouped['Uncategorized'];
     }
 
-    // Apply limit per category
+    // Apply pagination per category
+    const paginatedGrouped = {};
     Object.keys(filteredGrouped).forEach((key) => {
-      filteredGrouped[key] = filteredGrouped[key].slice(0, limit);
+      const categoryExercises = filteredGrouped[key];
+      paginatedGrouped[key] = categoryExercises.slice(skip, skip + limit);
     });
 
-    res.json(filteredGrouped);
+    res.json(paginatedGrouped);
   } catch (err) {
     console.error('Error grouping exercises by category:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 
