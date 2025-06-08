@@ -270,7 +270,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // search and filtration
 router.get('/search', authMiddleware, async (req, res) => {
   try {
-    const query = req.query.q?.trim().toLowerCase() || '';
+    const query = req.query.query?.trim().toLowerCase() || '';
+
     const category = req.query.category;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;

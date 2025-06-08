@@ -19,6 +19,8 @@ import {
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { CATEGORY_ORDER } from '../home/components/CategorySummary';
+import FilterModal from '../exercise/Modals/FilterModal';
+import SearchWithFilterBar from '../exercise/components/SearchWithFilterBar';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -102,7 +104,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 };
 
 // --- Section Component ---
-const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data }) => (
+const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onSeeAll }) => (
   <View style={styles.sectionContainer}>
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
@@ -115,7 +117,20 @@ const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data }) => (
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.sectionListContent}
     />
+
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
+      {onSeeAll && (
+        <TouchableOpacity onPress={onSeeAll}>
+          <Text style={{ color: '#4CAF50' }}>See All</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+
   </View>
+
+  
+  
 );
 
 // --- Main Screen Component ---
@@ -123,6 +138,8 @@ const ExerciseScreen: React.FC = () => {
   const [groupedExercises, setGroupedExercises] = useState<Record<string, ExerciseCardProps[]>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFilter, setShowFilter] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const router = useRouter()
 
@@ -163,6 +180,22 @@ const ExerciseScreen: React.FC = () => {
     fetchExercises();
   }, []);
 
+  const handleSearchSubmit = () => {
+    router.push({
+      pathname: '/exercise/results',
+      params: { query: searchQuery, category: selectedCategory },
+    });
+  };
+
+  const handleFilterApply = (category: string) => {
+    setShowFilter(false);
+    setSelectedCategory(category);
+    router.push({
+      pathname: '/exercise/results',
+      params: { query: searchQuery, category },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
@@ -171,35 +204,14 @@ const ExerciseScreen: React.FC = () => {
           <Text style={styles.headerTitle}>STANDARD</Text>
         </View>
 
-        <View style={styles.searchBarContainer}>
-          <View style={styles.searchBar}>
-            <MaterialCommunityIcons name="magnify" size={getFontSize(22)} color="#6B7280" style={styles.searchIcon} />
-            <TextInput
-              placeholder="Find exercises"
-              placeholderTextColor="#9CA3AF"
-              style={styles.searchInput}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onSubmitEditing={() =>
-                router.push({
-                  pathname: '/exercise-results',
-                  params: { query: searchQuery },
-                })
-              }
-            />
-
-          </View>
-          <TouchableOpacity style={styles.filterButton} 
-            onPress={
-              () => router.push({
-                      pathname: '/exercise-results',
-                      params: { filter: 'category' }, // Can expand this later
-                    })
-            }
-          >
-            <MaterialCommunityIcons name="filter-variant" size={getFontSize(24)} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
+        <SearchWithFilterBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          onSearchSubmit={handleSearchSubmit}
+          onFilterApply={handleFilterApply}
+        />
 
         {loading ? (
           <Text>Loading exercises...</Text>
@@ -210,9 +222,17 @@ const ExerciseScreen: React.FC = () => {
                 key={category}
                 title={category}
                 data={groupedExercises[category]}
+                onSeeAll={() =>
+                  router.push({
+                    pathname: '/exercise/results',
+                    params: { category },
+                  })
+                }
               />
+
             ))
         )}
+
 
       </ScrollView>
     </SafeAreaView>
@@ -240,36 +260,6 @@ const styles = StyleSheet.create({
     marginTop: getHeight(10), // Increased font size for "STANDARD"
     fontWeight: 'bold',
     color: '#4CAF50',
-  },
-  searchBarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: getWidth(20),
-    marginVertical: getHeight(10),
-  },
-  searchBar: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E5E7EB',
-    borderRadius: getWidth(14),
-    paddingHorizontal: getWidth(12),
-    height: getHeight(35),
-  },
-  searchIcon: {
-    marginRight: getWidth(8),
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: getFontSize(14),
-    color: '#1F2937',
-    paddingVertical: getHeight(10),
-  },
-  filterButton: {
-    marginLeft: getWidth(10),
-    padding: getWidth(10),
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   sectionContainer: {
     marginBottom: getHeight(25),
@@ -328,4 +318,3 @@ const styles = StyleSheet.create({
 });
 
 export default ExerciseScreen;
-
