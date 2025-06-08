@@ -57,8 +57,11 @@ interface Exercise {
     }, [query, category]);
   
     useEffect(() => {
-      fetchResults();
-    }, [page]);
+        console.log('Received query:', query);
+        console.log('Received category:', category);
+        fetchResults();
+      }, [query, category, page]);
+      
   
     const loadMore = () => {
       if (page < totalPages) setPage(page + 1);

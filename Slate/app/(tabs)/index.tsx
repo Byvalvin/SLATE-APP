@@ -401,10 +401,6 @@ export default function HomeScreen() {
 
 
       {/*Other Modals */}
-      <SafetyWarningModal
-        visible={showSafetyWarning}
-        onDismiss={handleDismissSafetyWarning}
-      />
       
       <ExerciseModal
         visible={addExerciseModalVisible}

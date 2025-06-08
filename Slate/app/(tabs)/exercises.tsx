@@ -179,6 +179,8 @@ const ExerciseScreen: React.FC = () => {
   }, []);
 
   const handleSearchSubmit = () => {
+    console.log('Search Query:', searchQuery);
+    console.log('Selected Category:', selectedCategory);
     router.push({
       pathname: '/exercise/results',
       params: { query: searchQuery, category: selectedCategory },
