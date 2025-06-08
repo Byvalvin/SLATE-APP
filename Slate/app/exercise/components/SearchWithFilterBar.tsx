@@ -1,13 +1,13 @@
-// components/SearchWithFilterBar.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, PixelRatio, Dimensions } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FilterModal from '../Modals/FilterModal'; // import FilterModal
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-// Updated scaling functions with PixelRatio for cleaner rendering
+// Scaling functions remain the same
 const getFontSize = (size: number): number => {
-  const scale = screenWidth / 375; // Assuming base width of 375 for scaling
+  const scale = screenWidth / 375;
   const newSize = size * scale;
   return PixelRatio.roundToNearestPixel(newSize);
 };
@@ -18,17 +18,19 @@ const getWidth = (size: number): number => {
 };
 
 const getHeight = (size: number): number => {
-  const scale = screenHeight / 812; // Assuming base height of 812 for scaling
+  const scale = screenHeight / 812;
   return PixelRatio.roundToNearestPixel(scale * size);
 };
+
 interface Props {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedCategory: string;
   setSelectedCategory: (category: string) => void;
   onSearchSubmit: () => void;
-  onFilterApply: (category: string) => void;
 }
+
+const CATEGORIES = ['Chest', 'Back', 'Legs', 'Arms', 'Shoulders', 'Core'];
 
 const SearchWithFilterBar: React.FC<Props> = ({
   searchQuery,
@@ -36,8 +38,14 @@ const SearchWithFilterBar: React.FC<Props> = ({
   selectedCategory,
   setSelectedCategory,
   onSearchSubmit,
-  onFilterApply,
 }) => {
+  const [showFilterModal, setShowFilterModal] = useState(false); // State to manage modal visibility
+
+  const handleFilterApply = (category: string) => {
+    setSelectedCategory(category);
+    setShowFilterModal(false); // Close the modal after applying the filter
+  };
+
   return (
     <View style={styles.searchBarContainer}>
       <View style={styles.searchBar}>
@@ -52,18 +60,21 @@ const SearchWithFilterBar: React.FC<Props> = ({
         />
       </View>
 
-      <TouchableOpacity style={styles.filterButton} onPress={() => setSelectedCategory(selectedCategory)}>
+      <TouchableOpacity style={styles.filterButton} onPress={() => setShowFilterModal(true)}>
         <MaterialCommunityIcons name="filter-variant" size={getFontSize(24)} color="#6B7280" />
       </TouchableOpacity>
 
-      {selectedCategory && (
-        <Text style={styles.selectedCategory}>
-          {selectedCategory}
-        </Text>
-      )}
-      
-    </View>
+      {selectedCategory && <Text style={styles.selectedCategory}>{selectedCategory}</Text>}
 
+      {/* The FilterModal is now integrated here */}
+      <FilterModal
+        visible={showFilterModal}
+        onClose={() => setShowFilterModal(false)} // Close modal when clicked outside or cancel
+        onApply={handleFilterApply}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+      />
+    </View>
   );
 };
 
@@ -71,36 +82,38 @@ const styles = StyleSheet.create({
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: getWidth(20),
-    marginVertical: getHeight(10),
+    padding: 10,
+    backgroundColor: '#fff',
+    marginBottom: 10,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
   },
   searchBar: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E5E7EB',
-    borderRadius: getWidth(14),
-    paddingHorizontal: getWidth(12),
-    height: getHeight(35),
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 10,
+    borderRadius: 8,
   },
   searchIcon: {
-    marginRight: getWidth(8),
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: getFontSize(14),
-    color: '#1F2937',
-    paddingVertical: getHeight(10),
+    fontSize: 16,
+    color: '#333',
+    paddingVertical: 10,
   },
   filterButton: {
-    marginLeft: getWidth(10),
-    padding: getWidth(10),
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginLeft: 15,
   },
   selectedCategory: {
-    marginLeft: getWidth(10),
-    fontSize: getFontSize(14),
+    marginLeft: 15,
+    fontSize: 16,
     color: '#4CAF50',
   },
 });

@@ -17,9 +17,7 @@ import {
   PixelRatio,
 } from 'react-native';
 
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { CATEGORY_ORDER } from '../home/components/CategorySummary';
-import FilterModal from '../exercise/Modals/FilterModal';
 import SearchWithFilterBar from '../exercise/components/SearchWithFilterBar';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -187,14 +185,6 @@ const ExerciseScreen: React.FC = () => {
     });
   };
 
-  const handleFilterApply = (category: string) => {
-    setShowFilter(false);
-    setSelectedCategory(category);
-    router.push({
-      pathname: '/exercise/results',
-      params: { query: searchQuery, category },
-    });
-  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -210,7 +200,6 @@ const ExerciseScreen: React.FC = () => {
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
           onSearchSubmit={handleSearchSubmit}
-          onFilterApply={handleFilterApply}
         />
 
         {loading ? (
