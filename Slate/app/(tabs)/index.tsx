@@ -25,6 +25,10 @@ import WorkoutTimer from '../home/components/WorkoutTimer';
 import DateNavigator from '../home/components/DateNavigator';
 import EditableStatBox from '../home/components/EditableStatBox';
 
+import SafetyWarningModal from '../home/components/Modals/SafetyWarningModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 // LogBox.ignoreLogs(['Warning: Text strings must be rendered within a <Text> component.']);
 
@@ -57,6 +61,22 @@ export default function HomeScreen() {
 
   const [user, setUser] = useState<any>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+
+  const [showSafetyWarning, setShowSafetyWarning] = useState(false);
+
+  useEffect(() => {
+    const checkDailySafetyWarning = async () => {
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const lastShownDate = await AsyncStorage.getItem('safetyWarningLastShown');
+  
+      if (lastShownDate !== today) {
+        setShowSafetyWarning(true);
+      }
+    };
+  
+    checkDailySafetyWarning();
+  }, []);
+  
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -201,8 +221,12 @@ export default function HomeScreen() {
       }
     }
   };
-  
 
+  const handleDismissSafetyWarning = async () => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    await AsyncStorage.setItem('safetyWarningLastShown', today);
+    setShowSafetyWarning(false);
+  };
 
   // Date navigator handlers
   const goToPreviousDay = () => {
@@ -377,6 +401,11 @@ export default function HomeScreen() {
 
 
       {/*Other Modals */}
+      <SafetyWarningModal
+        visible={showSafetyWarning}
+        onDismiss={handleDismissSafetyWarning}
+      />
+      
       <ExerciseModal
         visible={addExerciseModalVisible}
         onClose={() => setAddExerciseModalVisible(false)}

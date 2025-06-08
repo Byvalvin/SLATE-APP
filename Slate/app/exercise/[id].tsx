@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken } from '@/utils/token';
 import { servers } from '@/constants/API';
+import MiniWarning from '../home/components/MiniWarning';
 
 const ExerciseDetail = () => {
   const { id } = useLocalSearchParams();
@@ -100,6 +101,8 @@ const ExerciseDetail = () => {
         <Text style={styles.sectionTitle}>Equipment</Text>
         <Text style={styles.text}>{exercise.equipment?.join(', ') || 'None'}</Text>
 
+        <MiniWarning />
+        
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
