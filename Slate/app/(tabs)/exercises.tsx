@@ -64,12 +64,6 @@ interface Exercise {
   realistic_image_url?: string;
 }
 
-interface GroupedExercises {
-  Pull: Exercise[];
-  Push: Exercise[];
-  Legs: Exercise[];
-}
-
 // --- Card Component ---
 const ExerciseCard: React.FC<ExerciseCardProps> = ({
   id,
@@ -128,6 +122,9 @@ const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data }) => (
 const ExerciseScreen: React.FC = () => {
   const [groupedExercises, setGroupedExercises] = useState<Record<string, ExerciseCardProps[]>>({});
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const router = useRouter()
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -154,9 +151,8 @@ const ExerciseScreen: React.FC = () => {
           return acc;
         }, {} as Record<string, ExerciseCardProps[]>);
         
-        
-
         setGroupedExercises(transformed);
+        
       } catch (err) {
         console.error('Failed to load exercises', err);
       } finally {
@@ -182,9 +178,25 @@ const ExerciseScreen: React.FC = () => {
               placeholder="Find exercises"
               placeholderTextColor="#9CA3AF"
               style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSubmitEditing={() =>
+                router.push({
+                  pathname: '/exercise-results',
+                  params: { query: searchQuery },
+                })
+              }
             />
+
           </View>
-          <TouchableOpacity style={styles.filterButton} onPress={() => console.log('Filter pressed')}>
+          <TouchableOpacity style={styles.filterButton} 
+            onPress={
+              () => router.push({
+                      pathname: '/exercise-results',
+                      params: { filter: 'category' }, // Can expand this later
+                    })
+            }
+          >
             <MaterialCommunityIcons name="filter-variant" size={getFontSize(24)} color="#6B7280" />
           </TouchableOpacity>
         </View>
