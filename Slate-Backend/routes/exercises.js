@@ -186,11 +186,11 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     let exercisesQuery = { image_url: { $exists: true, $ne: '' } };  // Only exercises with an image
 
     // Apply category filter if categories are provided
-    if (categories && categories.length > 0) {
-      exercisesQuery.category = { $in: categories };  // Only include exercises in selected categories
-    } else if (!includeUncategorized) {
-      exercisesQuery.category = { $ne: 'Uncategorized' }; // Exclude 'Uncategorized' if not requested
-    }
+    // if (categories && categories.length > 0) {
+    //   exercisesQuery.category = { $in: categories };  // Only include exercises in selected categories
+    // } else if (!includeUncategorized) {
+    //   exercisesQuery.category = { $ne: 'Uncategorized' }; // Exclude 'Uncategorized' if not requested
+    // }
 
     // Apply search query filter if provided (search by exercise title/name)
     if (searchQuery) {
