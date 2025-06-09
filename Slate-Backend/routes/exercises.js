@@ -210,6 +210,7 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     }, {});
 
     // Return the grouped exercises
+    console.log(grouped,searchQuery);
     res.json(grouped);
 
   } catch (err) {
