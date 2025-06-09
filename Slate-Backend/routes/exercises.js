@@ -164,38 +164,42 @@ router.get('/grouped', authMiddleware, async (req, res) => {
 
 router.get('/by-category', authMiddleware, async (req, res) => {
   try {
+    // Pagination setup
     const limit = parseInt(req.query.limit) || 5;
-    const page = parseInt(req.query.page) || 1; // Pagination for each category
+    const page = parseInt(req.query.page) || 1;
     const skip = (page - 1) * limit;
 
-    const searchQuery = req.query.searchQuery || "";
-    if (searchQuery) {
-      exercisesQuery.title = { $regex: searchQuery, $options: "i" }; // Case-insensitive search by title
-    }
-
-    const categoriesParam = req.query.categories; // e.g. "Arms,Back,Legs"
+    // Extract search query and category parameters
+    const searchQuery = req.query.searchQuery || '';  // If no search query, it's an empty string
+    const categoriesParam = req.query.categories; // Categories query param, e.g. "Back,Arms"
     const includeUncategorized = req.query.includeUncategorized === 'true';
 
-    // If categoriesParam exists, split by comma and trim whitespace
+    // Split categories into an array and capitalize the first letter of each category
     const categories = categoriesParam
-    ? categoriesParam.split(',').map(c => c.trim().replace(/^\w/, (c) => c.toUpperCase())) // Capitalize first letter
-    : null;
-  
-    // Fetch exercises with images, only from the requested categories (if specified)
-    let exercisesQuery = { image_url: { $exists: true, $ne: '' } };
+      ? categoriesParam.split(',').map(c => c.trim().replace(/^\w/, (c) => c.toUpperCase()))
+      : null;
 
-    // If categories are provided, only fetch exercises in those categories
+    // Initialize exercises query object
+    let exercisesQuery = { image_url: { $exists: true, $ne: '' } };  // Only exercises with an image
+
+    // Apply category filter if categories are provided
     if (categories && categories.length > 0) {
-      exercisesQuery.category = { $in: categories }; // Filter by selected categories
+      exercisesQuery.category = { $in: categories };  // Only include exercises in selected categories
     } else if (!includeUncategorized) {
-      exercisesQuery.category = { $ne: 'Uncategorized' }; // Exclude 'Uncategorized' if not needed
+      exercisesQuery.category = { $ne: 'Uncategorized' }; // Exclude 'Uncategorized' if not requested
     }
 
+    // Apply search query filter if provided (search by exercise title/name)
+    if (searchQuery) {
+      exercisesQuery.name = { $regex: searchQuery, $options: 'i' };  // Case-insensitive search on 'name'
+    }
+
+    // Fetch exercises from the database with pagination and filters applied
     const exercises = await Exercise.find(exercisesQuery)
       .skip(skip)
       .limit(limit);
 
-    // Group exercises by category (using lower case for case insensitivity)
+    // Group exercises by category (case-insensitive)
     const grouped = exercises.reduce((acc, exercise) => {
       const category = (exercise.category || 'Uncategorized').toLowerCase();
       if (!acc[category]) {
@@ -204,14 +208,16 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       acc[category].push(exercise);
       return acc;
     }, {});
-    console.log(grouped);
 
+    // Return the grouped exercises
     res.json(grouped);
+
   } catch (err) {
     console.error('Error grouping exercises by category:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 
