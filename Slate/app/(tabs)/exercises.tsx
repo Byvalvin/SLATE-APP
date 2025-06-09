@@ -8,7 +8,6 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  TextInput,
   FlatList,
   TouchableOpacity,
   SafeAreaView,
@@ -94,6 +93,25 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 };
 
 // --- Section Component ---
+const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onEndReached }) => (
+  <View style={styles.sectionContainer}>
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
+    </View>
+    <FlatList
+      data={data}
+      renderItem={({ item }) => <ExerciseCard {...item} />}
+      keyExtractor={(item, index) => `${item.id || item.title}-${index}`} // Ensure uniqueness by concatenating id and index
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.sectionListContent}
+      onEndReached={onEndReached}
+      onEndReachedThreshold={0.5} // Trigger load more when reaching 50% of the list
+    />
+  </View>
+);
+
+
 const ExerciseScreen: React.FC = () => {
   const [groupedExercises, setGroupedExercises] = useState<Record<string, ExerciseCardProps[]>>({});
   const [loading, setLoading] = useState(true);
@@ -126,36 +144,62 @@ const ExerciseScreen: React.FC = () => {
         }
       );
       const data = await res.json();
-      console.log(category,data)
-      
-      setGroupedExercises((prevState) => ({
-        ...prevState,
-        [category]: [...(prevState[category] || []), ...(data[category] || [])],
-      }));
+  
+      // Process the fetched data
+      if (data[category.toLowerCase()]) {
+        const exercises = data[category.toLowerCase()].map((exercise: any) => ({
+          id: exercise.exerciseId,
+          title: exercise.name,
+          subtitle: exercise.primary_muscles[0], // Get the first muscle from the list
+          primaryImageUrl: exercise.image_url,
+          fallbackImageUrl: exercise.realistic_image_url,
+          onPress: () => router.push(`/exercise/${exercise.exerciseId}`), // Navigate on press
+        }));
+  
+        // Update the grouped exercises state
+        setGroupedExercises((prevState) => ({
+          ...prevState,
+          [category]: [...(prevState[category] || []), ...exercises],
+        }));
+      }
     } catch (err) {
       console.error('Failed to load exercises', err);
     } finally {
       setIsFetching(false);
     }
   };
+  
+  
   useEffect(() => {
+    // A flag to track if all categories have been loaded
+    let allLoaded = true;
+  
+    // Fetch exercises for each category
     CATEGORY_ORDER.forEach((category) => {
       if (categoryPages[category]) {
+        // If the category has not been loaded yet or has more data to load, fetch the data
         fetchExercisesForCategory(category, categoryPages[category], searchQuery);
+      } else {
+        allLoaded = false; // If there's a category that hasn't been loaded, set the flag to false
       }
     });
-  }, [categoryPages, searchQuery]); // Trigger re-fetching when page or search changes
   
+    // If all categories have loaded, set loading to false
+    if (allLoaded) {
+      setLoading(false);
+    }
+  }, [categoryPages, searchQuery]); // Triggers when categoryPages or searchQuery changes
   
 
   // Handle category change, reset pagination for all categories
   const handleSearchSubmit = () => {
-    setGroupedExercises({});
+    setGroupedExercises({}); // Clear exercises when a new search is applied
     setCategoryPages(CATEGORY_ORDER.reduce((acc, category) => {
-      acc[category] = 1;
+      acc[category] = 1;  // Reset to page 1 for each category
       return acc;
     }, {} as {[key:string]: number}));
   };
+  
   
   
   // Handle infinite scroll / pagination
@@ -163,10 +207,10 @@ const ExerciseScreen: React.FC = () => {
     if (!isFetching) {
       setCategoryPages((prev) => ({
         ...prev,
-        [category]: prev[category] + 1, // Increment page for the selected category
+        [category]: prev[category] + 1, // Increment page number for the specific category
       }));
     }
-  };
+  };  
   
   
 
@@ -187,17 +231,18 @@ const ExerciseScreen: React.FC = () => {
         />
   
         {loading ? (
-        <Text>Loading exercises...</Text>
-        ) : (
-        CATEGORY_ORDER.map(category => (
-          <ExerciseSection
-            key={category}
-            title={category}
-            data={groupedExercises[category] || []}
-            onEndReached={() => handleEndReached(category)}
-          />
-        ))
-      )}
+            <Text>Loading exercises...</Text>
+          ) : (
+            CATEGORY_ORDER.map(category => (
+              <ExerciseSection
+                key={category}
+                title={category}
+                data={groupedExercises[category] || []}
+                onEndReached={() => handleEndReached(category)} // Trigger page increment for the category
+              />
+            ))
+          )}
+
 
       </ScrollView>
     </SafeAreaView>
@@ -205,23 +250,7 @@ const ExerciseScreen: React.FC = () => {
   
 };
 
-const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onEndReached }) => (
-  <View style={styles.sectionContainer}>
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
-    </View>
-    <FlatList
-      data={data}
-      renderItem={({ item }) => <ExerciseCard {...item} />}
-      keyExtractor={(item, index) => `${item.id || item.title}-${index}`} // Ensure uniqueness by concatenating id and index
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.sectionListContent}
-      onEndReached={onEndReached}
-      onEndReachedThreshold={0.5} // Trigger load more when reaching 50% of the list
-    />
-  </View>
-);
+
 
 // --- Styles ---
 const styles = StyleSheet.create({
