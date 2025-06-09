@@ -174,6 +174,9 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     const categoriesParam = req.query.categories; // Categories query param, e.g. "Back,Arms"
     const includeUncategorized = req.query.includeUncategorized === 'true';
 
+    // Debugging log: check the search query
+    console.log('Received search query:', searchQuery);
+
     // Split categories into an array and capitalize the first letter of each category
     const categories = categoriesParam
       ? categoriesParam.split(',').map(c => c.trim().replace(/^\w/, (c) => c.toUpperCase()))
@@ -192,6 +195,7 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     // Apply search query filter if provided (search by exercise title/name)
     if (searchQuery) {
       exercisesQuery.name = { $regex: searchQuery, $options: 'i' };  // Case-insensitive search on 'name'
+      console.log('MongoDB query:', exercisesQuery);  // Log the query
     }
 
     // Fetch exercises from the database with pagination and filters applied
@@ -209,8 +213,11 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       return acc;
     }, {});
 
+    // Log the grouped result and search query to check correctness
+    console.log('Grouped exercises:', grouped);
+    console.log('Search query used:', searchQuery);
+    
     // Return the grouped exercises
-    console.log(grouped,searchQuery);
     res.json(grouped);
 
   } catch (err) {
@@ -218,6 +225,7 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 
