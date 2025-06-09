@@ -129,12 +129,12 @@ const ExerciseScreen: React.FC = () => {
   const router = useRouter();
 
   const fetchExercisesForCategory = async (category: string, page: number, searchQuery: string) => {
-    console.log(`Fetching exercises for category: ${category}, page: ${page}`); // Added log to check if function is called
+    //console.log(`Fetching exercises for category: ${category}, page: ${page}`); // Added log to check if function is called
     setCategoryPages((prev) => ({
       ...prev,
-      [category]: { ...prev[category], isFetching: true },
+      [category]: { ...prev[category], isFetching: true }, // Set isFetching to true when fetching
     }));
-
+  
     try {
       const token = await getAccessToken();
       const res = await fetch(
@@ -147,9 +147,10 @@ const ExerciseScreen: React.FC = () => {
       );
       
       const data = await res.json();
-      console.log(`Data for category ${category}:`, data); // Check the response
-
-      if (data[category.toLowerCase()]) {
+      //console.log(`Data for category ${category}:`, data); // Check the response
+  
+      // Check if the category data exists and if we received exercises
+      if (data[category.toLowerCase()] && Array.isArray(data[category.toLowerCase()])) {
         const exercises = data[category.toLowerCase()]?.map((exercise: any) => ({
           id: exercise.exerciseId,
           title: exercise.name,
@@ -158,7 +159,7 @@ const ExerciseScreen: React.FC = () => {
           fallbackImageUrl: exercise.realistic_image_url,
           onPress: () => router.push(`/exercise/${exercise.exerciseId}`),
         }));
-
+  
         setGroupedExercises((prevState) => {
           const updatedGroupedExercises = {
             ...prevState,
@@ -169,30 +170,41 @@ const ExerciseScreen: React.FC = () => {
           };
           return updatedGroupedExercises;
         });
+  
+        // Check if we have fewer than 5 exercises or if we're at the end
+        if (exercises.length < 5) {
+          //console.log(`Less than 5 exercises for category: ${category}, stopping pagination.`);
+          // Disable further fetches for this category if we don't have enough exercises
+          setCategoryPages((prev) => ({
+            ...prev,
+            [category]: { ...prev[category], isFetching: false, page: -1 }, // Stop pagination
+          }));
+        }
       } else {
         console.error(`No data for category: ${category}`);
       }
-      
+  
     } catch (err) {
       console.error('Failed to load exercises', err);
     } finally {
       setCategoryPages((prev) => ({
         ...prev,
-        [category]: { ...prev[category], isFetching: false },
+        [category]: { ...prev[category], isFetching: false }, // Set isFetching to false after fetching
       }));
       setLoading(false); // Set loading to false after data is fetched
     }
   };
+  
 
   // useEffect to trigger fetching for each category
   useEffect(() => {
-    console.log('useEffect triggered, loading:', loading, 'categoryPages:', categoryPages); // Added log to track the effect
+    //console.log('useEffect triggered, loading:', loading, 'categoryPages:', categoryPages); // Added log to track the effect
 
     if (loading) {
       // Fetch exercises for each category on load if they aren't already fetched
       CATEGORY_ORDER.forEach((category) => {
         const { isFetching } = categoryPages[category];
-        console.log(`Checking category: ${category}, isFetching: ${isFetching}`);
+        //console.log(`Checking category: ${category}, isFetching: ${isFetching}`);
         if (!isFetching && (!groupedExercises[category] || groupedExercises[category].length === 0)) {
           fetchExercisesForCategory(category, 1, searchQuery);
         }
@@ -202,16 +214,24 @@ const ExerciseScreen: React.FC = () => {
 
   const handleEndReached = (category: string) => {
     const currentPage = categoryPages[category].page;
-    if (!categoryPages[category].isFetching) {
-      setCategoryPages((prevState) => ({
-        ...prevState,
-        [category]: {
-          page: currentPage + 1,
-          isFetching: true,
-        },
-      }));
+    
+    // Prevent further fetches if we have already reached the end (page == -1)
+    if (categoryPages[category].isFetching || currentPage === -1) {
+      return;
     }
+  
+    setCategoryPages((prevState) => ({
+      ...prevState,
+      [category]: {
+        page: currentPage + 1, // Increment page
+        isFetching: true, // Mark as fetching to prevent duplicate requests
+      },
+    }));
+  
+    // Fetch more data for the next page
+    fetchExercisesForCategory(category, currentPage + 1, searchQuery);
   };
+  
 
   const handleSearchSubmit = () => {
     setGroupedExercises({});
@@ -255,6 +275,7 @@ const ExerciseScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+
 
 
 
