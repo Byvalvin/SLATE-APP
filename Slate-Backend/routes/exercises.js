@@ -194,7 +194,7 @@ router.get('/by-category', authMiddleware, async (req, res) => {
 
     // Apply search query filter if provided (search by exercise title/name)
     if (searchQuery) {
-      exercisesQuery.name = { $regex: searchQuery, $options: 'i' };  // Case-insensitive search on 'name'
+      exercisesQuery.name = { "$regex": searchQuery, "$options": 'i' };  // Case-insensitive search on 'name'
       console.log('MongoDB query:', exercisesQuery);  // Log the query
     }
 
