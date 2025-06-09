@@ -177,8 +177,10 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     const includeUncategorized = req.query.includeUncategorized === 'true';
 
     // If categoriesParam exists, split by comma and trim whitespace
-    const categories = categoriesParam ? categoriesParam.split(',').map(c => c.trim().toLowerCase()) : null;
-
+    const categories = categoriesParam
+    ? categoriesParam.split(',').map(c => c.trim().replace(/^\w/, (c) => c.toUpperCase())) // Capitalize first letter
+    : null;
+  
     // Fetch exercises with images, only from the requested categories (if specified)
     let exercisesQuery = { image_url: { $exists: true, $ne: '' } };
 
