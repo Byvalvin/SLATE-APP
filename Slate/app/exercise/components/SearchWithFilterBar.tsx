@@ -32,6 +32,7 @@ const SearchWithFilterBar: React.FC<Props> = ({
   const handleFilterApply = (category: string) => {
     setSelectedCategory(category);
     setShowFilterModal(false);
+    onSearchSubmit();  // Trigger the search when category filter is applied
   };
 
   return (
@@ -64,6 +65,7 @@ const SearchWithFilterBar: React.FC<Props> = ({
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   searchBarContainer: {

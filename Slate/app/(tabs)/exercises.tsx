@@ -129,10 +129,9 @@ const ExerciseScreen: React.FC = () => {
   const router = useRouter();
 
   const fetchExercisesForCategory = async (category: string, page: number, searchQuery: string) => {
-    //console.log(`Fetching exercises for category: ${category}, page: ${page}`); // Added log to check if function is called
     setCategoryPages((prev) => ({
       ...prev,
-      [category]: { ...prev[category], isFetching: true }, // Set isFetching to true when fetching
+      [category]: { ...prev[category], isFetching: true },
     }));
   
     try {
@@ -145,13 +144,11 @@ const ExerciseScreen: React.FC = () => {
           },
         }
       );
-      
       const data = await res.json();
-      //console.log(`Data for category ${category}:`, data); // Check the response
   
-      // Check if the category data exists and if we received exercises
-      if (data[category.toLowerCase()] && Array.isArray(data[category.toLowerCase()])) {
-        const exercises = data[category.toLowerCase()]?.map((exercise: any) => ({
+      // Handle data and update groupedExercises state
+      const exercises = Object.keys(data).reduce((acc, category) => {
+        const exercises = data[category].map((exercise: any) => ({
           id: exercise.exerciseId,
           title: exercise.name,
           subtitle: exercise.primary_muscles[0],
@@ -159,58 +156,44 @@ const ExerciseScreen: React.FC = () => {
           fallbackImageUrl: exercise.realistic_image_url,
           onPress: () => router.push(`/exercise/${exercise.exerciseId}`),
         }));
+        acc[category] = exercises;
+        return acc;
+      }, {} as Record<string, ExerciseCardProps[]>);
   
-        setGroupedExercises((prevState) => {
-          const updatedGroupedExercises = {
-            ...prevState,
-            [category]: [
-              ...(prevState[category] || []),
-              ...exercises,
-            ],
-          };
-          return updatedGroupedExercises;
-        });
-  
-        // Check if we have fewer than 5 exercises or if we're at the end
-        if (exercises.length < 5) {
-          //console.log(`Less than 5 exercises for category: ${category}, stopping pagination.`);
-          // Disable further fetches for this category if we don't have enough exercises
-          setCategoryPages((prev) => ({
-            ...prev,
-            [category]: { ...prev[category], isFetching: false, page: -1 }, // Stop pagination
-          }));
-        }
-      } else {
-        console.error(`No data for category: ${category}`);
+      setGroupedExercises(exercises);
+      
+      if (data.length < 5) {
+        setCategoryPages((prev) => ({
+          ...prev,
+          [category]: { ...prev[category], isFetching: false, page: -1 },
+        }));
       }
-  
     } catch (err) {
       console.error('Failed to load exercises', err);
     } finally {
       setCategoryPages((prev) => ({
         ...prev,
-        [category]: { ...prev[category], isFetching: false }, // Set isFetching to false after fetching
+        [category]: { ...prev[category], isFetching: false },
       }));
-      setLoading(false); // Set loading to false after data is fetched
+      setLoading(false);
     }
   };
   
 
   // useEffect to trigger fetching for each category
+  // Fetch exercises for all categories on initial load (using searchQuery and selectedCategory)
   useEffect(() => {
-    //console.log('useEffect triggered, loading:', loading, 'categoryPages:', categoryPages); // Added log to track the effect
-
     if (loading) {
-      // Fetch exercises for each category on load if they aren't already fetched
       CATEGORY_ORDER.forEach((category) => {
-        const { isFetching } = categoryPages[category];
-        //console.log(`Checking category: ${category}, isFetching: ${isFetching}`);
-        if (!isFetching && (!groupedExercises[category] || groupedExercises[category].length === 0)) {
+        if (!categoryPages[category].isFetching && (!groupedExercises[category] || groupedExercises[category].length === 0)) {
           fetchExercisesForCategory(category, 1, searchQuery);
         }
       });
     }
-  }, [loading, searchQuery, categoryPages]); // Track `categoryPages` to trigger correctly
+  }, [loading, searchQuery, categoryPages]); // Triggers based on search or loading state
+  
+  
+
 
   const handleEndReached = (category: string) => {
     const currentPage = categoryPages[category].page;

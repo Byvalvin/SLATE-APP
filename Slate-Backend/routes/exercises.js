@@ -165,37 +165,36 @@ router.get('/grouped', authMiddleware, async (req, res) => {
 router.get('/by-category', authMiddleware, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
-    const page = parseInt(req.query.page) || 1; // Pagination for each category
+    const page = parseInt(req.query.page) || 1;
     const skip = (page - 1) * limit;
-
-    const searchQuery = req.query.searchQuery || "";
+    const searchQuery = req.query.searchQuery || "";  // The search query
+    const categoriesParam = req.query.categories;    // The category filter
+    const includeUncategorized = req.query.includeUncategorized === 'true'; // Include uncategorized exercises
+    
+    // If searchQuery exists, we'll add the regex filter for exercise titles
+    const exercisesQuery = { 
+      image_url: { $exists: true, $ne: '' } 
+    };
+    
+    // Apply search query filter
     if (searchQuery) {
-      exercisesQuery.title = { $regex: searchQuery, $options: "i" }; // Case-insensitive search by title
+      exercisesQuery.title = { $regex: searchQuery, $options: "i" }; // Case-insensitive search
     }
-
-    const categoriesParam = req.query.categories; // e.g. "Arms,Back,Legs"
-    const includeUncategorized = req.query.includeUncategorized === 'true';
-
-    // If categoriesParam exists, split by comma and trim whitespace
-    const categories = categoriesParam
-    ? categoriesParam.split(',').map(c => c.trim().replace(/^\w/, (c) => c.toUpperCase())) // Capitalize first letter
-    : null;
-  
-    // Fetch exercises with images, only from the requested categories (if specified)
-    let exercisesQuery = { image_url: { $exists: true, $ne: '' } };
-
-    // If categories are provided, only fetch exercises in those categories
-    if (categories && categories.length > 0) {
-      exercisesQuery.category = { $in: categories }; // Filter by selected categories
+    
+    // Apply category filter (if provided)
+    if (categoriesParam) {
+      const categories = categoriesParam.split(',').map(c => c.trim());
+      exercisesQuery.category = { $in: categories };  // Match any of the selected categories
     } else if (!includeUncategorized) {
-      exercisesQuery.category = { $ne: 'Uncategorized' }; // Exclude 'Uncategorized' if not needed
+      exercisesQuery.category = { $ne: 'Uncategorized' }; // Exclude uncategorized exercises
     }
-
+    
+    // Fetch exercises based on query
     const exercises = await Exercise.find(exercisesQuery)
       .skip(skip)
       .limit(limit);
-
-    // Group exercises by category (using lower case for case insensitivity)
+    
+    // Group the exercises by category (optional)
     const grouped = exercises.reduce((acc, exercise) => {
       const category = (exercise.category || 'Uncategorized').toLowerCase();
       if (!acc[category]) {
@@ -204,14 +203,14 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       acc[category].push(exercise);
       return acc;
     }, {});
-    console.log(grouped);
-
-    res.json(grouped);
+    
+    res.json(grouped);  // Return grouped exercises based on category
   } catch (err) {
-    console.error('Error grouping exercises by category:', err);
+    console.error('Error in /by-category:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 
@@ -267,46 +266,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('Error fetching exercise by ID:', err);
     return res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// search and filtration
-router.get('/search', authMiddleware, async (req, res) => {
-  try {
-    const query = req.query.query?.trim().toLowerCase() || '';
-    const category = req.query.category;
-
-    console.log('Search query:', query);
-    console.log('Search category:', category);
-
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const filters = {
-      image_url: { $exists: true, $ne: '' },
-    };
-
-    if (category) {
-      filters.category = category;
-    }
-
-    if (query) {
-      filters.name = { $regex: query.replace(/\s+/g, '.*'), $options: 'i' };
-    }
-
-    const total = await Exercise.countDocuments(filters);
-    const exercises = await Exercise.find(filters).skip(skip).limit(limit);
-
-    res.json({
-      data: exercises,
-      page,
-      total,
-      totalPages: Math.ceil(total / limit),
-    });
-  } catch (err) {
-    console.error('Error in /search:', err);
-    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
