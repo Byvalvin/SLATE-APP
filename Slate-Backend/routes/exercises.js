@@ -196,19 +196,10 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     if (searchQuery) {
       const searchWords = searchQuery.split(/\s+/).map(word => `(?=.*${word})`).join('');
       const regexPattern = new RegExp(searchWords, 'i');
-      exercisesQuery.name = regexPattern;
-      // Case-insensitive search on 'name'
+      exercisesQuery.name = regexPattern; // Case-insensitive search on 'name'
       console.log('MongoDB query:', exercisesQuery);  // Log the query
     }
-    console.log(exercisesQuery, skip, limit)
-    console.log("--------------------------------");
-    console.log(await Exercise.find(
-      {
-        image_url: { $exists: true, $ne: '' },
-        name: exercisesQuery.name,
-        category: exercisesQuery.category
-    }))
-    console.log("--------------------------------");
+
     // Fetch exercises from the database with pagination and filters applied
     const exercises = await Exercise.find(exercisesQuery)
       .skip(skip)

@@ -235,9 +235,10 @@ const ExerciseScreen: React.FC = () => {
 
   const handleSearchSubmit = () => {
     setGroupedExercises({});
+    //setLoading(true); // Reset loading state
     setCategoryPages(
       CATEGORY_ORDER.reduce((acc, category) => {
-        acc[category] = { page: 1, isFetching: false };
+        acc[category] = { page: 0, isFetching: false };
         return acc;
       }, {} as Record<string, CategoryPage>)
     );
