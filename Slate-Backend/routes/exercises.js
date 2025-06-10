@@ -192,12 +192,10 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       exercisesQuery.category = { $ne: 'Uncategorized' }; // Exclude 'Uncategorized' if not requested
     }
 
-    // Apply search query filter if provided (search by exercise title/name)\
+    // Apply search query filter if provided (search by exercise title/name)
     if (searchQuery) {
-      // Escape special characters in the search query
-      const escapedSearchQuery = searchQuery.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, "\\$&"); // Escape regex special chars
-      exercisesQuery.name = new RegExp(escapedSearchQuery, 'i');  // Case-insensitive search on 'name'
-      console.log('MongoDB query:', exercisesQuery);  // Log the query to check for correctness
+      exercisesQuery.name = { "$regex": searchQuery, "$options": 'i' };  // Case-insensitive search on 'name'
+      console.log('MongoDB query:', exercisesQuery);  // Log the query
     }
 
     // Fetch exercises from the database with pagination and filters applied

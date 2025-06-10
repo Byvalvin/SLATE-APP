@@ -11,8 +11,6 @@ const ExerciseSchema = new mongoose.Schema({
   secondary_muscles: [String],
   equipment: [String],
   category: String,
-  //movement_type: { type: String }, // NEW: "Pull", "Push", "Leg"
-  //calories: Number, // do you actually want this??
   image_url: String, // Store the image URL directly
   realistic_image_url: String,
 });
