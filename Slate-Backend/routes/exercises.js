@@ -200,7 +200,13 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       // Case-insensitive search on 'name'
       console.log('MongoDB query:', exercisesQuery);  // Log the query
     }
-
+    console.log(exercisesQuery)
+    console.log(await Exercise.find({image_url: { $exists: true, $ne: '' }}))
+    console.log("--------------------------------");
+    console.log(await Exercise.find({name: exercisesQuery.name}))
+    console.log("--------------------------------");
+    console.log(await Exercise.find({category: exercisesQuery.category}))
+    console.log("--------------------------------");
     // Fetch exercises from the database with pagination and filters applied
     const exercises = await Exercise.find(exercisesQuery)
       .skip(skip)
