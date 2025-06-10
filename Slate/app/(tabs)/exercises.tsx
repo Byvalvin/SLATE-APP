@@ -77,7 +77,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = React.memo(({ id, title, subti
   };
 
   const router = useRouter();
-  
   return (
     <TouchableOpacity style={styles.card} onPress={() => router.push(`/exercise/${id}`)} activeOpacity={0.8}>
       <Image
@@ -92,7 +91,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = React.memo(({ id, title, subti
         <Text style={styles.cardSubtitle}>{subtitle}</Text>
       </View>
     </TouchableOpacity>
-  );
+  )
 });
 
 // --- Section Component ---
@@ -101,18 +100,22 @@ const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onEndRea
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
     </View>
-    <FlatList
-      data={data}
-      renderItem={({ item }) => <ExerciseCard {...item} />}
-      keyExtractor={(item, index) => `${item.id || item.title}-${index}`} // Ensure uniqueness by concatenating id and index
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.sectionListContent}
-      onEndReached={onEndReached}
-      onEndReachedThreshold={0.5} // Trigger load more when reaching 50% of the list
-    />
+    {data.length > 0 && ( // Only render FlatList if data exists
+      <FlatList
+        data={data}
+        renderItem={({ item }) => <ExerciseCard {...item} />}
+        keyExtractor={(item, index) => `${item.id || item.title}-${index}`} // Ensure uniqueness by concatenating id and index
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.sectionListContent}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.5} // Trigger load more when reaching 50% of the list
+      />
+    )}
   </View>
 );
+
+
 
 const ExerciseScreen: React.FC = () => {
   const [groupedExercises, setGroupedExercises] = useState<Record<string, ExerciseCardProps[]>>({});
@@ -129,7 +132,6 @@ const ExerciseScreen: React.FC = () => {
   const router = useRouter();
 
   const fetchExercisesForCategory = async (category: string, page: number, searchQuery: string) => {
-    //console.log(`Fetching exercises for category: ${category}, page: ${page}`); // Added log to check if function is called
     setCategoryPages((prev) => ({
       ...prev,
       [category]: { ...prev[category], isFetching: true }, // Set isFetching to true when fetching
@@ -145,11 +147,8 @@ const ExerciseScreen: React.FC = () => {
           },
         }
       );
-      
-      const data = await res.json();
-      //console.log(`Data for category ${category}:`, data); // Check the response
   
-      // Check if the category data exists and if we received exercises
+      const data = await res.json();
       if (data[category.toLowerCase()] && Array.isArray(data[category.toLowerCase()])) {
         const exercises = data[category.toLowerCase()]?.map((exercise: any) => ({
           id: exercise.exerciseId,
@@ -163,25 +162,24 @@ const ExerciseScreen: React.FC = () => {
         setGroupedExercises((prevState) => {
           const updatedGroupedExercises = {
             ...prevState,
-            [category]: [
-              ...(prevState[category] || []),
-              ...exercises,
-            ],
+            [category]: [...(prevState[category] || []), ...exercises],
           };
           return updatedGroupedExercises;
         });
   
-        // Check if we have fewer than 5 exercises or if we're at the end
+        // Disable further fetches if there are fewer than 5 exercises
         if (exercises.length < 5) {
-          //console.log(`Less than 5 exercises for category: ${category}, stopping pagination.`);
-          // Disable further fetches for this category if we don't have enough exercises
           setCategoryPages((prev) => ({
             ...prev,
             [category]: { ...prev[category], isFetching: false, page: -1 }, // Stop pagination
           }));
         }
       } else {
-        console.error(`No data for category: ${category}`);
+        // Set empty array when no exercises are found for the category
+        setGroupedExercises((prevState) => ({
+          ...prevState,
+          [category]: [],
+        }));
       }
   
     } catch (err) {
@@ -195,11 +193,11 @@ const ExerciseScreen: React.FC = () => {
     }
   };
   
+  
 
   // useEffect to trigger fetching for each category
   useEffect(() => {
     //console.log('useEffect triggered, loading:', loading, 'categoryPages:', categoryPages); // Added log to track the effect
-
     if (loading) {
       // Fetch exercises for each category on load if they aren't already fetched
       CATEGORY_ORDER.forEach((category) => {
@@ -231,14 +229,13 @@ const ExerciseScreen: React.FC = () => {
     // Fetch more data for the next page
     fetchExercisesForCategory(category, currentPage + 1, searchQuery);
   };
-  
 
   const handleSearchSubmit = () => {
     setGroupedExercises({});
-    //setLoading(true); // Reset loading state
+    setLoading(true); // Reset loading state
     setCategoryPages(
       CATEGORY_ORDER.reduce((acc, category) => {
-        acc[category] = { page: 0, isFetching: false };
+        acc[category] = { page: 1, isFetching: false };
         return acc;
       }, {} as Record<string, CategoryPage>)
     );
@@ -357,6 +354,13 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     fontSize: getFontSize(12),
     color: '#6B7280',
+  },
+  noDataText: {
+    fontSize: getFontSize(16), // Adjust based on your app's font scaling
+    color: '#888',  // A neutral gray color for the message
+    textAlign: 'center',  // Center the message
+    marginVertical: getHeight(20), // Add some space around the message
+    fontWeight: '500', // Medium weight for better visibility
   },
 
   flatListContent: {

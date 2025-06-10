@@ -175,7 +175,7 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     const includeUncategorized = req.query.includeUncategorized === 'true';
 
     // Debugging log: check the search query
-    console.log('Received search query:', searchQuery);
+    //console.log('Received search query:', searchQuery);
 
     // Split categories into an array and capitalize the first letter of each category
     const categories = categoriesParam
@@ -197,7 +197,7 @@ router.get('/by-category', authMiddleware, async (req, res) => {
       const searchWords = searchQuery.split(/\s+/).map(word => `(?=.*${word})`).join('');
       const regexPattern = new RegExp(searchWords, 'i');
       exercisesQuery.name = regexPattern; // Case-insensitive search on 'name'
-      console.log('MongoDB query:', exercisesQuery);  // Log the query
+      //console.log('MongoDB query:', exercisesQuery);  // Log the query
     }
 
     // Fetch exercises from the database with pagination and filters applied
@@ -216,8 +216,7 @@ router.get('/by-category', authMiddleware, async (req, res) => {
     }, {});
 
     // Log the grouped result and search query to check correctness
-    console.log('Grouped exercises:', grouped);
-    console.log('Search query used:', searchQuery);
+    //console.log('Grouped exercises:', grouped);
     
     // Return the grouped exercises
     res.json(grouped);
