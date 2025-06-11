@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {
+import { 
   ScrollView,
   StyleSheet,
   Text,
@@ -14,6 +14,13 @@ import { servers } from '../../constants/API';
 import { saveTokens } from '@/utils/token';
 import { useRouter } from 'expo-router';
 
+import * as Google from 'expo-auth-session/providers/google'; // Google OAuth
+import Constants from 'expo-constants';
+import * as AuthSession from 'expo-auth-session';
+
+
+
+const clientId = Constants.expoConfig?.extra?.googleClientId;
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
 export default function RegisterScreen() {
@@ -22,6 +29,44 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
 
   const router = useRouter();
+  const redirectUri = AuthSession.makeRedirectUri({
+    native: 'slate://redirect', // matches your scheme in app.config.js
+  });
+  console.log(redirectUri)
+
+  // Google OAuth hook
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId, // Replace with your Google Client ID
+  });
+
+  // Handle Google login
+  const handleGoogleLogin = async () => {
+    const result = await promptAsync();
+    if (result?.type === 'success') {
+      const { id_token } = result.params; // Google returns id_token
+      const user = {
+        googleId: id_token, // Pass the Google ID Token to backend
+      };
+
+      try {
+        const response = await fetch(`${servers[2]}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          await saveTokens(data.accessToken, data.refreshToken); // Store tokens
+          router.push('/onboarding/height_weight');
+        } else {
+          alert(data.message || 'Registration failed');
+        }
+      } catch (error) {
+        console.error('Error registering with Google:', error);
+        alert('Failed to connect to server.');
+      }
+    }
+  };
 
   const handleRegister = async () => {
     if (!name || !email || !password /*|| !dob*/) {
@@ -105,7 +150,7 @@ export default function RegisterScreen() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity style={styles.googleButton}>
+        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin} >
           <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
         </TouchableOpacity>
 
@@ -192,43 +237,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-
-// old dob stuff
-/*
-
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-
-
-  const [dob, setDob] = useState<Date | undefined>(undefined);
-
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-
-  
-
-  const showDatePicker = () => setDatePickerVisibility(true);
-  const hideDatePicker = () => setDatePickerVisibility(false);
-  const handleConfirm = (selectedDate: Date) => {
-    setDob(selectedDate);
-    hideDatePicker();
-  };
-
-       <TouchableOpacity style={styles.inputBox} onPress={showDatePicker}>
-          <Text style={{
-            color: dob ? '#000' : '#888',
-            fontSize: screenWidth * 0.035 // Use relative font size
-          }}>
-            {dob ? dob.toLocaleDateString() : 'Date of Birth'}
-          </Text>
-        </TouchableOpacity>
-
-
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          onConfirm={handleConfirm}
-          onCancel={hideDatePicker}
-          maximumDate={new Date()} // Prevent selecting future dates
-          date={dob || new Date(2000, 0, 1)} // Default date if none selected
-        />
-*/
