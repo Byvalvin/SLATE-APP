@@ -18,8 +18,10 @@ export default {
         foregroundImage: './assets/images/adaptive-icon.png',
         backgroundColor: '#ffffff'
       },
-      edgeToEdgeEnabled: true
+      edgeToEdgeEnabled: true,
+       package: "com.anonymous.Slate"
     },
+
     web: {
       bundler: 'metro',
       output: 'static',
@@ -34,6 +36,12 @@ export default {
           imageWidth: 200,
           resizeMode: 'contain',
           backgroundColor: '#ffffff'
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps._some_id_here_"
         }
       ]
     ],
