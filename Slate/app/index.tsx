@@ -46,8 +46,8 @@ export default function SplashScreen() {
           router.replace('/(tabs)');
         } else {
           console.log("Refreshed but no profile. Redirecting to onboarding.");
-          router.replace('/(auth)/register');
-          //router.replace('/onboarding/height_weight');
+          //router.replace('/(auth)/register');
+          router.replace('/onboarding/height_weight');
         }
       } else {
         console.log("No refresh token. Going to welcome/login screen.");

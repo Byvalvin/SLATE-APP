@@ -29,25 +29,30 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
 
   const router = useRouter();
+  /*
   const redirectUri = AuthSession.makeRedirectUri({
     native: 'slate://redirect', // matches your scheme in app.config.js
   });
   console.log(redirectUri)
+  */
 
   // Google OAuth hook
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId, // Replace with your Google Client ID
+    //scopes: ['name', 'email'], // what the app is requesting access to from gmail 
+    redirectUri: 'https://auth.expo.io/@byvalvin/Slate', // This should match what you added in the Google Console
   });
 
   // Handle Google register
   const handleGoogleRegister = async () => {
-    const result = await promptAsync();
+    //const result = await promptAsync();
     if (response?.type === 'success') {
       const { id_token } = response.params; // Google returns id_token
+      console.log(id_token===undefined);
       const user = {
         googleUserToken: id_token, // Pass the Google ID Token to backend
       };
-
+      console.log("before try")
       try {
         const response = await fetch(`${servers[2]}/api/auth/register`, {
           method: 'POST',
