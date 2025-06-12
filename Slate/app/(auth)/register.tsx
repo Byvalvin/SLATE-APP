@@ -39,13 +39,13 @@ export default function RegisterScreen() {
     clientId, // Replace with your Google Client ID
   });
 
-  // Handle Google login
-  const handleGoogleLogin = async () => {
+  // Handle Google register
+  const handleGoogleRegister = async () => {
     const result = await promptAsync();
-    if (result?.type === 'success') {
-      const { id_token } = result.params; // Google returns id_token
+    if (response?.type === 'success') {
+      const { id_token } = response.params; // Google returns id_token
       const user = {
-        googleId: id_token, // Pass the Google ID Token to backend
+        googleUserToken: id_token, // Pass the Google ID Token to backend
       };
 
       try {
@@ -57,7 +57,12 @@ export default function RegisterScreen() {
         const data = await response.json();
         if (response.ok) {
           await saveTokens(data.accessToken, data.refreshToken); // Store tokens
-          router.push('/onboarding/height_weight');
+          if(data.merge){
+            router.push('/(tabs)'); // they just merged their account and send them to home if same email for google and regular registration
+          }else{
+            router.push('/onboarding/height_weight');
+          }
+          
         } else {
           alert(data.message || 'Registration failed');
         }
@@ -150,7 +155,7 @@ export default function RegisterScreen() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin} >
+        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister} >
           <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
         </TouchableOpacity>
 
