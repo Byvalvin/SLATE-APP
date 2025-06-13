@@ -11,66 +11,63 @@ const authMiddleware = require('../middleware/auth');
 const JWT_EXPIRATION = '3h'; // Access token validity for 1 hour
 const REFRESH_TOKEN_EXPIRATION = '30d'; // Refresh token validity for 30 days
 
+
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// Register route (handles both regular and Google registration)
+
+
+// Google registration
+router.get('/google-signin', async(req, res)=>{
+  const GCID = process.env.GOOGLE_CLIENT_ID;
+  const PUBLIC_BASE_URL="http://localhost:8081"
+  const PUBLIC_SCHEME="slate://"
+
+  const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
+  const GOOGLE_REDIRECT = `${PUBLIC_BASE_URL}/api/auth/callback`
+  if (!GCID){
+    return res.status(500).json({error:"GCID not set"});
+  }
+
+  const url = new URL(req.url);
+  let idpClientId;
+
+  const internalClient = url.searchParams.get("client_id");
+  const redirectUri = url.searchParams.get("redirect_uri");
+
+
+  if(internalClient==="google"){
+    idpClientId = GCID;
+  }else{
+    return res.status(400).json({message:"bad client"});
+  }
+
+  const params = new URLSearchParams({
+    client_id: idpClientId,
+    redirect_uri: GOOGLE_REDIRECT,
+    response_type: "code",
+    scope: url.searchParams.get("scope") || "identity",
+    prompt: "select_account"
+  });
+
+  return res.redirect(GOOGLE_AUTH_URL+"?"+params.toString());
+});
+
+// Register route (handles both regular and )
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, googleUserToken } = req.body;
+    const { name, email, password} = req.body;
 
     let user;
-    let merge = false;
-
-    if (googleUserToken) {
-      // Handle Google registration
-      const ticket = await client.verifyIdToken({
-        idToken: googleUserToken,
-        audience: process.env.GOOGLE_CLIENT_ID, // Verify the token is for your app
-      });
-
-      const payload = ticket.getPayload();
-      const googleId = payload.sub; // Get Google ID
-      const googleEmail = payload.email; // Get email from Google account
-      const googleName = payload.name ?? '';
-
-      // Check if the user exists by googleId or email
-      user = await User.findOne({ googleId });
-      if (user) {
-        // If the user exists with Google ID, return an error or continue
-        return res.status(409).json({ message: 'User already registered with Google' });
-      }
-
-      // Check if the user exists by email
-      user = await User.findOne({ email: googleEmail });
-      if (user) {
-        // Merge Google authentication with existing email-based user
-        if (!user.isGoogleAuth) {
-          // Only merge if not already Google authenticated
-          user.isGoogleAuth = true;
-          user.googleId = googleId;
-          await user.save();
-          merge = true;
-        }
-      } else {
-        // If no user found, create a new user
-        user = new User({
-          name: name || googleName,
-          email: googleEmail,
-          googleId,
-          isGoogleAuth: true, // Flag this as a Google Auth user
-        });
-      }
-
-    } else {
-      // Handle regular user registration (email/password)
-      user = await User.findOne({ email });
-      if (user) {
-        return res.status(409).json({ message: 'User already exists with this email' });
-      }
-
-      // Create a new user with email/password
-      user = new User({ name, email, password });
+    
+    // Handle regular user registration (email/password)
+    user = await User.findOne({ email });
+    if (user) {
+      return res.status(409).json({ message: 'User already exists with this email' });
     }
+
+    // Create a new user with email/password
+    user = new User({ name, email, password });
+  
 
     // Generate JWT tokens (access and refresh)
     const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
@@ -86,7 +83,6 @@ router.post('/register', async (req, res) => {
 
     // Send tokens to frontend
     res.status(201).json({
-      merge,
       accessToken,
       refreshToken,
       message: 'Registration successful',
