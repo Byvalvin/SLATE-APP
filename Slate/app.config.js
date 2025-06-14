@@ -11,7 +11,8 @@ export default {
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {
-      supportsTablet: true
+      supportsTablet: true,
+      bundleIdentifier: "com.anonymous.Slate"
     },
     android: {
       adaptiveIcon: {
@@ -19,7 +20,7 @@ export default {
         backgroundColor: '#ffffff'
       },
       edgeToEdgeEnabled: true,
-       package: "com.anonymous.Slate"
+      package: "com.anonymous.Slate"
     },
 
     web: {
@@ -50,6 +51,10 @@ export default {
     },
     extra: {
       googleClientId: process.env.GOOGLE_CLIENT_ID,
+      googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      eas: {
+        projectId: "dfbbfd2d-c791-483e-9ee8-a02096bcac37"
+      }
     }
   }
 };
