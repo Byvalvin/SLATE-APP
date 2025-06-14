@@ -14,14 +14,15 @@ const REFRESH_TOKEN_EXPIRATION = '30d'; // Refresh token validity for 30 days
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const PUBLIC_BASE_URL="http://localhost:8081"
+//const server="http://localhost:8081"
+const server = 'https://slate-backend.vercel.app';
 const PUBLIC_SCHEME="slate://"
 
 router.post('/google-token', async (req, res) => {
   const { code } = req.body;
 
   try {
-    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, `${PUBLIC_BASE_URL}/api/auth/callback`);
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, `${server}/api/auth/callback`);
 
     // Exchange code for tokens
     const { tokens } = await client.getToken(code);
@@ -96,7 +97,7 @@ router.get('/callback', async(req,res)=>{
     state,
   });
 
-  return res.redirect(platform==="web" ? PUBLIC_BASE_URL : PUBLIC_SCHEME
+  return res.redirect(platform==="web" ? server : PUBLIC_SCHEME
      + "?" 
      + outgoingParams.toString()
     );
@@ -108,7 +109,8 @@ router.get('/google-signin', async(req, res)=>{
   const GCID = process.env.GOOGLE_CLIENT_ID;
 
   const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
-  const GOOGLE_REDIRECT = `${PUBLIC_BASE_URL}/api/auth/callback`
+  
+  const GOOGLE_REDIRECT = `${server}/api/auth/callback`
   if (!GCID){
     return res.status(500).json({error:"GCID not set"});
   }
