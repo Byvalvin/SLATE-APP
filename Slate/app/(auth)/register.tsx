@@ -28,8 +28,6 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const {user, isLoading, signIn} = useGauth();
-
   const router = useRouter();
   /*
   const redirectUri = AuthSession.makeRedirectUri({
@@ -161,7 +159,7 @@ export default function RegisterScreen() {
           <Text style={styles.separatorText}>or register with</Text>
           <View style={styles.line} />
         </View>
-        <TouchableOpacity style={styles.googleButton} onPress={signIn} >
+        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister} >
           <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
         </TouchableOpacity>
 
