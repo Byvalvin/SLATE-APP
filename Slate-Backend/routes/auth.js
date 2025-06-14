@@ -113,7 +113,9 @@ router.get('/google-signin', async(req, res)=>{
     return res.status(500).json({error:"GCID not set"});
   }
 
-  const url = new URL(req.url);
+  const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+  const url = new URL(fullUrl);
+
   let idpClientId;
 
   const internalClient = url.searchParams.get("client_id");
