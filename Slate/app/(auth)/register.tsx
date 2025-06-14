@@ -21,6 +21,8 @@ import * as AuthSession from 'expo-auth-session';
 
 
 const clientId = Constants.expoConfig?.extra?.googleClientId;
+const clientSecret = Constants.expoConfig?.extra?.googleClientSecret;
+
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
 export default function RegisterScreen() {
@@ -41,11 +43,12 @@ export default function RegisterScreen() {
     clientId, // Replace with your Google Client ID
     //scopes: ['name', 'email'], // what the app is requesting access to from gmail 
     redirectUri: 'https://auth.expo.io/@byvalvin/Slate', // This should match what you added in the Google Console
+    clientSecret,
   });
 
   // Handle Google register
   const handleGoogleRegister = async () => {
-    //const result = await promptAsync();
+    const result = await promptAsync();
     if (response?.type === 'success') {
       const { id_token } = response.params; // Google returns id_token
       console.log(id_token===undefined);

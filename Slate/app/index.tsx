@@ -46,10 +46,7 @@ export default function SplashScreen() {
           router.replace('/(tabs)');
         } else {
           console.log("Refreshed but no profile. Redirecting to onboarding.");
-<<<<<<< HEAD
           //router.replace('/(auth)/register');
-=======
->>>>>>> parent of 5d1bd2a (test gregister)
           router.replace('/onboarding/height_weight');
         }
       } else {
