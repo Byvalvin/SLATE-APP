@@ -15,12 +15,9 @@ import { saveTokens } from '@/utils/token';
 import { useRouter } from 'expo-router';
 
 import * as Google from 'expo-auth-session/providers/google'; // Google OAuth
-import Constants, { ExecutionEnvironment } from 'expo-constants';
+import Constants from 'expo-constants';
 import * as AuthSession from 'expo-auth-session';
-import * as WebBrowser from 'expo-web-browser';
-import { GauthProvider, useGauth } from './context/G-authContext';
 
-WebBrowser.maybeCompleteAuthSession();
 
 
 const clientId = Constants.expoConfig?.extra?.googleClientId;
@@ -34,7 +31,54 @@ export default function RegisterScreen() {
   const {user, isLoading, signIn} = useGauth();
 
   const router = useRouter();
+  /*
+  const redirectUri = AuthSession.makeRedirectUri({
+    native: 'slate://redirect', // matches your scheme in app.config.js
+  });
+  console.log(redirectUri)
+  */
 
+  // Google OAuth hook
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId, // Replace with your Google Client ID
+    //scopes: ['name', 'email'], // what the app is requesting access to from gmail 
+    redirectUri: 'https://auth.expo.io/@byvalvin/Slate', // This should match what you added in the Google Console
+  });
+
+  // Handle Google register
+  const handleGoogleRegister = async () => {
+    //const result = await promptAsync();
+    if (response?.type === 'success') {
+      const { id_token } = response.params; // Google returns id_token
+      console.log(id_token===undefined);
+      const user = {
+        googleUserToken: id_token, // Pass the Google ID Token to backend
+      };
+      console.log("before try")
+      try {
+        const response = await fetch(`${servers[2]}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          await saveTokens(data.accessToken, data.refreshToken); // Store tokens
+          if(data.merge){
+            router.push('/(tabs)'); // they just merged their account and send them to home if same email for google and regular registration
+          }else{
+            router.push('/onboarding/height_weight');
+          }
+          
+        } else {
+          alert(data.message || 'Registration failed');
+        }
+      } catch (error) {
+        console.error('Error registering with Google:', error);
+        alert('Failed to connect to server.');
+      }
+    }
+  };
 
   const handleRegister = async () => {
     if (!name || !email || !password /*|| !dob*/) {
