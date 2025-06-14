@@ -84,7 +84,7 @@ router.post('/google-token', async (req, res) => {
 router.get('/callback', async(req,res)=>{
   const incomingParams = new URLSearchParams(req.url.split("?")[1]);
   const combinedPlatformAndState = incomingParams.get("state");
-
+  console.log(incomingParams);
   if (!combinedPlatformAndState){
     return res.status(400).json({message:"invalid state"});
   }
