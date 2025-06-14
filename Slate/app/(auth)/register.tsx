@@ -50,7 +50,7 @@ export default function RegisterScreen() {
       const { id_token } = response.params; // Google returns id_token
       console.log(id_token===undefined);
       const user = {
-        googleUserToken: id_token, // Pass the Google ID Token to backend
+        googleId: id_token, // Pass the Google ID Token to backend
       };
       console.log("before try")
       try {
@@ -62,12 +62,7 @@ export default function RegisterScreen() {
         const data = await response.json();
         if (response.ok) {
           await saveTokens(data.accessToken, data.refreshToken); // Store tokens
-          if(data.merge){
-            router.push('/(tabs)'); // they just merged their account and send them to home if same email for google and regular registration
-          }else{
-            router.push('/onboarding/height_weight');
-          }
-          
+          router.push('/onboarding/height_weight');
         } else {
           alert(data.message || 'Registration failed');
         }

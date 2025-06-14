@@ -5,175 +5,44 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { OAuth2Client } = require('google-auth-library');
+
 const authMiddleware = require('../middleware/auth');
 
 const JWT_EXPIRATION = '3h'; // Access token validity for 1 hour
 const REFRESH_TOKEN_EXPIRATION = '30d'; // Refresh token validity for 30 days
 
-
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-//const server="http://localhost:8081"
-const server = 'https://slate-backend.vercel.app';
-const PUBLIC_SCHEME="slate://"
-
-router.post('/google-token', async (req, res) => {
-  const { code } = req.body;
-
-  try {
-    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, `${server}/api/auth/callback`);
-
-    // Exchange code for tokens
-    const { tokens } = await client.getToken(code);
-    client.setCredentials(tokens);
-
-    // Get user info
-    const ticket = await client.verifyIdToken({
-      idToken: tokens.id_token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const payload = ticket.getPayload();
-
-    if (!payload) {
-      return res.status(400).json({ message: 'Invalid Google token' });
-    }
-
-    const { sub: googleId, email, name, picture } = payload;
-
-    let user = await User.findOne({ email });
-
-    if (!user) {
-      // Create new user
-      user = new User({
-        name,
-        email,
-        googleId,
-        isGoogleAuth: true,
-      });
-    } else {
-      // If existing user, but not Google-auth, reject (optional)
-      if (!user.isGoogleAuth) {
-        return res.status(409).json({ message: 'Email already registered with password' });
-      }
-    }
-
-    // Save or update
-    await user.save();
-
-    // Generate tokens
-    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: JWT_EXPIRATION });
-    const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRATION });
-
-    user.refreshToken = refreshToken;
-    await user.save();
-
-    return res.status(200).json({
-      accessToken,
-      refreshToken,
-      message: 'Google login successful',
-    });
-
-  } catch (err) {
-    console.error('Google token exchange error:', err);
-    return res.status(500).json({ message: 'Failed to process Google login' });
-  }
-});
-
-router.get('/callback', async(req,res)=>{
-  const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-  const incomingParams = new URLSearchParams(req.url.split("?")[1]);
-  const state = incomingParams.get("state");
-  console.log(incomingParams);
-  if (!state){
-    return res.status(400).json({message:"invalid state"});
-  }
-
-  // strip platform
-  const platform = "android";
-
-  const outgoingParams = new URLSearchParams({
-    code: incomingParams.get("code")?.toString() || "",
-    state,
-  });
-
-  return res.redirect(platform==="web" ? server : PUBLIC_SCHEME
-     + "?" 
-     + outgoingParams.toString()
-    );
-  
-});
-
-// Google registration
-router.get('/google-signin', async(req, res)=>{
-  const GCID = process.env.GOOGLE_CLIENT_ID;
-
-  const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
-  
-  const GOOGLE_REDIRECT = `${server}/api/auth/callback`
-  if (!GCID){
-    return res.status(500).json({error:"GCID not set"});
-  }
-
-  const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-  const url = new URL(fullUrl);
-
-  let idpClientId;
-
-  const internalClient = url.searchParams.get("client_id");
-  const redirectUri = url.searchParams.get("redirect_uri");
-  const state = url.searchParams.get("state");
-
-
-  if(internalClient==="google"){
-    idpClientId = GCID;
-  }else{
-    return res.status(400).json({message:"bad client"});
-  }
-
-  const params = new URLSearchParams({
-    client_id: idpClientId,
-    redirect_uri: GOOGLE_REDIRECT,
-    response_type: "code",
-    scope: url.searchParams.get("scope") || "identity",
-    state,
-    prompt: "select_account"
-  });
-
-  return res.redirect(GOOGLE_AUTH_URL+"?"+params.toString());
-});
-
-// Register route (handles both regular and )
+// Register route (handles both regular and Google registration)
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password} = req.body;
+    const { name, email, password, dob, googleId } = req.body;
 
-    let user;
-    
-    // Handle regular user registration (email/password)
-    user = await User.findOne({ email });
-    if (user) {
-      return res.status(409).json({ message: 'User already exists with this email' });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: 'User already exists' });
     }
 
-    // Create a new user with email/password
-    user = new User({ name, email, password });
-  
+    let user;
+    if (googleId) {
+      // If Google ID is provided, skip password and create Google-authenticated user
+      user = new User({ name, email, dob, googleId, isGoogleAuth: true });
+    } else {
+      // Regular user registration (email/password)
+      user = new User({ name, email, password, dob });
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
 
-    // Generate JWT tokens (access and refresh)
+    // Save user and generate tokens
     const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: `${JWT_EXPIRATION}`, // Set expiration time as per your requirement
+      expiresIn: JWT_EXPIRATION,
     });
-
     const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: `${REFRESH_TOKEN_EXPIRATION}`, // Refresh token can last longer
+      expiresIn: REFRESH_TOKEN_EXPIRATION,
     });
 
     user.refreshToken = refreshToken;
     await user.save();
 
-    // Send tokens to frontend
     res.status(201).json({
       accessToken,
       refreshToken,
@@ -181,7 +50,7 @@ router.post('/register', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Registration error:', err);
+    console.error(err);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -201,10 +70,10 @@ router.post('/login', async (req, res) => {
 
       // Generate access and refresh tokens
       const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: `${JWT_EXPIRATION}`,
+        expiresIn: JWT_EXPIRATION,
       });
       const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
-        expiresIn: `${REFRESH_TOKEN_EXPIRATION}`,
+        expiresIn: REFRESH_TOKEN_EXPIRATION,
       });
 
       // Save the refresh token in DB
@@ -229,10 +98,10 @@ router.post('/login', async (req, res) => {
     }
 
     const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: `${JWT_EXPIRATION}`,
+      expiresIn: JWT_EXPIRATION,
     });
     const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: `${REFRESH_TOKEN_EXPIRATION}`,
+      expiresIn: REFRESH_TOKEN_EXPIRATION,
     });
 
     user.refreshToken = refreshToken;
@@ -268,10 +137,8 @@ router.post('/refresh-token', async (req, res) => {
     }
 
     // Generate new tokens
-    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET,
-     { expiresIn: `${JWT_EXPIRATION}` });
-    const newRefreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET,
-     { expiresIn: `${REFRESH_TOKEN_EXPIRATION}` });
+    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${JWT_EXPIRATION}` });
+    const newRefreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: `${REFRESH_TOKEN_EXPIRATION}` });
 
     // Save the new refresh token in the DB
     user.refreshToken = newRefreshToken;
