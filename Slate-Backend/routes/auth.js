@@ -17,9 +17,69 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const PUBLIC_BASE_URL="http://localhost:8081"
 const PUBLIC_SCHEME="slate://"
 
-router.post('/google-token', async(req,res)=>{
+router.post('/google-token', async (req, res) => {
+  const { code } = req.body;
 
+  try {
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, `${PUBLIC_BASE_URL}/api/auth/callback`);
+
+    // Exchange code for tokens
+    const { tokens } = await client.getToken(code);
+    client.setCredentials(tokens);
+
+    // Get user info
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload) {
+      return res.status(400).json({ message: 'Invalid Google token' });
+    }
+
+    const { sub: googleId, email, name, picture } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user
+      user = new User({
+        name,
+        email,
+        googleId,
+        isGoogleAuth: true,
+      });
+    } else {
+      // If existing user, but not Google-auth, reject (optional)
+      if (!user.isGoogleAuth) {
+        return res.status(409).json({ message: 'Email already registered with password' });
+      }
+    }
+
+    // Save or update
+    await user.save();
+
+    // Generate tokens
+    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: JWT_EXPIRATION });
+    const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRATION });
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    return res.status(200).json({
+      accessToken,
+      refreshToken,
+      message: 'Google login successful',
+    });
+
+  } catch (err) {
+    console.error('Google token exchange error:', err);
+    return res.status(500).json({ message: 'Failed to process Google login' });
+  }
 });
+
 router.get('/callback', async(req,res)=>{
   const incomingParams = new URLSearchParams(req.url.split("?")[1]);
   const combinedPlatformAndState = incomingParams.get("state");

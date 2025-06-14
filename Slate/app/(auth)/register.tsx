@@ -79,58 +79,55 @@ export default function RegisterScreen() {
   const buttonBackground = isFormFilled ? '#55F358' : '#E9E2DA';
 
   return (
-    <GauthProvider>
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <View style={styles.innerContainer}>
-            <Text style={styles.title}>Let’s get you started</Text>
-            <Text style={styles.subtitle}>Create your account</Text>
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <View style={styles.innerContainer}>
+        <Text style={styles.title}>Let’s get you started</Text>
+        <Text style={styles.subtitle}>Create your account</Text>
 
-            <TextInput
-              placeholder="Name"
-              placeholderTextColor="#888"
-              style={styles.inputBox}
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words" // Capitalize names
-            />
+        <TextInput
+          placeholder="Name"
+          placeholderTextColor="#888"
+          style={styles.inputBox}
+          value={name}
+          onChangeText={setName}
+          autoCapitalize="words" // Capitalize names
+        />
 
-            <TextInput
-              placeholder="Email"
-              placeholderTextColor="#888"
-              style={styles.inputBox}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="#888"
+          style={styles.inputBox}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
 
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor="#888"
-              style={styles.inputBox}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#888"
+          style={styles.inputBox}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-            <View style={styles.separatorContainer}>
-              <View style={styles.line} />
-              <Text style={styles.separatorText}>or register with</Text>
-              <View style={styles.line} />
-            </View>
+        <View style={styles.separatorContainer}>
+          <View style={styles.line} />
+          <Text style={styles.separatorText}>or register with</Text>
+          <View style={styles.line} />
+        </View>
+        <TouchableOpacity style={styles.googleButton} onPress={signIn} >
+          <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
+        </TouchableOpacity>
 
-            <TouchableOpacity style={styles.googleButton} onPress={signIn} >
-              <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
-            </TouchableOpacity>
-
-            <Pressable onPress={handleRegister}>
-              <View style={[styles.registerButton, { backgroundColor: buttonBackground }]}>
-                <Text style={styles.registerButtonText}>REGISTER</Text>
-              </View>
-            </Pressable>
+        <Pressable onPress={handleRegister}>
+          <View style={[styles.registerButton, { backgroundColor: buttonBackground }]}>
+            <Text style={styles.registerButtonText}>REGISTER</Text>
           </View>
-        </ScrollView>
-    </GauthProvider>
+        </Pressable>
+      </View>
+    </ScrollView>
   );
 }
 

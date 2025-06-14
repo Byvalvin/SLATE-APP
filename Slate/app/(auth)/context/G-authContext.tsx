@@ -7,6 +7,7 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { AuthError, AuthRequestConfig, DiscoveryDocument, makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import { servers } from "@/constants/API";
+import { saveTokens } from "@/utils/token";
 // import { discovery } from "expo-auth-session/providers/google";
 
 
@@ -26,7 +27,7 @@ export type AuthUser = {
 
 const GauthContext = createContext({
     user: null as AuthUser | null,
-    signIn: () => {},
+    signIn: () => {console.log("sentinel")},
     signOut: () => {},
     fetchWithAuth: async (url:string, options?:RequestInit) => Promise.resolve(new Response),
     isLoading: false,
@@ -50,17 +51,41 @@ export const GauthProvider = ({children}: {children: ReactNode})=>{
     const [error, setError] = useState<AuthError | null>(null)
 
     const [request, response, promptAsync] = useAuthRequest(config, discovery)
-    const signIn = async()=>{
+    const signIn = async () => {
         try {
-            if(!request){
-                console.log("no request");
-                return;
+          if (!request) return;
+      
+          const result = await promptAsync();
+      
+          if (result.type === 'success' && result.params?.code) {
+            const code = result.params.code;
+      
+            const response = await fetch(`${servers[2]}/api/auth/google-token`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code }),
+            });
+      
+            const data = await response.json();
+      
+            if (!response.ok) {
+              throw new Error(data.message || 'Google login failed');
             }
-            await promptAsync();
-        } catch (error) {
-            console.log(error);
+      
+            console.log("✅ Google login success:", data);
+            // Optional: store tokens
+            await saveTokens(data.accessToken, data.refreshToken);
+            // Optional: update user state
+            setUser(data.user || null);
+          } else {
+            console.warn("Google auth cancelled or failed");
+          }
+        } catch (err) {
+          console.error("Google login error:", err);
+          setError(err as AuthError);
         }
-    };
+      };
+      
     const signOut = async()=>{};
     const fetchWithGauth = async(url:string, options?:RequestInit)=>{};
 
