@@ -14,13 +14,38 @@ const REFRESH_TOKEN_EXPIRATION = '30d'; // Refresh token validity for 30 days
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const PUBLIC_BASE_URL="http://localhost:8081"
+const PUBLIC_SCHEME="slate://"
 
+router.post('/google-token', async(req,res)=>{
+
+});
+router.get('/callback', async(req,res)=>{
+  const incomingParams = new URLSearchParams(req.url.split("?")[1]);
+  const combinedPlatformAndState = incomingParams.get("state");
+
+  if (!combinedPlatformAndState){
+    return res.status(400).json({message:"invalid state"});
+  }
+
+  // strip platform
+  const platform = "android";
+
+  const outgoingParams = new URLSearchParams({
+    code: incomingParams.get("code")?.toString() || "",
+    state,
+  });
+
+  return res.redirect(platform==="web" ? PUBLIC_BASE_URL : PUBLIC_SCHEME
+     + "?" 
+     + outgoingParams.toString()
+    );
+  
+});
 
 // Google registration
 router.get('/google-signin', async(req, res)=>{
   const GCID = process.env.GOOGLE_CLIENT_ID;
-  const PUBLIC_BASE_URL="http://localhost:8081"
-  const PUBLIC_SCHEME="slate://"
 
   const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
   const GOOGLE_REDIRECT = `${PUBLIC_BASE_URL}/api/auth/callback`

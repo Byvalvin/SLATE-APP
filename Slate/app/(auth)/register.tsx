@@ -18,6 +18,7 @@ import * as Google from 'expo-auth-session/providers/google'; // Google OAuth
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
+import { GauthProvider, useGauth } from './context/G-authContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -30,86 +31,10 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const {user, isLoading, signIn} = useGauth();
+
   const router = useRouter();
-  /*
-  const redirectUri = AuthSession.makeRedirectUri({
-    native: 'slate://redirect', // matches your scheme in app.config.js
-  });
-  console.log(redirectUri)
-  */
 
-  // Google OAuth hook
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId, // Replace with your Google Client ID
-    scopes: ['openid', 'profile', 'email'], // what the app is requesting access to from gmail 
-    redirectUri: 'https://auth.expo.io/@byvalvin/Slate', // This should match what you added in the Google Console
-    //shouldAutoExchangeCode: Constants.executionEnvironment !== ExecutionEnvironment.StoreClient ? true : undefined,
-  });
-
-  const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
-
-  // Handle Google register
-// Handle Google register
-const getGoogleUser = async (accessToken: string) => {
-
-  try{
-        const response = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-            headers: { Authorization: `Bearer ${accessToken}`}
-        });
-
-        const user = await response.json()
-        if (user?.email) {
-            const { email, name } = user; // you will get more data in the user object
-            console.log(email,name)
-        }
-    }
-    catch(error){
-        console.log('GoogleUserReq error: ', error);
-    }
-}
-const handleGoogleRegister = async () => {
-  const result = await promptAsync(); // Ensure you await this correctly
-  console.log('Response Type:', result.type); // Check response type first to ensure success
-
-  if (response?.type === 'success') {
-  /*
-    const { id_token } = response.params; // Google returns id_token
-    console.log('Google ID Token:', id_token);
-
-    const user = {
-      googleUserToken: id_token, // Pass the Google ID Token to backend
-    };
-    */
-    const { authentication } = response;
-    const user = getGoogleUser((authentication as any).accessToken);
-
-    try {
-      // Sending token to backend
-      const response = await fetch(`${servers[2]}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(user),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        await saveTokens(data.accessToken, data.refreshToken); // Store tokens
-        if (data.merge) {
-          router.push('/(tabs)'); // User merged their account
-        } else {
-          router.push('/onboarding/height_weight'); // Regular onboarding
-        }
-      } else {
-        alert(data.message || 'Registration failed');
-      }
-    } catch (error) {
-      console.error('Error registering with Google:', error);
-      alert('Failed to connect to server.');
-    }
-  } else {
-    console.log('Google OAuth failed or was cancelled.');
-  }
-};
 
   const handleRegister = async () => {
     if (!name || !email || !password /*|| !dob*/) {
@@ -154,56 +79,58 @@ const handleGoogleRegister = async () => {
   const buttonBackground = isFormFilled ? '#55F358' : '#E9E2DA';
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <View style={styles.innerContainer}>
-        <Text style={styles.title}>Let’s get you started</Text>
-        <Text style={styles.subtitle}>Create your account</Text>
+    <GauthProvider>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <View style={styles.innerContainer}>
+            <Text style={styles.title}>Let’s get you started</Text>
+            <Text style={styles.subtitle}>Create your account</Text>
 
-        <TextInput
-          placeholder="Name"
-          placeholderTextColor="#888"
-          style={styles.inputBox}
-          value={name}
-          onChangeText={setName}
-          autoCapitalize="words" // Capitalize names
-        />
+            <TextInput
+              placeholder="Name"
+              placeholderTextColor="#888"
+              style={styles.inputBox}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words" // Capitalize names
+            />
 
-        <TextInput
-          placeholder="Email"
-          placeholderTextColor="#888"
-          style={styles.inputBox}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
+            <TextInput
+              placeholder="Email"
+              placeholderTextColor="#888"
+              style={styles.inputBox}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
 
-        <TextInput
-          placeholder="Password"
-          placeholderTextColor="#888"
-          style={styles.inputBox}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+            <TextInput
+              placeholder="Password"
+              placeholderTextColor="#888"
+              style={styles.inputBox}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
 
-        <View style={styles.separatorContainer}>
-          <View style={styles.line} />
-          <Text style={styles.separatorText}>or register with</Text>
-          <View style={styles.line} />
-        </View>
+            <View style={styles.separatorContainer}>
+              <View style={styles.line} />
+              <Text style={styles.separatorText}>or register with</Text>
+              <View style={styles.line} />
+            </View>
 
-        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister} >
-          <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.googleButton} onPress={signIn} >
+              <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
+            </TouchableOpacity>
 
-        <Pressable onPress={handleRegister}>
-          <View style={[styles.registerButton, { backgroundColor: buttonBackground }]}>
-            <Text style={styles.registerButtonText}>REGISTER</Text>
+            <Pressable onPress={handleRegister}>
+              <View style={[styles.registerButton, { backgroundColor: buttonBackground }]}>
+                <Text style={styles.registerButtonText}>REGISTER</Text>
+              </View>
+            </Pressable>
           </View>
-        </Pressable>
-      </View>
-    </ScrollView>
+        </ScrollView>
+    </GauthProvider>
   );
 }
 

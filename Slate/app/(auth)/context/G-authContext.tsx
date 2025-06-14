@@ -1,12 +1,13 @@
-import 
-{
+import {
     useState,
     createContext,
     ReactNode,
     useContext,
 } from "react";
 import * as WebBrowser from "expo-web-browser";
-import { AuthError } from "expo-auth-session";
+import { AuthError, AuthRequestConfig, DiscoveryDocument, makeRedirectUri, useAuthRequest } from "expo-auth-session";
+import { servers } from "@/constants/API";
+// import { discovery } from "expo-auth-session/providers/google";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -32,12 +33,34 @@ const GauthContext = createContext({
     error: null as AuthError | null,
 });
 
+const config: AuthRequestConfig = {
+    clientId: "google",
+    scopes: ["openid", "profile" ,"email"],
+    redirectUri: makeRedirectUri(),
+};
+
+const discovery: DiscoveryDocument = {
+    authorizationEndpoint: `${servers[2]}/api/auth/google-signin`,
+    tokenEndpoint: `${servers[2]}/api/auth/google-token`,
+};
+
 export const GauthProvider = ({children}: {children: ReactNode})=>{
     const [user, setUser] = useState<AuthUser | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<AuthError | null>(null)
 
-    const signIn = async()=>{};
+    const [request, response, promptAsync] = useAuthRequest(config, discovery)
+    const signIn = async()=>{
+        try {
+            if(!request){
+                console.log("no request");
+                return;
+            }
+            await promptAsync();
+        } catch (error) {
+            console.log(error);
+        }
+    };
     const signOut = async()=>{};
     const fetchWithGauth = async(url:string, options?:RequestInit)=>{};
 
