@@ -82,10 +82,11 @@ router.post('/google-token', async (req, res) => {
 });
 
 router.get('/callback', async(req,res)=>{
+  const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
   const incomingParams = new URLSearchParams(req.url.split("?")[1]);
-  const combinedPlatformAndState = incomingParams.get("state");
+  const state = incomingParams.get("state");
   console.log(incomingParams);
-  if (!combinedPlatformAndState){
+  if (!state){
     return res.status(400).json({message:"invalid state"});
   }
 
@@ -122,6 +123,7 @@ router.get('/google-signin', async(req, res)=>{
 
   const internalClient = url.searchParams.get("client_id");
   const redirectUri = url.searchParams.get("redirect_uri");
+  const state = url.searchParams.get("state");
 
 
   if(internalClient==="google"){
@@ -135,6 +137,7 @@ router.get('/google-signin', async(req, res)=>{
     redirect_uri: GOOGLE_REDIRECT,
     response_type: "code",
     scope: url.searchParams.get("scope") || "identity",
+    state,
     prompt: "select_account"
   });
 
