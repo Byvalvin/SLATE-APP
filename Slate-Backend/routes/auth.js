@@ -5,52 +5,95 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-
+const { OAuth2Client } = require('google-auth-library');
 const authMiddleware = require('../middleware/auth');
 
 const JWT_EXPIRATION = '3h'; // Access token validity for 1 hour
 const REFRESH_TOKEN_EXPIRATION = '30d'; // Refresh token validity for 30 days
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'https://auth.expo.io/@byvalvin/Slate');
+
 // Register route (handles both regular and Google registration)
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, dob, googleId } = req.body;
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: 'User already exists' });
-    }
+    const { name, email, password, googleUserToken } = req.body;
 
     let user;
-    if (googleId) {
-      // If Google ID is provided, skip password and create Google-authenticated user
-      user = new User({ name, email, dob, googleId, isGoogleAuth: true });
+    let merge = false;
+
+    if (googleUserToken) {
+      // Handle Google registration
+      const ticket = await client.verifyIdToken({
+        idToken: googleUserToken,
+        audience: process.env.GOOGLE_CLIENT_ID, // Verify the token is for your app
+      });
+
+      const payload = ticket.getPayload();
+      const googleId = payload.sub; // Get Google ID
+      const googleEmail = payload.email; // Get email from Google account
+      const googleName = payload.name ?? '';
+
+      // Check if the user exists by googleId or email
+      user = await User.findOne({ googleId });
+      if (user) {
+        // If the user exists with Google ID, return an error or continue
+        return res.status(409).json({ message: 'User already registered with Google' });
+      }
+
+      // Check if the user exists by email
+      user = await User.findOne({ email: googleEmail });
+      if (user) {
+        // Merge Google authentication with existing email-based user
+        if (!user.isGoogleAuth) {
+          // Only merge if not already Google authenticated
+          user.isGoogleAuth = true;
+          user.googleId = googleId;
+          await user.save();
+          merge = true;
+        }
+      } else {
+        // If no user found, create a new user
+        user = new User({
+          name: name || googleName,
+          email: googleEmail,
+          googleId,
+          isGoogleAuth: true, // Flag this as a Google Auth user
+        });
+      }
+
     } else {
-      // Regular user registration (email/password)
-      user = new User({ name, email, password, dob });
-      const hashedPassword = await bcrypt.hash(password, 10);
-      user.password = hashedPassword;
+      // Handle regular user registration (email/password)
+      user = await User.findOne({ email });
+      if (user) {
+        return res.status(409).json({ message: 'User already exists with this email' });
+      }
+
+      // Create a new user with email/password
+      user = new User({ name, email, password });
     }
 
-    // Save user and generate tokens
+    // Generate JWT tokens (access and refresh)
     const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: JWT_EXPIRATION,
+      expiresIn: `${JWT_EXPIRATION}`, // Set expiration time as per your requirement
     });
+
     const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: REFRESH_TOKEN_EXPIRATION,
+      expiresIn: `${REFRESH_TOKEN_EXPIRATION}`, // Refresh token can last longer
     });
 
     user.refreshToken = refreshToken;
     await user.save();
 
+    // Send tokens to frontend
     res.status(201).json({
+      merge,
       accessToken,
       refreshToken,
       message: 'Registration successful',
     });
 
   } catch (err) {
-    console.error(err);
+    console.error('Registration error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -70,10 +113,10 @@ router.post('/login', async (req, res) => {
 
       // Generate access and refresh tokens
       const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: JWT_EXPIRATION,
+        expiresIn: `${JWT_EXPIRATION}`,
       });
       const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
-        expiresIn: REFRESH_TOKEN_EXPIRATION,
+        expiresIn: `${REFRESH_TOKEN_EXPIRATION}`,
       });
 
       // Save the refresh token in DB
@@ -98,10 +141,10 @@ router.post('/login', async (req, res) => {
     }
 
     const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: JWT_EXPIRATION,
+      expiresIn: `${JWT_EXPIRATION}`,
     });
     const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: REFRESH_TOKEN_EXPIRATION,
+      expiresIn: `${REFRESH_TOKEN_EXPIRATION}`,
     });
 
     user.refreshToken = refreshToken;
@@ -137,8 +180,10 @@ router.post('/refresh-token', async (req, res) => {
     }
 
     // Generate new tokens
-    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: `${JWT_EXPIRATION}` });
-    const newRefreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: `${REFRESH_TOKEN_EXPIRATION}` });
+    const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET,
+     { expiresIn: `${JWT_EXPIRATION}` });
+    const newRefreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET,
+     { expiresIn: `${REFRESH_TOKEN_EXPIRATION}` });
 
     // Save the new refresh token in the DB
     user.refreshToken = newRefreshToken;
