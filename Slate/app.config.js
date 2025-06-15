@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 export default {
   expo: {
+    owner: "byvalvin",
     name: 'Slate',
     slug: 'Slate',
     version: '1.0.0',
@@ -53,7 +54,7 @@ export default {
       googleClientId: process.env.GOOGLE_CLIENT_ID,
       googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
       eas: {
-        projectId: "dfbbfd2d-c791-483e-9ee8-a02096bcac37"
+        projectId: "78bd9b5f-171d-4c1c-899a-21e6815a72ef"
       }
     }
   }
