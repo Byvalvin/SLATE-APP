@@ -14,13 +14,7 @@ import { servers } from '../../constants/API';
 import { saveTokens } from '@/utils/token';
 import { useRouter } from 'expo-router';
 
-import * as Google from 'expo-auth-session/providers/google'; // Google OAuth
-import {clientId, clientSecret} from "../../constants/g-auth";
-
 import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
-
-
-
 
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
@@ -33,20 +27,7 @@ export default function RegisterScreen() {
   const [isSubmittingGauthRequest, setIsSubmittingGauthRequest] = useState(false);
 
   const router = useRouter();
-  /*
-  const redirectUri = AuthSession.makeRedirectUri({
-    native: 'slate://redirect', // matches your scheme in app.config.js
-  });
-  console.log(redirectUri)
-  */
 
-  // Google OAuth hook
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId, // Replace with your Google Client ID
-    //scopes: ['name', 'email'], // what the app is requesting access to from gmail 
-    redirectUri: 'https://auth.expo.io/@byvalvin/Slate', // This should match what you added in the Google Console
-    clientSecret,
-  });
 
   // Handle Google register
   const handleGoogleRegister = async()=>{
@@ -68,7 +49,7 @@ export default function RegisterScreen() {
         });
 
         const data = await createUserResponse.json();
-        console.log(data);
+        //console.log(data);
         if (createUserResponse.ok) {
           await saveTokens(data.accessToken, data.refreshToken); // Save the session tokens
           alert('Google Registration successful!');
