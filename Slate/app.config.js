@@ -12,7 +12,7 @@ export default {
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.anonymous.Slate"
+      bundleIdentifier: "com.byvalvin.Slate"
     },
     android: {
       adaptiveIcon: {
@@ -20,7 +20,7 @@ export default {
         backgroundColor: '#ffffff'
       },
       edgeToEdgeEnabled: true,
-      package: "com.anonymous.Slate"
+      package: "com.byvalvin.Slate"
     },
 
     web: {
