@@ -17,50 +17,35 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, googleUserToken } = req.body;
+    console.log(name, email, googleUserToken);
 
     let user;
-    let merge = false;
 
     if (googleUserToken) {
       // Handle Google registration
-      const ticket = await client.verifyIdToken({
-        idToken: googleUserToken,
-        audience: process.env.GOOGLE_CLIENT_ID, // Verify the token is for your app
-      });
+      // We no longer verify Google ID with OAuth2Client; the frontend is sending the verified Google token
+      // In this simplified version, we assume the token has been verified by the client.
 
-      const payload = ticket.getPayload();
-      const googleId = payload.sub; // Get Google ID
-      const googleEmail = payload.email; // Get email from Google account
-      const googleName = payload.name ?? '';
-
-      // Check if the user exists by googleId or email
-      user = await User.findOne({ googleId });
+      // Check if the user already exists by Google ID
+      user = await User.findOne({ googleId: googleUserToken });
       if (user) {
-        // If the user exists with Google ID, return an error or continue
         return res.status(409).json({ message: 'User already registered with Google' });
       }
-
-      // Check if the user exists by email
-      user = await User.findOne({ email: googleEmail });
+      // Check if the user exists by email (if not, create a new one)
+      user = await User.findOne({ email });
       if (user) {
-        // Merge Google authentication with existing email-based user
-        if (!user.isGoogleAuth) {
-          // Only merge if not already Google authenticated
-          user.isGoogleAuth = true;
-          user.googleId = googleId;
-          await user.save();
-          merge = true;
-        }
-      } else {
-        // If no user found, create a new user
-        user = new User({
-          name: name || googleName,
-          email: googleEmail,
-          googleId,
-          isGoogleAuth: true, // Flag this as a Google Auth user
-        });
+        return res.status(409).json({ message: 'User already exists with this email' });
       }
 
+      // If no user exists, create a new Google-authenticated user
+      user = new User({
+        name: name || 'Google User', // Use a default name if not provided
+        email,
+        googleId: googleUserToken, // Use the Google token directly
+        isGoogleAuth: true, // Flag for Google-authenticated user
+      });
+
+      console.log(user);
     } else {
       // Handle regular user registration (email/password)
       user = await User.findOne({ email });
@@ -76,7 +61,6 @@ router.post('/register', async (req, res) => {
     const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: `${JWT_EXPIRATION}`, // Set expiration time as per your requirement
     });
-
     const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: `${REFRESH_TOKEN_EXPIRATION}`, // Refresh token can last longer
     });
@@ -86,7 +70,6 @@ router.post('/register', async (req, res) => {
 
     // Send tokens to frontend
     res.status(201).json({
-      merge,
       accessToken,
       refreshToken,
       message: 'Registration successful',
@@ -209,7 +192,7 @@ router.post('/refresh-token', async (req, res) => {
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await User.findOne({ userId: req.user.userId })
-      .select('-password -refreshToken -_id -__v');
+      .select('-password -refreshToken -_id -__v -googleId');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

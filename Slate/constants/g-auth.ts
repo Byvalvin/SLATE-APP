@@ -1,4 +1,5 @@
 import { sample } from "lodash";
+import Constants from 'expo-constants';
 
 export const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 export const GOOGLE_REDIRECT = `${process.env.PUBLIC_BASE_URL}/api/auth/callback`
@@ -25,3 +26,11 @@ export const COOKIE_OPTIONS = {
     path: "api/auth/refresh",
     maxAge: REFRESH_MAX_AGE
  }
+
+
+const clientIds = Constants.expoConfig?.extra || {};
+
+export const clientId = clientIds.googleClientId;
+export const clientSecret = clientIds.googleClientSecret;
+export const iosClientId = clientIds.googleIOSClientId;
+export const androidClientId = clientIds.googleAndroidClientId;

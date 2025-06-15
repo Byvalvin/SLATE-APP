@@ -15,13 +15,13 @@ import { saveTokens } from '@/utils/token';
 import { useRouter } from 'expo-router';
 
 import * as Google from 'expo-auth-session/providers/google'; // Google OAuth
-import Constants from 'expo-constants';
-import * as AuthSession from 'expo-auth-session';
+import {clientId, clientSecret} from "../../constants/g-auth";
+
+import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
 
 
 
-const clientId = Constants.expoConfig?.extra?.googleClientId;
-const clientSecret = Constants.expoConfig?.extra?.googleClientSecret;
+
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
@@ -29,6 +29,8 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const [isSubmittingGauthRequest, setIsSubmittingGauthRequest] = useState(false);
 
   const router = useRouter();
   /*
@@ -47,34 +49,61 @@ export default function RegisterScreen() {
   });
 
   // Handle Google register
-  const handleGoogleRegister = async () => {
-    const result = await promptAsync();
-    if (response?.type === 'success') {
-      const { id_token } = response.params; // Google returns id_token
-      console.log(id_token===undefined);
-      const user = {
-        googleId: id_token, // Pass the Google ID Token to backend
-      };
-      console.log("before try")
-      try {
-        const response = await fetch(`${servers[2]}/api/auth/register`, {
+  const handleGoogleRegister = async()=>{
+    try {
+      setIsSubmittingGauthRequest(true);
+      await GoogleSignin.hasPlayServices(); // has google play services check for only android devices
+      const response = await GoogleSignin.signIn();
+      if(isSuccessResponse(response)){
+        const {idToken, user} = response.data;
+        const {name, email} = user;
+
+        // addition call to our backend to make user object for user
+        // Send Google user token along with the name and email to the backend
+        const userData = { googleUserToken: idToken, name, email };
+        const createUserResponse = await fetch(`${servers[2]}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(user),
+          body: JSON.stringify(userData),
         });
-        const data = await response.json();
-        if (response.ok) {
-          await saveTokens(data.accessToken, data.refreshToken); // Store tokens
-          router.push('/onboarding/height_weight');
+
+        const data = await createUserResponse.json();
+        console.log(data);
+        if (createUserResponse.ok) {
+          await saveTokens(data.accessToken, data.refreshToken); // Save the session tokens
+          alert('Google Registration successful!');
+          router.push('/onboarding/height_weight'); // Navigate to the onboarding screen
         } else {
-          alert(data.message || 'Registration failed');
+          alert(data.message || 'Google registration failed');
         }
-      } catch (error) {
-        console.error('Error registering with Google:', error);
-        alert('Failed to connect to server.');
       }
+      
+      setIsSubmittingGauthRequest(false);
+    } catch (error) {
+      setIsSubmittingGauthRequest(false);
+      if (isErrorWithCode(error)){
+        const{IN_PROGRESS, PLAY_SERVICES_NOT_AVAILABLE, } = statusCodes;
+        switch (error.code) {
+          case IN_PROGRESS: // shouldnt execute since button disables if in progress
+            console.log("Google Sign In in Progress");      
+            break;
+
+          case PLAY_SERVICES_NOT_AVAILABLE: //ONLY ANDROID
+            console.log("Play services Unavailable");
+            alert("Play services Unavailable.");
+        
+          default:
+            console.error(error,error.code);
+        }
+      }else{// None Google Sign In 3rd Party error
+        console.error(error);
+      }
+      console.error(error);
+      alert('Google registration failed');
+      
     }
-  };
+  }
+
 
   const handleRegister = async () => {
     if (!name || !email || !password /*|| !dob*/) {
@@ -157,7 +186,7 @@ export default function RegisterScreen() {
           <Text style={styles.separatorText}>or register with</Text>
           <View style={styles.line} />
         </View>
-        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister} >
+        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister} disabled={isSubmittingGauthRequest} >
           <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
         </TouchableOpacity>
 

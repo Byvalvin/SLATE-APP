@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-nati
 import Modal from 'react-native-modal';
 import { useRouter } from 'expo-router';
 import { deleteTokens } from '@/utils/token';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -12,6 +13,7 @@ type Props = {
   user: {
     name: string;
     email: string;
+    isGoogleAuth: boolean;
     dob: string;
     createdAt: string;
     plan?: string;
@@ -22,8 +24,10 @@ const AccountModal = ({ visible, onClose, user }: Props) => {
   const router = useRouter();
 
   const handleLogout = async () => {
+    if(user.isGoogleAuth)GoogleSignin.signOut(); // signOut google
+    // clear data
     await deleteTokens();
-    onClose();
+    onClose(); //will close modal
     router.replace('/(auth)/login')
   };
 

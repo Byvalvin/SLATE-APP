@@ -7,6 +7,8 @@ import { deleteTokens, getAccessToken, refreshAccessToken } from '@/utils/token'
 import { useRouter } from 'expo-router';
 import { hasProfile } from '@/utils/profile';
 import LiquidWaveLoader from '@/components/LiquidWaveLoader';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { clientId, iosClientId } from '@/constants/g-auth';
 
 // Get screen dimensions for responsive sizing
 const { width, height } = Dimensions.get('window');
@@ -55,6 +57,15 @@ export default function SplashScreen() {
       }
     }
   };
+
+  // set relevant google auth ids
+  useEffect(()=>{
+    GoogleSignin.configure({
+        iosClientId,
+        webClientId: clientId,
+        //profileImageSize: 150,
+    })
+  });
 
   // Effect to handle the splash screen fade-out and session check
   useEffect(() => {

@@ -53,6 +53,9 @@ export default {
     extra: {
       googleClientId: process.env.GOOGLE_CLIENT_ID,
       googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      googleIOSClientId: process.env.GOOGLE_IOS_CLIENT_ID,
+      googleAndroidClientId: process.env.GOOGLE_ANDROID_CLIENT_ID,
+      
       eas: {
         projectId: "78bd9b5f-171d-4c1c-899a-21e6815a72ef"
       }
