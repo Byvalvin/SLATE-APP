@@ -1,4 +1,5 @@
-Slate: Your Personalized Fitness Companion
+*Slate: Your Personalized Fitness Companion
+
  <img src="https://github.com/user-attachments/assets/b0afdb6f-1db3-4311-953a-9d8cfc4f6818" width="300" alt="Slate App Screenshot 1">
 
 <img src="https://github.com/user-attachments/assets/b5b420a5-08a5-45a1-b633-591a9fdf5fb9" width="300" alt="Slate App Screenshot 2">
