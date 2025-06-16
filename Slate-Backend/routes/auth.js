@@ -5,13 +5,11 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { OAuth2Client } = require('google-auth-library');
 const authMiddleware = require('../middleware/auth');
 
 const JWT_EXPIRATION = '3h'; // Access token validity for 1 hour
 const REFRESH_TOKEN_EXPIRATION = '30d'; // Refresh token validity for 30 days
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'https://auth.expo.io/@byvalvin/Slate');
 
 // Register route (handles both regular and Google registration)
 router.post('/register', async (req, res) => {
@@ -25,9 +23,11 @@ router.post('/register', async (req, res) => {
       // Handle Google registration
       // We no longer verify Google ID with OAuth2Client; the frontend is sending the verified Google token
       // In this simplified version, we assume the token has been verified by the client.
+      const decoded = jwt.decode(googleUserToken);
+      const googleId = decoded.sub; // ✅ Stable Google ID
 
       // Check if the user already exists by Google ID
-      user = await User.findOne({ googleId: googleUserToken });
+      user = await User.findOne({ googleId });
       if (user) {
         return res.status(409).json({ message: 'User already registered with Google' });
       }
@@ -39,9 +39,9 @@ router.post('/register', async (req, res) => {
 
       // If no user exists, create a new Google-authenticated user
       user = new User({
-        name: name || 'Google User', // Use a default name if not provided
+        name: name || decoded.name || 'Google User', // Use a default name if not provided
         email,
-        googleId: googleUserToken, // Use the Google token directly
+        googleId, // Use the Google token directly
         isGoogleAuth: true, // Flag for Google-authenticated user
       });
 
@@ -85,61 +85,51 @@ router.post('/register', async (req, res) => {
 // Login route (handles both regular and Google login)
 router.post('/login', async (req, res) => {
   try {
-    const { email, password, googleId } = req.body;
+    const { email, password, googleUserToken } = req.body;
+    let user, message;
 
-    // If the user is logging in with Google OAuth
-    if (googleId) {
-      const user = await User.findOne({ googleId });
+    // ---- Google Login ----
+    if (googleUserToken) {
+      // Use the Google ID token as the unique identifier (same as registration)
+      const decoded = jwt.decode(googleUserToken);
+      const googleId = decoded.sub;
+
+      user = await User.findOne({ googleId });
       if (!user) {
         return res.status(401).json({ message: 'Google user not found' });
       }
+      message = 'Google login successful'
+      
+    }else{
+      // ---- Regular Email/Password Login ----
+      user = await User.findOne({ email });
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
 
-      // Generate access and refresh tokens
-      const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: `${JWT_EXPIRATION}`,
-      });
-      const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
-        expiresIn: `${REFRESH_TOKEN_EXPIRATION}`,
-      });
-
-      // Save the refresh token in DB
-      user.refreshToken = refreshToken;
-      await user.save();
-
-      return res.status(200).json({
-        accessToken,
-        refreshToken,
-        message: 'Google login successful',
-      });
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
     }
-
-    // If the user is logging in with email and password
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
+    
     const accessToken = jwt.sign({ userId: user.userId }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: `${JWT_EXPIRATION}`,
     });
     const refreshToken = jwt.sign({ userId: user.userId }, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: `${REFRESH_TOKEN_EXPIRATION}`,
     });
-
     user.refreshToken = refreshToken;
     await user.save();
 
     res.status(200).json({
       accessToken,
       refreshToken,
-      message: 'Login successful',
+      message,
     });
 
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -205,7 +195,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 
-// Logout route
+// Logout route BUT NEVER ACTUALLY USE PLS
 router.post('/logout', authMiddleware, async (req, res) => {
   try {
     const user = await User.findOne({ userId: req.user.userId });

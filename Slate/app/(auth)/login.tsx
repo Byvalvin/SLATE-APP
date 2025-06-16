@@ -11,61 +11,76 @@ import {
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import * as Google from 'expo-auth-session/providers/google'; // Google OAuth
 import { servers } from '../../constants/API';
 import { saveTokens } from '@/utils/token';
 import { hasProfile } from '@/utils/profile';
-import Constants from 'expo-constants';
+import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
 
 
-const clientId = Constants.expoConfig?.extra?.googleClientId;
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window'); // Get screen dimensions
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const [isSubmittingGauthRequest, setIsSubmittingGauthRequest] = useState(false);
+
   const router = useRouter();
 
-    // Google OAuth hook
-    const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-      clientId, // Replace with your Google Client ID
-    });
 
-    // const [request, response, promptAsync] = Google.useAuthRequest({
-    //   expoClientId: clientId,
-    // });
-    
-  
-    // Handle Google login
-    const handleGoogleLogin = async () => {
-      const result = await promptAsync();
-      if (result?.type === 'success') {
-        const { id_token } = result.params; // Google returns id_token
-        const user = {
-          googleId: id_token, // Pass the Google ID Token to backend
-        };
-  
-        try {
-          const response = await fetch(`${servers[2]}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(user),
-          });
-          const data = await response.json();
-          if (response.ok) {
-            await saveTokens(data.accessToken, data.refreshToken); // Store tokens
-            router.push('/(tabs)'); // Navigate to the main screen
-          } else {
-            alert(data.message || 'Login failed');
-          }
-        } catch (error) {
-          console.error('Error logging in with Google:', error);
-          alert('Failed to connect to server.');
+  // Handle Google login
+  const handleGoogleLogin = async () => {
+    try {
+      setIsSubmittingGauthRequest(true);
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+
+      if (isSuccessResponse(response)) {
+        const { idToken } = response.data;
+
+        const loginPayload = { googleUserToken: idToken };
+        const res = await fetch(`${servers[2]}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(loginPayload),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          await saveTokens(data.accessToken, data.refreshToken);
+          alert('Login successful');
+          router.push('/onboarding/height_weight'); // first onboard qurstion
+        } else {
+          alert(data.message || 'Login failed');
         }
       }
-    };
+      setIsSubmittingGauthRequest(false);
+    } catch (error) {
+      setIsSubmittingGauthRequest(false);
+      if (isErrorWithCode(error)) {
+        const { SIGN_IN_CANCELLED, IN_PROGRESS, PLAY_SERVICES_NOT_AVAILABLE } = statusCodes;
 
-  
+        switch (error.code) {
+          case SIGN_IN_CANCELLED:
+            alert('Google Sign-In was cancelled.');
+            break;
+          case IN_PROGRESS:
+            alert('Google Sign-In already in progress.');
+            break;
+          case PLAY_SERVICES_NOT_AVAILABLE:
+            alert('Play Services unavailable.');
+            break;
+          default:
+            alert('Unknown Google Sign-In error.');
+        }
+      } else {
+        console.error('Google login error:', error);
+        alert('Login failed.');
+      }
+    }
+  };
+
+
   const handleLogin = async () => {
     if (!email || !password) {
       alert('Please enter email and password');
@@ -135,7 +150,7 @@ export default function LoginScreen() {
           <View style={styles.line} />
         </View>
 
-        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+        <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin} disabled={isSubmittingGauthRequest}>
           <AntDesign name="google" size={screenWidth * 0.08} color="#DB4437" />
         </TouchableOpacity>
 

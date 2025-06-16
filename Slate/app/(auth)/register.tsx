@@ -49,7 +49,7 @@ export default function RegisterScreen() {
         });
 
         const data = await createUserResponse.json();
-        //console.log(data);
+        // console.log(data);
         if (createUserResponse.ok) {
           await saveTokens(data.accessToken, data.refreshToken); // Save the session tokens
           alert('Google Registration successful!');
