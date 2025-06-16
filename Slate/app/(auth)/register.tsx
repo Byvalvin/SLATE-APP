@@ -10,7 +10,7 @@ import {
   Dimensions, // Import Dimensions
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import { servers } from '../../constants/API';
+import { server } from '../../constants/API';
 import { saveTokens } from '@/utils/token';
 import { useRouter } from 'expo-router';
 
@@ -42,7 +42,7 @@ export default function RegisterScreen() {
         // addition call to our backend to make user object for user
         // Send Google user token along with the name and email to the backend
         const userData = { googleUserToken: idToken, name, email };
-        const createUserResponse = await fetch(`${servers[2]}/api/auth/register`, {
+        const createUserResponse = await fetch(`${server}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(userData),
@@ -100,7 +100,7 @@ export default function RegisterScreen() {
     };
 
     try {
-      const response = await fetch(`${servers[2]}/api/auth/register`, {
+      const response = await fetch(`${server}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(user),

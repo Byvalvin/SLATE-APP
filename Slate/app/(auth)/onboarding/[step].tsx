@@ -19,7 +19,7 @@ import NextButton from './components/NextButton';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { submitOnboarding } from '@/utils/profile';
-import { servers } from '@/constants/API';
+import { server } from '@/constants/API';
 
 const OnboardingStepScreen = () => {
   const { step } = useLocalSearchParams();
@@ -69,7 +69,7 @@ const OnboardingStepScreen = () => {
         console.log('Final Form Data:', formData);
         Alert.alert('All done!', 'You’ve completed onboarding.');
         //🔄 Replace with actual backend API call
-        await submitOnboarding(`${servers[2]}/api/profile/`,formData);
+        await submitOnboarding(`${server}/api/profile/`,formData);
   
         Alert.alert('All done!', 'You’ve completed onboarding.');
   

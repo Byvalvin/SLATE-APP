@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { servers } from '../../constants/API';
+import { server } from '../../constants/API';
 import { saveTokens } from '@/utils/token';
 import { hasProfile } from '@/utils/profile';
 import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
@@ -39,7 +39,7 @@ export default function LoginScreen() {
         const { idToken } = response.data;
 
         const loginPayload = { googleUserToken: idToken };
-        const res = await fetch(`${servers[2]}/api/auth/login`, {
+        const res = await fetch(`${server}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(loginPayload),
@@ -92,7 +92,7 @@ export default function LoginScreen() {
     }
 
     try {
-      const response = await fetch(`${servers[2]}/api/auth/login`, {
+      const response = await fetch(`${server}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

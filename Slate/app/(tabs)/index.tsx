@@ -14,7 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AntDesign } from '@expo/vector-icons'; // Import icons for the date navigator and add button
 import { format, addDays, subDays, isToday } from 'date-fns'; // Import date manipulation functions and isToday
 import { getAccessToken } from '@/utils/token';
-import { servers } from '@/constants/API';
+import { server } from '@/constants/API';
 import { fetchWithAuth } from '@/utils/user';
 import { Exercise } from '../home/Interfaces';
 import AccountModal from '@/components/AccountModal';
@@ -69,7 +69,7 @@ export default function HomeScreen() {
           return;
         }
 
-        const res = await fetchWithAuth(`${servers[2]}/api/auth/me`);
+        const res = await fetchWithAuth(`${server}/api/auth/me`);
 
         if (res.ok) {
           const userData = await res.json();
@@ -96,7 +96,7 @@ export default function HomeScreen() {
     const fetchStreak = async () => {
       try {
         const token = await getAccessToken();
-        const res = await fetch(`${servers[2]}/api/profile/me`, {
+        const res = await fetch(`${server}/api/profile/me`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -156,7 +156,7 @@ export default function HomeScreen() {
     const fetchExercises = async () => {
       try {
         const token = await getAccessToken();
-        const res = await fetch(`${servers[2]}/api/exercises/user-daily-exercises?date=${format(currentDate, 'yyyy-MM-dd')}`, {
+        const res = await fetch(`${server}/api/exercises/user-daily-exercises?date=${format(currentDate, 'yyyy-MM-dd')}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -183,7 +183,7 @@ export default function HomeScreen() {
     if (newRunningState) {
       try {
         const token = await getAccessToken();
-        const res = await fetch(`${servers[2]}/api/profile/update-streak`, {
+        const res = await fetch(`${server}/api/profile/update-streak`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -239,7 +239,7 @@ export default function HomeScreen() {
   
     try {
       const token = await getAccessToken();
-      await fetch(`${servers[2]}/api/exercises/user-daily-exercises`, {
+      await fetch(`${server}/api/exercises/user-daily-exercises`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -275,7 +275,7 @@ export default function HomeScreen() {
     // Save to API
     try {
       const token = await getAccessToken();
-      await fetch(`${servers[2]}/api/exercises/user-daily-exercises`, {
+      await fetch(`${server}/api/exercises/user-daily-exercises`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

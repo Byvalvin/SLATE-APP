@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, SafeAreaV
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken } from '@/utils/token';
-import { servers } from '@/constants/API';
+import { server } from '@/constants/API';
 import MiniWarning from '../home/components/MiniWarning';
 
 // Get screen dimensions for relative sizing
@@ -29,7 +29,7 @@ const ExerciseDetail = () => {
     const fetchExercise = async () => {
       try {
         const token = await getAccessToken();
-        const res = await fetch(`${servers[2]}/api/exercises/by-ids?ids=${id}`, {
+        const res = await fetch(`${server}/api/exercises/by-ids?ids=${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();

@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import {jwtDecode} from 'jwt-decode';
-import { servers } from '@/constants/API';
+import { server } from '@/constants/API';
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -50,7 +50,7 @@ export async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null;
 
   try {
-    const response = await fetch(`${servers[2]}/api/auth/refresh-token`, {
+    const response = await fetch(`${server}/api/auth/refresh-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),

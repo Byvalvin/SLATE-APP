@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Only Ionicons is used now
 
-import { servers } from '@/constants/API';
+import { server } from '@/constants/API';
 import { getAccessToken } from '@/utils/token';
 import { useRouter } from 'expo-router';
 // Get screen dimensions for relative sizing
@@ -34,7 +34,7 @@ const ProgramsScreen = () => {
     const fetchPrograms = async () => {
       try {
         const token = await getAccessToken();
-        const response = await fetch(`${servers[2]}/api/programs`, {
+        const response = await fetch(`${server}/api/programs`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

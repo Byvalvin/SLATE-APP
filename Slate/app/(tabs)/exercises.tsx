@@ -1,4 +1,4 @@
-import { servers } from '@/constants/API';
+import { server } from '@/constants/API';
 import { getAccessToken } from '@/utils/token';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -140,7 +140,7 @@ const ExerciseScreen: React.FC = () => {
     try {
       const token = await getAccessToken();
       const res = await fetch(
-        `${servers[2]}/api/exercises/by-category?page=${page}&limit=5&categories=${category}&searchQuery=${searchQuery}`,
+        `${server}/api/exercises/by-category?page=${page}&limit=5&categories=${category}&searchQuery=${searchQuery}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

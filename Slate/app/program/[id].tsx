@@ -12,7 +12,7 @@ import {
   Platform, // Import Platform for iOS/Android specific styling
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { servers } from '@/constants/API';
+import { server } from '@/constants/API';
 import { getAccessToken } from '@/utils/token';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MonthItem } from './components/MonthItem'; // Make sure this path is correct
@@ -40,7 +40,7 @@ const ProgramDetail = () => {
       try {
         const token = await getAccessToken();
 
-        const programRes = await fetch(`${servers[2]}/api/programs/${id}`, {
+        const programRes = await fetch(`${server}/api/programs/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const programData = await programRes.json();
@@ -60,7 +60,7 @@ const ProgramDetail = () => {
         const idArray = Array.from(allIds);
         if (idArray.length > 0) {
           const query = idArray.join(',');
-          const exerciseRes = await fetch(`${servers[2]}/api/exercises/by-ids?ids=${query}`, {
+          const exerciseRes = await fetch(`${server}/api/exercises/by-ids?ids=${query}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           const exerciseList = await exerciseRes.json();
