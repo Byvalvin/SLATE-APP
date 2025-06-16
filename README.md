@@ -1,15 +1,5 @@
 Slate: Your Personalized Fitness Companion
-<img src="https://github.com/user-attachments/assets/b0afdb6f-1db3-4311-953a-9d8cfc4f6818" width="300" alt="Slate App Screenshot 1">
-
-<img src="https://github.com/user-attachments/assets/b5b420a5-08a5-45a1-b633-591a9fdf5fb9" width="300" alt="Slate App Screenshot 2">
-
-<img src="https://github.com/user-attachments/assets/64ba0eea-364c-46c7-9887-88ee1ce09c23" width="300" alt="Slate App Screenshot 3">
-
-<img src="https://github.com/user-attachments/assets/ec96458d-d3f9-4e9b-990f-12bb26e3b282" width="300" alt="Slate App Screenshot 4">
-
-<img src="https://github.com/user-attachments/assets/fb172ebb-f611-49c1-aef8-89d76485c3cc" width="300" alt="Slate App Screenshot 5">
-
-<img src="https://github.com/user-attachments/assets/6cc0bb86-94fa-42fe-8aba-4ef98d29a402" width="300" alt="Slate <img src="https://github.com/user-attachments/assets/b0afdb6f-1db3-4311-953a-9d8cfc4f6818" width="300" alt="Slate App Screenshot 1">
+ <img src="https://github.com/user-attachments/assets/b0afdb6f-1db3-4311-953a-9d8cfc4f6818" width="300" alt="Slate App Screenshot 1">
 
 <img src="https://github.com/user-attachments/assets/b5b420a5-08a5-45a1-b633-591a9fdf5fb9" width="300" alt="Slate App Screenshot 2">
 
