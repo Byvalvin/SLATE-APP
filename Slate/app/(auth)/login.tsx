@@ -48,8 +48,12 @@ export default function LoginScreen() {
         const data = await res.json();
         if (res.ok) {
           await saveTokens(data.accessToken, data.refreshToken);
-          alert('Login successful');
-          router.push('/onboarding/height_weight'); // first onboard qurstion
+          const profileExists = await hasProfile();
+          if (profileExists) {
+            router.replace('/(tabs)');
+          } else {
+            router.push('/onboarding/height_weight');
+          }
         } else {
           alert(data.message || 'Login failed');
         }
