@@ -72,7 +72,7 @@ For convenient testing and demonstration on Android devices, we have provided a 
 
 ### Download the APK:
 Navigate to the releases folder in our GitHub repository and download the latest Slate_v1.0.0.apk file to your Android device.
-( https://github.com/your-username/your-repo/raw/main/releases/Slate_v1.0.0.apk)
+[https://github.com/your-username/your-repo/raw/main/releases/Slate_v1.0.0.apk](https://github.com/Byvalvin/SLATE-APP/tree/main/releases/Slate_v1.0.0.apk)
 
 ### Enable "Install from Unknown Sources":
 If prompted, you may need to enable "Install from Unknown Sources" or "Install unknown apps" in your device's security settings to install applications not downloaded from the Google Play Store. The exact path varies by Android version and device manufacturer (e.g., Settings > Apps & notifications > Special app access > Install unknown apps).
