@@ -64,34 +64,20 @@ Slate is a modern, intuitive workout application designed to empower users on th
 
 ### ☁️ Media
 - **Cloudinary** – For hosting and serving optimized media content
-
----
-
-## 🚀 Getting Started
-
-These instructions will help you set up a local development environment for Slate.
-
-### ✅ Prerequisites
-
-- [Node.js](https://nodejs.org/)
-- [Expo CLI](https://docs.expo.dev/get-started/installation/)
-- MongoDB Atlas Account (or local MongoDB)
-- Google Cloud Project for OAuth credentials
-
 ---
 ## APK Installation (for Android Users)
 For convenient testing and demonstration on Android devices, we have provided a pre-built Android Package Kit (APK) file.
 
-##Installation Steps for Users:
+## Installation Steps for Users:
 
-###Download the APK:
+### Download the APK:
 Navigate to the releases folder in our GitHub repository and download the latest Slate_vX.X.X.apk file to your Android device.
 Link to APK (e.g., https://github.com/your-username/your-repo/raw/main/releases/Slate_v1.0.0.apk)
 (Remember to update the link with your actual GitHub repository URL and APK filename.)
 
-###Enable "Install from Unknown Sources":
+### Enable "Install from Unknown Sources":
 If prompted, you may need to enable "Install from Unknown Sources" or "Install unknown apps" in your device's security settings to install applications not downloaded from the Google Play Store. The exact path varies by Android version and device manufacturer (e.g., Settings > Apps & notifications > Special app access > Install unknown apps).
 
-###Install the APK:
+### Install the APK:
 Locate the downloaded APK file (usually in your "Downloads" folder) and tap on it to begin the installation process. Follow the on-screen prompts.
 
