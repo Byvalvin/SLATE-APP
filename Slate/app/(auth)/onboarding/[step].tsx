@@ -40,26 +40,22 @@ const OnboardingStepScreen = () => {
       </View>
     );
   }
-
-  // const allRequiredAnswered = stepData.inputs.every((input) => {
-  //   if (input.required) {
-  //     const val = formData[input.key];
-  //     return val !== undefined && val !== '' && val !== null && !(Array.isArray(val) && val.length === 0);
-  //   }
-  //   return true;
-  // });
-
-  const allRequiredAnswered = ()=>{
-    if (stepData.required) {
-      const val = formData[stepData.key];
-      return val !== undefined && val !== '' && val !== null && !(Array.isArray(val) && val.length === 0);
-    }
-    return true;
-}
   
+  const allRequiredAnswered = () => {
+    if (!stepData.required) return true;
+
+    return stepData.inputs.every((input) => {
+      const val = formData[input.key];
+      if (Array.isArray(val)) {
+        return val.length > 0;
+      }
+      return val !== undefined && val !== null && val !== '';
+    });
+  };
+
 
   const goToNextStep = async () => {
-    if (stepIndex + 1 < onboardingSteps.length) {
+    if ( stepIndex + 1 < onboardingSteps.length) {
       await AsyncStorage.setItem('onboardingFormData', JSON.stringify(formData));
 
       const nextStepKey = onboardingSteps[stepIndex + 1].key;
@@ -186,7 +182,7 @@ const OnboardingStepScreen = () => {
         {stepData.note && <Note text={stepData.note} />}
       </ScrollView>
 
-      <NextButton onPress={goToNextStep} disabled={!allRequiredAnswered} />
+      <NextButton onPress={goToNextStep} disabled={!allRequiredAnswered()} />
 
     </View>
   );
