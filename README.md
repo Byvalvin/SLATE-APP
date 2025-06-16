@@ -80,3 +80,8 @@ If prompted, you may need to enable "Install from Unknown Sources" or "Install u
 ### Install the APK:
 Locate the downloaded APK file (usually in your "Downloads" folder) and tap on it to begin the installation process. Follow the on-screen prompts.
 
+## 👨‍💻 Team
+Ahmer Farooq – GitHub
+
+Daniel  – GitHub
+
