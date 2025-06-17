@@ -115,5 +115,4 @@ router.post('/update-streak', authMiddleware, async (req, res) => {
   }
 });
 
-
 module.exports = router;
