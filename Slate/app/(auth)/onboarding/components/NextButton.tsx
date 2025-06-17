@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     paddingVertical: screenHeight * 0.012,
     paddingBottom:screenHeight * 0.012, // Make padding relative (vertical focus)
     alignItems: 'center', // Relative border radius from LoginScreen's loginButton
-    marginBottom: screenHeight * 0.03,
+    marginBottom: screenHeight * 0.4,
     width: screenWidth * 0.85,
     alignSelf: 'center',
   },
