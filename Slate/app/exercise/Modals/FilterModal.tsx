@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  FlatList,
   StyleSheet,
 } from 'react-native';
 
@@ -13,45 +12,62 @@ const CATEGORIES = ['Chest', 'Back', 'Legs', 'Arms', 'Shoulders', 'Core'];
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onApply: (category: string) => void;
-  selectedCategory: string;
-  setSelectedCategory: (val: string) => void;
+  onApply: (categories: string[]) => void;
+  selectedCategories: string[];
+  setSelectedCategories: (val: string[]) => void;
 }
 
 const FilterModal: React.FC<Props> = ({
   visible,
   onClose,
   onApply,
-  selectedCategory,
-  setSelectedCategory,
+  selectedCategories,
+  setSelectedCategories,
 }) => {
+  const toggleCategory = (category: string) => {
+    if (selectedCategories.includes(category)) {
+      setSelectedCategories(selectedCategories.filter((c) => c !== category));
+    } else {
+      setSelectedCategories([...selectedCategories, category]);
+    }
+  };
+
   return (
     <Modal transparent visible={visible} animationType="slide">
       <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
         <View style={styles.container}>
-          <Text style={styles.title}>Filter by Category</Text>
+          <Text style={styles.title}>Filter by Categories</Text>
           {CATEGORIES.map((category) => (
             <TouchableOpacity
               key={category}
               style={[
                 styles.item,
-                selectedCategory === category && styles.selectedItem,
+                selectedCategories.includes(category) && styles.selectedItem,
               ]}
-              onPress={() => setSelectedCategory(category)}
+              onPress={() => toggleCategory(category)}
             >
               <Text style={styles.itemText}>{category}</Text>
             </TouchableOpacity>
           ))}
+          <TouchableOpacity
+            style={styles.clearAllButton}
+            onPress={() => setSelectedCategories([])}
+          >
+            <Text style={styles.clearAllText}>Clear All</Text>
+          </TouchableOpacity>
           <View style={styles.actions}>
             <TouchableOpacity onPress={onClose}>
-              <Text style={styles.cancel}>Cancel</Text>
+              <Text style={styles.cancel}>Close</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => onApply(selectedCategory)}>
+            {/* <TouchableOpacity onPress={() => onApply(selectedCategories)}>
               <Text style={styles.apply}>Apply</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
       </TouchableOpacity>
+
+
+
     </Modal>
   );
 };
@@ -98,4 +114,18 @@ const styles = StyleSheet.create({
     color: '#4CAF50',
     fontWeight: '600',
   },
+
+  clearAllButton: {
+  marginTop: 10,
+  paddingVertical: 8,
+  alignItems: 'center',
+  borderRadius: 8,
+  backgroundColor: '#F87171',
+},
+
+clearAllText: {
+  color: '#fff',
+  fontWeight: '600',
+},
+
 });

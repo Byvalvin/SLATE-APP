@@ -121,7 +121,7 @@ const ExerciseScreen: React.FC = () => {
   const [groupedExercises, setGroupedExercises] = useState<Record<string, ExerciseCardProps[]>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categoryPages, setCategoryPages] = useState<Record<string, CategoryPage>>(
     CATEGORY_ORDER.reduce((acc, category) => {
       acc[category] = { page: 1, isFetching: false }; // Initialize with page 1 and isFetching false
@@ -176,10 +176,12 @@ const ExerciseScreen: React.FC = () => {
         }
       } else {
         // Set empty array when no exercises are found for the category
-        setGroupedExercises((prevState) => ({
-          ...prevState,
-          [category]: [],
-        }));
+        if (page === 1) {
+          setGroupedExercises((prevState) => ({
+            ...prevState,
+            [category]: [],
+          }));
+        }
       }
   
     } catch (err) {
@@ -252,29 +254,37 @@ const ExerciseScreen: React.FC = () => {
         <SearchWithFilterBar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
+          selectedCategories={selectedCategories}
+          setSelectedCategories={setSelectedCategories}
           onSearchSubmit={handleSearchSubmit}
         />
 
-        {loading ? (
+       {loading ? (
           <Text>Loading exercises...</Text>
         ) : (
-          CATEGORY_ORDER.map((category) => (
-            <ExerciseSection
-              key={category}
-              title={category}
-              data={groupedExercises[category] || []}
-              onEndReached={() => handleEndReached(category)} // Trigger page increment for the category
-            />
-          ))
+          CATEGORY_ORDER
+            .filter((category) =>
+              selectedCategories.length === 0 || selectedCategories.includes(category)
+            )
+            .map((category) => {
+              const exercises = groupedExercises[category];
+              if (!exercises || exercises.length === 0) return null;
+
+              return (
+                <ExerciseSection
+                  key={category}
+                  title={category}
+                  data={exercises}
+                  onEndReached={() => handleEndReached(category)}
+                />
+              );
+            })
         )}
+
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-
 
 
 
