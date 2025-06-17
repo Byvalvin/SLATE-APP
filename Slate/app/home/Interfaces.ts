@@ -9,4 +9,4 @@ export interface Exercise {
     category?: string;
     isCustom: boolean, // mark as custom if user added it manually
     notes: string,
-  }
+  };

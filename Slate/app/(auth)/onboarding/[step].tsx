@@ -182,7 +182,7 @@ const OnboardingStepScreen = () => {
         {stepData.note && <Note text={stepData.note} />}
       </ScrollView>
 
-      <NextButton onPress={goToNextStep} buttonText={stepIndex===onboardingSteps.length? 'SUBMIT':'NEXT'} disabled={!allRequiredAnswered()} />
+      <NextButton onPress={goToNextStep} buttonText={stepIndex===onboardingSteps.length-1? 'SUBMIT':'NEXT'} disabled={!allRequiredAnswered()} />
 
     </View>
   );
