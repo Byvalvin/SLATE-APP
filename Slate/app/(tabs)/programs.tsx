@@ -16,6 +16,8 @@ import { Ionicons } from '@expo/vector-icons'; // Only Ionicons is used now
 import { server } from '@/constants/API';
 import { getAccessToken } from '@/utils/token';
 import { useRouter } from 'expo-router';
+import { SectionSkeleton } from '../exercise/components/ExerciseSectionSkeleton'; // Import the SectionSkeleton
+
 // Get screen dimensions for relative sizing
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -36,13 +38,11 @@ const ProgramsScreen = () => {
         const token = await getAccessToken();
         const response = await fetch(`${server}/api/programs`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         if (!response.ok) throw new Error('Failed to fetch programs');
         const data = await response.json();
-        // console.log('Fetched programs:', JSON.stringify(data, null, 2));
-
         setPrograms(data);
       } catch (error) {
         console.error('Fetch error:', error);
@@ -54,12 +54,11 @@ const ProgramsScreen = () => {
     fetchPrograms();
   }, []);
 
-  const router = useRouter()
+  const router = useRouter();
   const handleProgramPress = (programId: string) => {
     console.log(programId);
     router.push(`/program/${programId}`);
   };
-
 
   // --- Reusable Card Components ---
   const renderCard = (
@@ -69,10 +68,11 @@ const ProgramsScreen = () => {
     subtitle: string,
     isNew?: boolean
   ) => {
-    const validImage = imageUri && imageUri.trim() !== ''
-      ? imageUri
-      : 'https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/default_program_image.png'; // 👈 Add your fallback URL
-  
+    const validImage =
+      imageUri && imageUri.trim() !== ''
+        ? imageUri
+        : 'https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/default_program_image.png'; // 👈 Add your fallback URL
+
     return (
       <TouchableOpacity style={styles.card} key={programId} onPress={() => handleProgramPress(programId)}>
         {isNew && (
@@ -82,13 +82,14 @@ const ProgramsScreen = () => {
         )}
         <Image source={{ uri: validImage }} style={styles.cardImage} />
         <View style={styles.cardContent}>
-          <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text>
+          <Text style={styles.cardTitle} numberOfLines={2}>
+            {title}
+          </Text>
           <Text style={styles.cardSubtitle}>{subtitle}</Text>
         </View>
       </TouchableOpacity>
     );
   };
-  
 
   if (loading) {
     return (
@@ -97,12 +98,11 @@ const ProgramsScreen = () => {
       </View>
     );
   }
+
   return (
     <View style={styles.fullScreenContainer}>
-    
       <StatusBar barStyle="light-content" backgroundColor="#005B44" />
 
-   
       <View style={styles.topGreenBackground}>
         <View style={styles.profileSection}>
           <View style={styles.profileLeft}>
@@ -112,42 +112,44 @@ const ProgramsScreen = () => {
               <Ionicons name="chevron-forward" size={getFontSize(20)} color="#fff" />
             </View>
           </View>
-      
+
           <Image
-            source={{ uri: `https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/male_green_ifnxek.png` }}
+            source={{
+              uri: `https://res.cloudinary.com/dnapppihv/image/upload/v1748430385/male_green_ifnxek.png`,
+            }}
             style={styles.profileImage}
           />
         </View>
       </View>
 
-     
-      <ScrollView style={styles.scrollViewContent} contentContainerStyle={{ paddingBottom: getHeight(30) }}> 
-     
+      <ScrollView style={styles.scrollViewContent} contentContainerStyle={{ paddingBottom: getHeight(30) }}>
         <View style={styles.curatedInfo}>
           <Ionicons name="sparkles" size={getFontSize(16)} color="#6B7280" />
           <Text style={styles.curatedInfoText}>Curated for you </Text>
         </View>
 
-    
-        {Object.entries(programs).map(([category, items]) => (
-          <View key={category}>
-            <Text style={styles.sectionTitle}>{category.toUpperCase()}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-            {items.map(program =>
-              renderCard(
-                program.programId || program._id || `${program.name}-${category}`, // fallback if no ID
-                program.meta.imageUrl,
-                program.name,
-                program.meta.focusTag,
-                program.meta.isNew
-              )
-            )}
-
-            </ScrollView>
-          </View>
-        ))}
-     
-        <View style={{ height: getHeight(60) }} />
+        {loading ? (
+          // Render skeletons while loading
+          [...Array(3)].map((_, index) => <SectionSkeleton key={index} />)
+        ) : (
+          // Render real content after data is fetched
+          Object.entries(programs).map(([category, items]) => (
+            <View key={category}>
+              <Text style={styles.sectionTitle}>{category.toUpperCase()}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
+                {items.map((program) =>
+                  renderCard(
+                    program.programId || program._id || `${program.name}-${category}`,
+                    program.meta.imageUrl,
+                    program.name,
+                    program.meta.focusTag,
+                    program.meta.isNew
+                  )
+                )}
+              </ScrollView>
+            </View>
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -162,19 +164,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#005B44', // The new dark green background color
     paddingHorizontal: getWidth(16),
     paddingBottom: getHeight(50), // Padding at the bottom of the green section
-    // Added zIndex to ensure it's above the scroll view if any overlap issues, though unlikely with current layout
     zIndex: 1,
   },
-  scrollViewContent: { // New style for the scrollable area below the green header
+  scrollViewContent: {
     flex: 1,
-    paddingHorizontal: getWidth(16), // Keep horizontal padding consistent
-    // marginTop: -getHeight(20), // Example of pulling scroll content slightly under a curved header if needed
+    paddingHorizontal: getWidth(16),
   },
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop:Platform.OS === 'android' ? getHeight(35) : getHeight(65), // Adjust for Android status bar
+    marginTop: Platform.OS === 'android' ? getHeight(35) : getHeight(65),
   },
   profileLeft: {
     flexDirection: 'column',
@@ -196,19 +196,19 @@ const styles = StyleSheet.create({
   },
   profileImage: {
     width: getWidth(60),
-    height: getHeight(60), // Ensure height matches width for a circle if source image is square
-    borderRadius: getWidth(30), // half of width/height
-    backgroundColor: '#D9F7D9', // Placeholder background
+    height: getHeight(60),
+    borderRadius: getWidth(30),
+    backgroundColor: '#D9F7D9',
   },
   curatedInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EBF4F5', // Light blue/green background
+    backgroundColor: '#EBF4F5',
     borderRadius: getWidth(8),
     paddingVertical: getHeight(8),
     paddingHorizontal: getWidth(12),
     marginBottom: getHeight(20),
-    marginTop: getHeight(20), // Add margin top to separate from the green header
+    marginTop: getHeight(20),
   },
   curatedInfoText: {
     fontSize: getFontSize(13),
@@ -223,11 +223,11 @@ const styles = StyleSheet.create({
     marginTop: getHeight(10),
   },
   horizontalScroll: {
-    paddingBottom: getHeight(20), // Space below cards
+    paddingBottom: getHeight(20),
   },
   card: {
-    width: getWidth(180), // Card width
-    height: getHeight(220), // Card height - kept same
+    width: getWidth(180),
+    height: getHeight(220),
     backgroundColor: '#fff',
     borderRadius: getWidth(12),
     marginRight: getWidth(15),
@@ -236,42 +236,41 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: getWidth(8),
     elevation: 5,
-    overflow: 'hidden', // Clip image and tags
+    overflow: 'hidden',
   },
   newTag: {
     position: 'absolute',
     top: getHeight(10),
     right: getWidth(10),
-    backgroundColor: '#55F358', // Green color for NEW tag
+    backgroundColor: '#55F358',
     borderRadius: getWidth(8),
     paddingHorizontal: getWidth(8),
     paddingVertical: getHeight(4),
-    zIndex: 1, // Ensure tag is above the image
+    zIndex: 1,
   },
   newTagText: {
-    color: '#fff', // Changed to white for better contrast on green tag
+    color: '#fff',
     fontSize: getFontSize(10),
     fontWeight: 'bold',
   },
   cardImage: {
-    width: '100%', // Image now takes full width of the card
-    height: getHeight(154), // Adjusted height: 154 is 70% of 220 (card height)
-    borderTopLeftRadius: getWidth(12), // Keep top corners rounded
-    borderTopRightRadius: getWidth(12), // Keep top corners rounded
-    // No bottom radius needed here as content is below
-    resizeMode: 'cover', // Ensures the image covers the area, cropping if necessary
+    width: '100%',
+    height: getHeight(154),
+    borderTopLeftRadius: getWidth(12),
+    borderTopRightRadius: getWidth(12),
+    resizeMode: 'cover',
   },
   cardContent: {
     paddingHorizontal: getWidth(12),
-    paddingVertical: getHeight(8), // Adjusted padding slightly for better balance
-    flex: 1, // Allows content to take remaining space
-    justifyContent: 'space-around', // Distribute space a bit more evenly if title is short
+    paddingVertical: getHeight(8),
+    flex: 1,
+    justifyContent: 'space-around',
   },
   cardTitle: {
     fontSize: getFontSize(14),
     fontWeight: '600',
     color: '#1F2937',
-    marginBottom: getHeight(4), // Slightly reduced margin
+    marginBottom: getHeight(4),
   },
   cardSubtitle: {
     fontSize: getFontSize(12),

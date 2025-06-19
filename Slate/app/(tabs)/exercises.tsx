@@ -18,6 +18,7 @@ import {
 
 import { CATEGORY_ORDER } from '../home/components/CategorySummary';
 import SearchWithFilterBar from '../exercise/components/SearchWithFilterBar';
+import SkeletonExerciseSection, { SectionSkeleton } from '../exercise/components/ExerciseSectionSkeleton';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -114,7 +115,6 @@ const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onEndRea
     )}
   </View>
 );
-
 
 
 const ExerciseScreen: React.FC = () => {
@@ -243,6 +243,12 @@ const ExerciseScreen: React.FC = () => {
     );
   };
 
+    // Check if all sections have no data
+    const allSectionsEmpty = CATEGORY_ORDER.every((category) => {
+      const exercises = groupedExercises[category];
+      return !exercises || exercises.length === 0;
+    });
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
@@ -258,14 +264,17 @@ const ExerciseScreen: React.FC = () => {
           setSelectedCategories={setSelectedCategories}
           onSearchSubmit={handleSearchSubmit}
         />
-
-       {loading ? (
-          <Text>Loading exercises...</Text>
+        {loading ? (
+          <View>
+            {CATEGORY_ORDER.map((category) => (
+              <SectionSkeleton key={category} />
+            ))}
+          </View>
+        ) : allSectionsEmpty ? (
+          <Text style={styles.noDataText}>No results found</Text>
         ) : (
           CATEGORY_ORDER
-            .filter((category) =>
-              selectedCategories.length === 0 || selectedCategories.includes(category)
-            )
+            .filter((category) => selectedCategories.length === 0 || selectedCategories.includes(category))
             .map((category) => {
               const exercises = groupedExercises[category];
               if (!exercises || exercises.length === 0) return null;
