@@ -26,9 +26,10 @@ export default function WelcomeScreen() {
             <Text style={styles.body}>
               from your own personal AI trainer curated for you.
             </Text>
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/register')}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/legal-screen')}>
               <Text style={styles.buttonText}>GET STARTED</Text>
             </TouchableOpacity>
+
             <View style={styles.footer}>
               <Text style={styles.footerText}>Already have an account?</Text>
               <TouchableOpacity onPress={() => router.push('/login')}>
