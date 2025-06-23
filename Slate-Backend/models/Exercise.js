@@ -5,6 +5,7 @@ const ExerciseSchema = new mongoose.Schema({
   exerciseId: { type: String, default: uuidv4, unique: true }, // Add a UUID for consistency
   name: { type: String, required: true },
   slug: String,
+  alias: [String],
   description: String,
   instructions: [String],
   primary_muscles: [String],
@@ -16,3 +17,7 @@ const ExerciseSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Exercise', ExerciseSchema);
+
+/*
+I need to create more exercise images in this watercolour gradient style from the examples provided. Pls ensure either no bakground or a paper-like background like in the one with the woman in the examples. Can you do one for DUMBBELL PEC FLY.
+*/
