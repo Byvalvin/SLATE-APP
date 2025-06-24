@@ -19,5 +19,5 @@ const ExerciseSchema = new mongoose.Schema({
 module.exports = mongoose.model('Exercise', ExerciseSchema);
 
 /*
-I need to create more exercise images in this watercolour gradient style from the examples provided. Pls ensure either no bakground or a paper-like background like in the one with the woman in the examples. Can you do one for DUMBBELL PEC FLY.
+I need to create more exercise images in this watercolour gradient style from the examples provided. Pls ensure either no background or a paper-like background like in the one with the woman in the examples. Can you do one for DIPS.
 */

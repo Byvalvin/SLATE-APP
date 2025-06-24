@@ -79,7 +79,7 @@ const ExerciseDetail = () => {
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <Text style={styles.errorText}>Exercise not found or failed to load.</Text>
-        <TouchableOpacity style={styles.backButtonBottom} onPress={() => router.push('/exercises')}>
+        <TouchableOpacity style={styles.backButtonBottom} onPress={() => router.push('/(tabs)/exercises')}>
           <Text style={styles.backButtonBottomText}>Go Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -90,7 +90,7 @@ const ExerciseDetail = () => {
     <SafeAreaView style={styles.fullScreen}>
       <ScrollView style={styles.scrollView}>
        
-        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(tabs)/programs')}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/(tabs)/exercises')}>
           <Ionicons name="chevron-back" size={getFontSize(24)} color="#374151" />
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>

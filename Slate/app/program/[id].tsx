@@ -97,7 +97,7 @@ const ProgramDetail = () => {
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <Text style={styles.errorText}>Program not found or failed to load.</Text>
-        <TouchableOpacity style={styles.backButtonBottom} onPress={() => router.push('/programs')}>
+        <TouchableOpacity style={styles.backButtonBottom} onPress={() => router.push('/(tabs)/exercises')}>
            <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </SafeAreaView>
