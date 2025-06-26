@@ -7,7 +7,8 @@ import {
   StyleSheet,
 } from 'react-native';
 
-const CATEGORIES = ['Chest', 'Back', 'Legs', 'Arms', 'Shoulders', 'Core'];
+import { CATEGORY_ORDER as CATEGORIES } from '@/app/home/components/CategorySummary';
+// const CATEGORIES = ['Chest', 'Back', 'Legs', 'Arms', 'Shoulders', 'Core'];
 
 interface Props {
   visible: boolean;
