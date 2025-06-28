@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Profile = require('../models/Profile');
 const Program = require('../models/Program');
-const authMiddleware = require('../middleware/auth'); // You need to extract user ID from token
+const authMiddleware = require('../middleware/auth'); // You need to extract user ID from 
+const { format, differenceInCalendarDays } = require('date-fns');
 
 // Create a new profile
 router.post('/', authMiddleware, async (req, res) => {
