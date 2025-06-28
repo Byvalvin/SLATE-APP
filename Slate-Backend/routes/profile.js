@@ -103,10 +103,13 @@ router.post('/update-streak', authMiddleware, async (req, res) => {
     }
 
     // Only increment streak if today isn't already counted
-    if (today.getTime() !== (profile.lastStreakUpdate?.getTime() || 0)) {
+    const lastUpdateNormalized = new Date(profile.lastStreakUpdate || 0);
+    lastUpdateNormalized.setHours(0, 0, 0, 0);
+    if (today.getTime() !== lastUpdateNormalized.getTime()) {
       profile.streak = (profile.streak || 0) + 1;
       profile.lastStreakUpdate = new Date();
     }
+
 
     await profile.save();
     return res.status(200).json({ streak: profile.streak });
