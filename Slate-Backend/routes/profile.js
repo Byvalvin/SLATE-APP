@@ -77,30 +77,33 @@ router.post('/update-streak', authMiddleware, async (req, res) => {
       let missedWorkout = false;
 
       let current = new Date(lastUpdate);
-      current.setDate(current.getDate() + 1); // Start from next day after last update
+      current.setDate(current.getDate() + 1); // Start from next day
 
       while (current < today) {
-        const dayOfWeek = format(current, 'eeee').toLowerCase(); // e.g., 'monday'
+        const dayOfWeek = format(current, 'eeee').toLowerCase();
         const daysSinceStart = differenceInCalendarDays(current, profile.program_start_date);
-        const currentMonthIndex = Math.floor(daysSinceStart / 28); // approx 4 weeks per month
+        const currentMonthIndex = Math.floor(daysSinceStart / 28);
         const currentMonth = program.months[currentMonthIndex];
 
-        if (!currentMonth) break; // No data for this month (end of program)
+        if (!currentMonth) break;
 
         const exercisesForDay = currentMonth.weekly_plan?.[dayOfWeek] || [];
 
         if (exercisesForDay.length > 0) {
+          // There was a workout scheduled on this day, but it wasn't updated
           missedWorkout = true;
+          console.log(`Missed workout on ${dayOfWeek}, ${current.toISOString().split('T')[0]}`);
           break;
         }
 
-        current.setDate(current.getDate() + 1); // Move to next day
+        current.setDate(current.getDate() + 1);
       }
 
       if (missedWorkout) {
         profile.streak = 0;
       }
     }
+
 
     // Only increment streak if today isn't already counted
     const lastUpdateNormalized = new Date(profile.lastStreakUpdate || 0);
