@@ -33,6 +33,10 @@ export default function RegisterScreen() {
   const handleGoogleRegister = async()=>{
     try {
       setIsSubmittingGauthRequest(true);
+
+      // Sign out any active Google session first, so user can alway pick account
+      await GoogleSignin.signOut();
+
       await GoogleSignin.hasPlayServices(); // has google play services check for only android devices
       const response = await GoogleSignin.signIn();
       if(isSuccessResponse(response)){

@@ -32,6 +32,10 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
     try {
       setIsSubmittingGauthRequest(true);
+
+      // Sign out any active Google session first, so user can alway pick account
+      await GoogleSignin.signOut();
+
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
 
