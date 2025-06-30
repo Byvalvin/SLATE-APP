@@ -116,6 +116,7 @@ const ExerciseSection: React.FC<ExerciseSectionProps> = ({ title, data, onEndRea
   </View>
 );
 
+const CATEGORIES = [...CATEGORY_ORDER, 'Other'];
 
 const ExerciseScreen: React.FC = () => {
   const [groupedExercises, setGroupedExercises] = useState<Record<string, ExerciseCardProps[]>>({});
@@ -123,7 +124,7 @@ const ExerciseScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categoryPages, setCategoryPages] = useState<Record<string, CategoryPage>>(
-    CATEGORY_ORDER.reduce((acc, category) => {
+    CATEGORIES.reduce((acc, category) => {
       acc[category] = { page: 1, isFetching: false }; // Initialize with page 1 and isFetching false
       return acc;
     }, {} as Record<string, CategoryPage>)
@@ -202,7 +203,7 @@ const ExerciseScreen: React.FC = () => {
     //console.log('useEffect triggered, loading:', loading, 'categoryPages:', categoryPages); // Added log to track the effect
     if (loading) {
       // Fetch exercises for each category on load if they aren't already fetched
-      CATEGORY_ORDER.forEach((category) => {
+      CATEGORIES.forEach((category) => {
         const { isFetching } = categoryPages[category];
         //console.log(`Checking category: ${category}, isFetching: ${isFetching}`);
         if (!isFetching && (!groupedExercises[category] || groupedExercises[category].length === 0)) {
@@ -236,7 +237,7 @@ const ExerciseScreen: React.FC = () => {
     setGroupedExercises({});
     setLoading(true); // Reset loading state
     setCategoryPages(
-      CATEGORY_ORDER.reduce((acc, category) => {
+      CATEGORIES.reduce((acc, category) => {
         acc[category] = { page: 1, isFetching: false };
         return acc;
       }, {} as Record<string, CategoryPage>)
@@ -244,7 +245,7 @@ const ExerciseScreen: React.FC = () => {
   };
 
     // Check if all sections have no data
-    const allSectionsEmpty = CATEGORY_ORDER.every((category) => {
+    const allSectionsEmpty = CATEGORIES.every((category) => {
       const exercises = groupedExercises[category];
       return !exercises || exercises.length === 0;
     });
@@ -266,14 +267,14 @@ const ExerciseScreen: React.FC = () => {
         />
         {loading ? (
           <View>
-            {CATEGORY_ORDER.map((category) => (
+            {CATEGORIES.map((category) => (
               <SectionSkeleton key={category} />
             ))}
           </View>
         ) : allSectionsEmpty ? (
           <Text style={styles.noDataText}>No results found</Text>
         ) : (
-          CATEGORY_ORDER
+          CATEGORIES
             .filter((category) => selectedCategories.length === 0 || selectedCategories.includes(category))
             .map((category) => {
               const exercises = groupedExercises[category];
